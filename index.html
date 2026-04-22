@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ProspectFlow</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f5f4f0; --bg2:#ffffff; --bg3:#eeecea; --bg4:#e4e2de;
+  --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.15);
+  --text:#1a1814; --text2:#6b6860; --text3:#a09e9a;
+  --blue:#2563eb; --blue-bg:#eff6ff; --blue-lt:#dbeafe;
+  --red:#dc2626; --red-bg:#fef2f2; --red-lt:#fee2e2;
+  --amber:#d97706; --amber-bg:#fffbeb; --amber-lt:#fde68a;
+  --green:#16a34a; --green-bg:#f0fdf4; --green-lt:#bbf7d0;
+  --purple:#7c3aed; --purple-bg:#f5f3ff; --purple-lt:#ddd6fe;
+  --slate:#475569; --slate-bg:#f8fafc; --slate-lt:#e2e8f0;
+  --teal:#0d9488; --teal-bg:#f0fdfa; --teal-lt:#ccfbf1;
+  --r:14px; --rs:9px;
+  --sh:0 1px 3px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.04);
+  --sh2:0 4px 14px rgba(0,0,0,0.09),0 2px 4px rgba(0,0,0,0.05);
+  --sh3:0 20px 48px rgba(0,0,0,0.14),0 8px 16px rgba(0,0,0,0.07);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px}
+
+/* ── LAYOUT ── */
+.app{display:flex;min-height:100vh}
+.sidebar{width:224px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;transition:transform .3s;overflow-y:auto}
+.main-area{margin-left:224px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+@media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main-area{margin-left:0}.mob-overlay{display:block!important}}
+.mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:49}
+
+/* ── SIDEBAR ── */
+.sb-brand{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+.sb-logo{font-size:17px;font-weight:800;letter-spacing:-.4px}
+.sb-date{font-size:11px;color:var(--text3);margin-top:3px;font-weight:500}
+.sb-nav{flex:1;padding:8px 7px}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--rs);cursor:pointer;color:var(--text2);font-weight:500;font-size:13px;transition:all .15s;user-select:none;margin-bottom:2px;border:none;background:none;width:100%;text-align:left}
+.ni:hover{background:var(--bg3);color:var(--text)}
+.ni.active{background:var(--text);color:#fff}
+.ni .ico{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.nbadge{margin-left:auto;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;min-width:20px;text-align:center;color:white}
+.nbadge.red{background:var(--red)}
+.nbadge.amber{background:var(--amber)}
+.nbadge.blue{background:var(--blue)}
+.nbadge.green{background:var(--green)}
+.nbadge.purple{background:var(--purple)}
+.nbadge.slate{background:var(--slate)}
+.nbadge.teal{background:var(--teal)}
+.nsec{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);padding:10px 10px 3px}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 18px;height:54px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:40}
+.mob-btn{display:none;background:none;border:none;cursor:pointer;font-size:20px;color:var(--text);padding:4px}
+@media(max-width:768px){.mob-btn{display:block}}
+.topbar-title{font-size:15px;font-weight:700;flex:1}
+.topbar-date{font-size:12px;font-weight:600;color:var(--text2);background:var(--bg3);padding:4px 11px;border-radius:20px}
+
+/* ── PAGES ── */
+.page{display:none;padding:18px;max-width:980px;width:100%;margin:0 auto}
+.page.active{display:block}
+.ph{margin-bottom:18px}
+.pt{font-size:21px;font-weight:800;letter-spacing:-.4px}
+.ps{font-size:13px;color:var(--text2);margin-top:2px}
+
+/* ── DASHBOARD CARDS ── */
+.dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px}
+.dc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 15px;cursor:pointer;transition:all .15s;box-shadow:var(--sh);text-align:center}
+.dc:hover{box-shadow:var(--sh2);transform:translateY(-1px)}
+.dn{font-size:26px;font-weight:800;letter-spacing:-1px;margin-bottom:3px}
+.dl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.dc.tot{border-top:3px solid var(--text)}.dc.tot .dn{color:var(--text)}.dc.tot .dl{color:var(--text2)}
+.dc.s-today{border-top:3px solid var(--green)}.dc.s-today .dn,.dc.s-today .dl{color:var(--green)}
+.dc.s-dnp{border-top:3px solid var(--red)}.dc.s-dnp .dn,.dc.s-dnp .dl{color:var(--red)}
+.dc.s-ni{border-top:3px solid var(--slate)}.dc.s-ni .dn,.dc.s-ni .dl{color:var(--slate)}
+.dc.s-followup{border-top:3px solid var(--blue)}.dc.s-followup .dn,.dc.s-followup .dl{color:var(--blue)}
+.dc.s-reminder{border-top:3px solid var(--amber)}.dc.s-reminder .dn,.dc.s-reminder .dl{color:var(--amber)}
+.dc.s-future{border-top:3px solid var(--purple)}.dc.s-future .dn,.dc.s-future .dl{color:var(--purple)}
+.dc.s-cold{border-top:3px solid var(--teal)}.dc.s-cold .dn,.dc.s-cold .dl{color:var(--teal)}
+
+/* ── ALERT ITEMS ── */
+.alert-item{background:var(--amber-bg);border:1px solid rgba(217,119,6,.2);border-left:4px solid var(--amber);border-radius:var(--rs);padding:11px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13px;font-weight:500;cursor:pointer}
+.alert-item.ov{background:var(--red-bg);border-color:rgba(220,38,38,.2);border-left-color:var(--red)}
+.alert-act{border:none;border-radius:6px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;background:var(--amber);color:white;white-space:nowrap}
+.alert-act.red{background:var(--red)}
+
+/* ── PROSPECT CARDS ── */
+.plist{display:flex;flex-direction:column;gap:8px}
+.pc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;display:flex;align-items:flex-start;gap:11px;cursor:pointer;transition:all .15s;box-shadow:var(--sh)}
+.pc:hover{border-color:var(--border2);box-shadow:var(--sh2)}
+.pav{width:37px;height:37px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+.pb{flex:1;min-width:0}
+.pn{font-weight:700;font-size:14px;margin-bottom:1px}
+.pp{font-size:12px;color:var(--text2);margin-bottom:4px}
+.pm{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.chip{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.chip.today-p{background:var(--green-lt);color:var(--green)}
+.chip.dnp{background:var(--red-lt);color:var(--red)}
+.chip.ni{background:var(--slate-lt);color:var(--slate)}
+.chip.followup{background:var(--blue-lt);color:var(--blue)}
+.chip.reminder{background:var(--amber-lt);color:var(--amber)}
+.chip.future{background:var(--purple-lt);color:var(--purple)}
+.chip.cold{background:var(--teal-lt);color:var(--teal)}
+.chip.n{background:var(--bg3);color:var(--text2)}
+.pnote{font-size:12px;color:var(--text2);margin-top:5px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.prem{font-size:11px;font-weight:700;color:var(--amber);margin-top:3px}
+.prem.ov{color:var(--red)}
+.pact{display:flex;gap:5px;flex-shrink:0;align-items:flex-start;padding-top:2px}
+.bico{padding:7px;border-radius:var(--rs);background:var(--bg3);border:1px solid var(--border);cursor:pointer;font-size:13px;transition:all .15s;line-height:1;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.bico:hover{background:var(--bg4)}
+
+/* ── BUTTONS ── */
+.btn{padding:8px 15px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .15s;font-family:inherit;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-dark{background:var(--text);color:white}
+.btn-dark:hover{background:#333}
+.btn-blue{background:var(--blue);color:white}
+.btn-blue:hover{background:#1d4ed8}
+.btn-ghost{background:var(--bg3);color:var(--text2);border-color:var(--border)}
+.btn-ghost:hover{background:var(--bg4);color:var(--text)}
+.btn-red{background:var(--red-bg);color:var(--red);border-color:rgba(220,38,38,.2)}
+.btn-red:hover{background:var(--red);color:white}
+.btn-green{background:var(--green-bg);color:var(--green);border-color:rgba(22,163,74,.2)}
+.btn-green:hover{background:var(--green);color:white}
+.btn-sm{padding:5px 10px;font-size:11px}
+.btn-xs{padding:3px 8px;font-size:11px}
+.w100{width:100%}
+
+/* ── FORMS ── */
+.fg{margin-bottom:12px}
+.fl{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.4px}
+.fi{width:100%;padding:9px 12px;border-radius:var(--rs);border:1.5px solid var(--border2);background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:border-color .15s}
+.fi:focus{border-color:var(--blue);background:white}
+.fi::placeholder{color:var(--text3)}
+textarea.fi{min-height:72px;resize:vertical}
+select.fi{cursor:pointer}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:480px){.frow{grid-template-columns:1fr}}
+
+/* ── STATUS GRID ── */
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}
+@media(max-width:420px){.sgrid{grid-template-columns:repeat(2,1fr)}}
+.sbtn{padding:9px 6px;border-radius:var(--rs);border:2px solid var(--border);background:var(--bg);color:var(--text2);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;line-height:1.3}
+.sbtn:hover{border-color:var(--border2);background:var(--bg3)}
+.sbtn.sel-today{background:var(--green-lt);border-color:var(--green);color:var(--green)}
+.sbtn.sel-dnp{background:var(--red-lt);border-color:var(--red);color:var(--red)}
+.sbtn.sel-ni{background:var(--slate-lt);border-color:var(--slate);color:var(--slate)}
+.sbtn.sel-followup{background:var(--blue-lt);border-color:var(--blue);color:var(--blue)}
+.sbtn.sel-reminder{background:var(--amber-lt);border-color:var(--amber);color:var(--amber)}
+.sbtn.sel-future{background:var(--purple-lt);border-color:var(--purple);color:var(--purple)}
+.sbtn.sel-cold{background:var(--teal-lt);border-color:var(--teal);color:var(--teal)}
+
+/* ── MODAL ── */
+.mwrap{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:14px}
+.mwrap.open{display:flex}
+.modal{background:var(--bg2);border-radius:18px;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;box-shadow:var(--sh3);border:1px solid var(--border)}
+.mhd{padding:16px 18px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;position:sticky;top:0;background:var(--bg2);z-index:1}
+.mav{width:42px;height:42px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
+.mn{font-size:16px;font-weight:800;flex:1}
+.mp{font-size:12px;color:var(--text2);margin-top:1px}
+.mclose{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:5px 11px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);flex-shrink:0}
+.mbody{padding:16px 18px}
+.sdiv{display:flex;align-items:center;gap:8px;margin:14px 0 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3)}
+.sdiv::before,.sdiv::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── TIMELINE ── */
+.tl{display:flex;flex-direction:column;gap:7px;max-height:260px;overflow-y:auto}
+.tli{background:var(--bg);border-radius:var(--rs);padding:9px 12px;border-left:3px solid var(--border2);font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.tli.note{border-left-color:var(--blue)}
+.tli.status{border-left-color:var(--amber)}
+.tli.import{border-left-color:var(--green)}
+.tdate{font-size:11px;color:var(--text3);margin-top:3px}
+
+/* ── SEARCH / FILTER ── */
+.sbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+.sinput{flex:1;min-width:160px;padding:8px 12px;border-radius:var(--rs);border:1.5px solid var(--border2);background:var(--bg2);font-family:inherit;font-size:13px;color:var(--text);outline:none}
+.sinput:focus{border-color:var(--blue)}
+.sinput::placeholder{color:var(--text3)}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:4px;background:var(--bg3);border-radius:var(--rs);padding:4px;margin-bottom:14px;flex-wrap:wrap}
+.tbb{flex:1;padding:6px 8px;border-radius:7px;border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;text-align:center;min-width:60px}
+.tbb.active{background:var(--bg2);color:var(--text);box-shadow:var(--sh)}
+
+/* ── CSV IMPORT ── */
+.dropzone{border:2px dashed var(--border2);border-radius:var(--r);padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg2)}
+.dropzone:hover,.dropzone.drag{border-color:var(--blue);background:var(--blue-bg)}
+.dup-card{border-radius:var(--rs);border:1.5px solid var(--border2);padding:10px 13px;margin-bottom:7px;background:var(--bg2)}
+.dup-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dup-opts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.dup-opt{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--bg3);color:var(--text2);transition:all .15s}
+.dup-opt.sel{border-color:var(--blue);background:var(--blue-bg);color:var(--blue)}
+.dup-opt.sel-skip{border-color:var(--slate);background:var(--slate-lt);color:var(--slate)}
+.dup-opt.sel-merge{border-color:var(--green);background:var(--green-lt);color:var(--green)}
+.dup-opt.sel-replace{border-color:var(--amber);background:var(--amber-lt);color:var(--amber)}
+.parsed-row{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rs);margin-bottom:6px;background:var(--bg2)}
+
+/* ── BROADCAST ── */
+.wa-prev{background:var(--bg3);border-radius:var(--rs);padding:11px 13px;font-size:13px;color:var(--text2);margin-top:8px;border-left:3px solid #25d366;white-space:pre-wrap;min-height:40px}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:44px 20px;color:var(--text3)}
+.empty-ico{font-size:38px;margin-bottom:9px}
+.empty-txt{font-size:14px;font-weight:500}
+.empty-sub{font-size:12px;margin-top:3px}
+
+/* ── TOAST ── */
+#tc{position:fixed;bottom:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{background:var(--text);color:white;border-radius:var(--rs);padding:10px 16px;font-size:13px;font-weight:500;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:auto;max-width:280px;box-shadow:var(--sh2)}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.ok{background:var(--green)}
+.toast.warn{background:var(--amber)}
+.toast.err{background:var(--red)}
+</style>
+</head>
+<body>
+
+<div class="mob-overlay" id="mob-overlay" onclick="closeSB()"></div>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo">ProspectFlow</div>
+    <div class="sb-date" id="sb-date"></div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nsec">Overview</div>
+    <button class="ni active" onclick="gp('dashboard',this)"><span class="ico">◼</span>Dashboard</button>
+
+    <div class="nsec">Buckets</div>
+    <button class="ni" onclick="gp('today',this)"><span class="ico">📋</span>Today's List<span class="nbadge green" id="b-today">0</span></button>
+    <button class="ni" onclick="gp('dnp',this)"><span class="ico">📵</span>DNP<span class="nbadge red" id="b-dnp">0</span></button>
+    <button class="ni" onclick="gp('ni',this)"><span class="ico">🚫</span>Not Interested<span class="nbadge slate" id="b-ni">0</span></button>
+    <button class="ni" onclick="gp('followup',this)"><span class="ico">🔄</span>Follow Up<span class="nbadge blue" id="b-followup">0</span></button>
+    <button class="ni" onclick="gp('reminder',this)"><span class="ico">⏰</span>Reminders<span class="nbadge amber" id="b-reminder">0</span></button>
+    <button class="ni" onclick="gp('future',this)"><span class="ico">🌱</span>Future/Investor<span class="nbadge purple" id="b-future">0</span></button>
+    <button class="ni" onclick="gp('cold',this)"><span class="ico">❄️</span>Cold Pool<span class="nbadge teal" id="b-cold">0</span></button>
+
+    <div class="nsec">Tools</div>
+    <button class="ni" onclick="gp('add',this)"><span class="ico">➕</span>Add Prospects</button>
+    <button class="ni" onclick="gp('broadcast',this)"><span class="ico">📢</span>Broadcast</button>
+    <button class="ni" onclick="gp('import',this)"><span class="ico">📂</span>Import CSV</button>
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<div class="main-area">
+  <div class="topbar">
+    <button class="mob-btn" onclick="openSB()">☰</button>
+    <div class="topbar-title" id="tb-title">Dashboard</div>
+    <div class="topbar-date" id="tb-date"></div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div style="padding:18px;max-width:980px;margin:0 auto">
+      <div class="ph"><div class="pt" id="dash-greeting">Good morning 👋</div><div class="ps">Here's your pipeline at a glance</div></div>
+      <div class="dg" id="dg"></div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:8px;margin:16px 0 8px">
+        <span>🚨 Reminders Due</span><span style="flex:1;height:1px;background:var(--red-lt);display:block"></span>
+      </div>
+      <div id="dash-rems"></div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:8px;margin:18px 0 8px">
+        <span>Recent Activity</span><span style="flex:1;height:1px;background:var(--border);display:block"></span>
+      </div>
+      <div id="dash-recent"></div>
+    </div>
+  </div>
+
+  <!-- TODAY -->
+  <div class="page" id="page-today">
+    <div style="padding:18px;max-width:980px;margin:0 auto">
+      <div class="ph" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+        <div><div class="pt">📋 Today's Calling List</div><div class="ps">New prospects — call and move to a bucket</div></div>
+        <button class="btn btn-blue btn-sm" onclick="gp('add',null)">+ Add</button>
+      </div>
+      <div class="sbar"><input class="sinput" placeholder="Search…" oninput="rs('today')" id="q-today"></div>
+      <div id="list-today"></div>
+    </div>
+  </div>
+
+  <!-- DNP -->
+  <div class="page" id="page-dnp">
+    <div style="padding:18px;max-width:980px;margin:0 auto">
+      <div class="ph" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+        <div><div class="pt">📵 Did Not Pick</div><div class="ps">Call back later — didn't answer</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="bulkToToday()">↩ Move All → Today</button>
+      </div>
+      <div class="sbar"><input class="sinput" placeholder="Search…" oninput="rs('dnp')" id="q-dnp"></div>
+      <div id="list-dnp"></div>
+    </div>
+  </div>
+
+  <!-- NI -->
+  <div class="page" id="page-ni">
+    <div style="padding:18px;max-width:980px;margin:0 auto">
+      <div class="ph"><div class="pt">🚫 Not Interested</div><div class="ps">Said no — archived for reference</div></div>
+      <div class="sbar"><input class="sinput" placeholder="Search…" oninput="rs('ni')" id="q-ni"></div>
+      <div id="list-ni"></div>
+    </div>
+  </div>
+
+  <!-- FOLLOW UP -->
+  <div class="page" id="page-followup">
+    <div style="padding:18px;max-width:980px;margin:0 auto">
+      <div class="ph"><div class="pt">🔄 Follow Up</div><div class="ps">Checked proposal or interested — stay in touch</div></div>
+      <div class="sbar"><input class="sinput" placeholder="Search…" oninput="rs('followup')" id="q-followup"></div>
+      <div id="list-followup"></div>
+    </div>
+  </div>
+
+  <!-- REMINDER -->
+  <div class="page" id="page-reminder">
+    <div style="padding:18px;max-width:980px;margin:0 auto">
+      <div class="ph"><div class="pt">⏰ Reminders</div><div class="ps">Scheduled callbacks & meetings — don't miss!</div></div>
+      <div class="tabs" id="rem-tabs">
+        <button class="tbb active" onclick="setRemTab('overdue',this)">🔴 Overdue</button>
+        <button class="tbb" onclick="setRemTab('today',this)">🟡 Today</button>
+        <button class="tbb" onclick="setRemTab('upcoming',this)">🟢 Upcoming</button>
+        <button class="tbb" onclick="setRemTab('all',this)">All</button>
+      </div>
+      <div id="list-reminder"></div>
+    </div>
+  </div>
+
+  <!-- FUTURE -->
+  <div class="page" id="page-future">
+    <div style="padding:18px;max-width:980px;margin:0 auto">
+      <div class="ph"><div class="pt">🌱 Future / Investors</div><div class="ps">Not ready now — nurture and revisit</div></div>
+      <div class="sbar"><input class="sinput" placeholder="Search…" oninput="rs('future')" id="q-future"></div>
+      <div id="list-future"></div>
+    </div>
+  </div>
+
+  <!-- COLD -->
+  <div class="page" id="page-cold">
+    <div style="padding:18px;max-width:980px;margin:0 auto">
+      <div class="ph"><div class="pt">❄️ Cold Pool</div><div class="ps">Low priority — check back later</div></div>
+      <div class="sbar"><input class="sinput" placeholder="Search…" oninput="rs('cold')" id="q-cold"></div>
+      <div id="list-cold"></div>
+    </div>
+  </div>
+
+  <!-- ADD -->
+  <div class="page" id="page-add">
+    <div style="padding:18px;max-width:680px;margin:0 auto">
+      <div class="ph"><div class="pt">➕ Add Prospect</div><div class="ps">Single or bulk — lands in Today's List</div></div>
+      <div class="tabs">
+        <button class="tbb active" id="tadd-s" onclick="setAddTab('s')">Single</button>
+        <button class="tbb" id="tadd-b" onclick="setAddTab('b')">Bulk Paste</button>
+      </div>
+      <div id="add-s">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--sh)">
+          <div class="frow"><div class="fg"><label class="fl">Name *</label><input class="fi" id="sn" placeholder="Rahul Sharma"></div><div class="fg"><label class="fl">Phone *</label><input class="fi" id="sp" placeholder="98XXXXXXXX" type="tel"></div></div>
+          <div class="frow"><div class="fg"><label class="fl">Project</label><input class="fi" id="spr" placeholder="Pyramid, Plots…"></div><div class="fg"><label class="fl">Budget</label><input class="fi" id="sb" placeholder="80L, 1.5Cr…"></div></div>
+          <div class="fg"><label class="fl">Source</label><input class="fi" id="ss" placeholder="Reference, MagicBricks…"></div>
+          <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="sno" placeholder="Any details…" style="min-height:60px"></textarea></div>
+          <button class="btn btn-dark w100" onclick="addSingle()">Add to Today's List →</button>
+        </div>
+      </div>
+      <div id="add-b" style="display:none">
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--sh)">
+          <div class="fg"><label class="fl">Paste names & numbers (one per line)</label><textarea class="fi" id="bt" placeholder="Rahul Sharma, 9876543210&#10;Priya Mehta 8765432109&#10;9543210987" oninput="parseBulk()" style="min-height:110px"></textarea></div>
+          <div id="bp" style="max-height:280px;overflow-y:auto;margin-top:10px"></div>
+          <button class="btn btn-dark w100" style="margin-top:10px" onclick="confirmBulk()" id="bc-btn" disabled>Add 0 →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMPORT CSV -->
+  <div class="page" id="page-import">
+    <div style="padding:18px;max-width:780px;margin:0 auto">
+      <div class="ph"><div class="pt">📂 Import CSV</div><div class="ps">Supports your exact column format: Date, Name, Phone, Project, Action/Status, Notes</div></div>
+
+      <!-- Step 1: Upload -->
+      <div id="imp-step1">
+        <div class="dropzone" id="dz" onclick="document.getElementById('cfi').click()" ondragover="dzOver(event)" ondragleave="dzLeave()" ondrop="dzDrop(event)">
+          <div style="font-size:38px;margin-bottom:10px">📂</div>
+          <div style="font-weight:700;font-size:16px;margin-bottom:6px">Drop your CSV here or click to browse</div>
+          <div style="color:var(--text2);font-size:12px;margin-bottom:14px">Works with your format: Date · Name · Phone · Project · Action/Status · Notes</div>
+          <button class="btn btn-blue" onclick="event.stopPropagation();document.getElementById('cfi').click()">Choose File</button>
+        </div>
+        <input type="file" id="cfi" accept=".csv,.txt" style="display:none" onchange="loadCsv(this)">
+      </div>
+
+      <!-- Step 2: Duplicates -->
+      <div id="imp-step2" style="display:none">
+        <div style="background:var(--amber-bg);border:1px solid rgba(217,119,6,.25);border-radius:var(--rs);padding:12px 15px;margin-bottom:14px;font-size:13px">
+          <strong>⚠️ Duplicates found</strong> — same phone number already exists. Choose what to do with each:
+          <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="setAllDup('skip')">Skip All</button>
+            <button class="btn btn-ghost btn-sm" onclick="setAllDup('merge')">Merge Notes All</button>
+            <button class="btn btn-ghost btn-sm" onclick="setAllDup('replace')">Replace All</button>
+          </div>
+        </div>
+        <div id="dup-list" style="max-height:360px;overflow-y:auto"></div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-dark" onclick="proceedImport()" id="imp-proceed-btn">Proceed with Import</button>
+          <button class="btn btn-ghost" onclick="resetImport()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Preview new -->
+      <div id="imp-step3" style="display:none">
+        <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px" id="imp-preview-label"></div>
+        <div id="imp-preview-list" style="max-height:400px;overflow-y:auto"></div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn btn-dark" onclick="confirmImport()" id="imp-confirm-btn">Import All</button>
+          <button class="btn btn-ghost" onclick="resetImport()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BROADCAST -->
+  <div class="page" id="page-broadcast">
+    <div style="padding:18px;max-width:700px;margin:0 auto">
+      <div class="ph"><div class="pt">📢 Broadcast</div><div class="ps">Compose once, send to selected prospects via WhatsApp</div></div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:15px;box-shadow:var(--sh);margin-bottom:12px">
+        <div class="fg"><label class="fl">Message (use {name} for personalisation)</label><textarea class="fi" id="bcmsg" placeholder="Hi {name}, wanted to share an exciting opportunity…" style="min-height:90px" oninput="bcPreview()"></textarea></div>
+        <div class="wa-prev" id="bc-prev">Preview will appear here…</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:15px;box-shadow:var(--sh)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+          <div style="font-weight:700">Select Recipients</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="bcAll()">All</button>
+            <button class="btn btn-ghost btn-sm" onclick="bcByStatus('followup')">Follow-up</button>
+            <button class="btn btn-ghost btn-sm" onclick="bcByStatus('future')">Future</button>
+            <button class="btn btn-ghost btn-sm" onclick="bcByStatus('reminder')">Reminder</button>
+            <button class="btn btn-ghost btn-sm" onclick="bcClear()">Clear</button>
+          </div>
+        </div>
+        <input class="sinput w100" style="margin-bottom:8px" placeholder="Search…" oninput="renderBC()" id="q-bc">
+        <div id="bc-list" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+      <div id="bc-bar" style="display:none;background:var(--blue-bg);border:1px solid var(--blue-lt);border-radius:var(--rs);padding:11px 15px;margin-top:10px;display:none;align-items:center;justify-content:space-between">
+        <span style="font-size:13px;font-weight:600;color:var(--blue)"><span id="bc-cnt">0</span> selected</span>
+        <button class="btn btn-blue" onclick="sendBC()">📤 Send via WhatsApp</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- main-area -->
+</div><!-- app -->
+
+<!-- PROSPECT MODAL -->
+<div class="mwrap" id="pmodal" onclick="closePM(event)">
+  <div class="modal">
+    <div class="mhd">
+      <div class="mav" id="pm-av"></div>
+      <div style="flex:1">
+        <div class="mn" id="pm-n"></div>
+        <div class="mp" id="pm-p"></div>
+      </div>
+      <button class="mclose" onclick="document.getElementById('pmodal').classList.remove('open')">✕</button>
+    </div>
+    <div class="mbody">
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">
+        <a class="btn btn-blue" id="pm-call" style="text-decoration:none">📞 Call</a>
+        <button class="btn" style="background:#25d366;color:white" id="pm-wa">💬 WhatsApp</button>
+        <button class="btn btn-red btn-sm" onclick="delCurr()">🗑 Delete</button>
+      </div>
+
+      <div class="sdiv">Move to Bucket</div>
+      <div class="sgrid">
+        <button class="sbtn" onclick="chSt('today')">📋 Today</button>
+        <button class="sbtn" onclick="chSt('dnp')">📵 DNP</button>
+        <button class="sbtn" onclick="chSt('ni')">🚫 Not Interested</button>
+        <button class="sbtn" onclick="chSt('followup')">🔄 Follow Up</button>
+        <button class="sbtn" onclick="chSt('reminder')">⏰ Reminder</button>
+        <button class="sbtn" onclick="chSt('future')">🌱 Future</button>
+        <button class="sbtn" onclick="chSt('cold')">❄️ Cold Pool</button>
+      </div>
+
+      <div id="pm-remflds" style="display:none;margin-bottom:12px">
+        <div class="frow">
+          <div class="fg"><label class="fl">Date *</label><input class="fi" type="date" id="pm-rd"></div>
+          <div class="fg"><label class="fl">Time</label><input class="fi" type="time" id="pm-rt"></div>
+        </div>
+        <div class="fg"><label class="fl">What's the plan?</label><input class="fi" id="pm-rn" placeholder="Meeting, callback, site visit…"></div>
+        <button class="btn btn-dark w100" onclick="saveRem()">Save Reminder</button>
+      </div>
+
+      <div class="sdiv">Add Note</div>
+      <div style="display:flex;gap:7px;margin-bottom:12px">
+        <input class="fi" style="flex:1" id="pm-ni" placeholder="Call went well, asked for details…">
+        <button class="btn btn-blue" onclick="addNote()">Save</button>
+      </div>
+
+      <div class="sdiv">Details</div>
+      <div class="frow" style="margin-bottom:8px">
+        <div class="fg"><label class="fl">Project</label><input class="fi" id="pm-proj" placeholder="Pyramid…"></div>
+        <div class="fg"><label class="fl">Budget</label><input class="fi" id="pm-bud" placeholder="80L…"></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="saveDetails()">Save Details</button>
+
+      <div class="sdiv">Activity Timeline</div>
+      <div class="tl" id="pm-tl"></div>
+    </div>
+  </div>
+</div>
+
+<div id="tc"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  INDEXEDDB
+// ═══════════════════════════════════════════
+const DB='ProspectFlowDB3', ST='prospects';
+let db, prospects=[], openId=null, bcSel=new Set(), remTab='overdue', curPage='dashboard';
+let csvParsed=[], csvDups=[], csvNew=[], dupDecisions={};
+let bulkParsed=[];
+
+function openDB(){
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open(DB,1);
+    r.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains(ST))d.createObjectStore(ST,{keyPath:'id'})};
+    r.onsuccess=e=>{db=e.target.result;res()};
+    r.onerror=rej;
+  });
+}
+const tx=(mode='readonly')=>db.transaction(ST,mode).objectStore(ST);
+function dbAll(){return new Promise((r,j)=>{const q=tx().getAll();q.onsuccess=()=>r(q.result);q.onerror=j})}
+function dbPut(p){return new Promise((r,j)=>{const q=tx('readwrite').put(p);q.onsuccess=r;q.onerror=j})}
+function dbDel(id){return new Promise((r,j)=>{const q=tx('readwrite').delete(id);q.onsuccess=r;q.onerror=j})}
+
+// ═══════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function now(){return new Date().toISOString()}
+function todayStr(){return new Date().toISOString().split('T')[0]}
+function ini(n){return(n||'?').trim().split(' ').filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?'}
+const AVC=[{bg:'#dbeafe',c:'#1d4ed8'},{bg:'#dcfce7',c:'#15803d'},{bg:'#fce7f3',c:'#be185d'},{bg:'#fef3c7',c:'#b45309'},{bg:'#ede9fe',c:'#6d28d9'},{bg:'#ccfbf1',c:'#0f766e'},{bg:'#fee2e2',c:'#b91c1c'},{bg:'#e0e7ff',c:'#3730a3'},{bg:'#fdf4ff',c:'#86198f'}];
+function avc(n){let s=0;for(const c of(n||''))s+=c.charCodeAt(0);return AVC[s%AVC.length]}
+function fdt(s){if(!s)return'';try{const d=new Date(s.includes('T')?s:s+'T00:00:00');return d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}catch{return s}}
+function fdts(s){if(!s)return'';try{const d=new Date(s);return d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true})}catch{return s}}
+function ago(s){if(!s)return'';const d=Date.now()-new Date(s).getTime(),m=Math.floor(d/6e4),h=Math.floor(m/60),dd=Math.floor(h/24);return dd>0?dd+'d ago':h>0?h+'h ago':m>0?m+'m ago':'Just now'}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+const SM={
+  today:  {l:'Today',     c:'var(--green)', ch:'today-p', i:'📋'},
+  dnp:    {l:'DNP',       c:'var(--red)',   ch:'dnp',     i:'📵'},
+  ni:     {l:'Not Interested',c:'var(--slate)',ch:'ni',   i:'🚫'},
+  followup:{l:'Follow Up',c:'var(--blue)',  ch:'followup',i:'🔄'},
+  reminder:{l:'Reminder', c:'var(--amber)', ch:'reminder',i:'⏰'},
+  future: {l:'Future',    c:'var(--purple)',ch:'future',  i:'🌱'},
+  cold:   {l:'Cold Pool', c:'var(--teal)',  ch:'cold',    i:'❄️'},
+};
+
+function remSt(p){
+  if(!p.reminderDT)return null;
+  const dt=new Date(p.reminderDT),n=new Date(),td=new Date();td.setHours(23,59,59,999);
+  if(dt<n)return'overdue';if(dt<=td)return'today';return'upcoming';
+}
+
+// ═══════════════════════════════════════════
+//  CSV PARSER  (handles quoted commas, semicolons in notes)
+// ═══════════════════════════════════════════
+function parseCSVLine(line){
+  const cols=[];let cur='',inQ=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c==='"'){
+      if(inQ&&line[i+1]==='"'){cur+='"';i++;}
+      else inQ=!inQ;
+    } else if(c===','&&!inQ){cols.push(cur.trim());cur='';}
+    else cur+=c;
+  }
+  cols.push(cur.trim());
+  return cols;
+}
+
+function normaliseHeader(h){
+  return h.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+}
+
+// Map Action/Status column to internal bucket
+function mapStatus(raw){
+  if(!raw)return'today';
+  const r=raw.toLowerCase();
+  if(r.includes('cold pool')||r.includes('cold'))return'cold';
+  if(r.includes('not interested'))return'ni';
+  if(r.includes('confirm visit')||r.includes('visit')||r.includes('meeting'))return'reminder';
+  if(r.includes('follow up')||r.includes('follow-up')||r.includes('send details'))return'followup';
+  if(r.includes('call again')||r.includes('call tomorrow')||r.includes('call back')||r.includes('call after')||r.includes('call in')||r.includes('call at')||r.includes('call on')||r.includes('call later'))return'reminder';
+  if(r.includes('interested'))return'followup';
+  if(r.includes('invest'))return'future';
+  if(r.includes('potential'))return'future';
+  if(r.includes('pitched'))return'followup';
+  return'today';
+}
+
+// Extract a reminder date/time from the Action/Status text
+function extractReminderDT(raw){
+  if(!raw)return null;
+  // Patterns: "Call again 27-Mar-2026", "Confirm visit 01-Apr-2026", "call tomorrow at 11:20 AM", "Call Friday ~12 PM"
+  const ddmmyyyy=/(\d{1,2})[\/\-](\w{3,9})[\/\-](\d{2,4})/i;
+  const mths={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  const m=raw.match(ddmmyyyy);
+  if(m){
+    const day=parseInt(m[1]),mon=mths[m[2].toLowerCase().slice(0,3)],yr=m[3].length===2?2000+parseInt(m[3]):parseInt(m[3]);
+    if(mon!==undefined){
+      // extract time if any
+      const tm=raw.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+      let h=9,min=0;
+      if(tm){h=parseInt(tm[1]);min=tm[2]?parseInt(tm[2]):0;if(tm[3].toLowerCase()==='pm'&&h<12)h+=12;if(tm[3].toLowerCase()==='am'&&h===12)h=0;}
+      return new Date(yr,mon,day,h,min).toISOString();
+    }
+  }
+  // "tomorrow"
+  if(/tomorrow/i.test(raw)){
+    const tm=raw.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
+    const d=new Date();d.setDate(d.getDate()+1);
+    if(tm){let h=parseInt(tm[1]);const min=tm[2]?parseInt(tm[2]):0;if(tm[3].toLowerCase()==='pm'&&h<12)h+=12;if(tm[3].toLowerCase()==='am'&&h===12)h=0;d.setHours(h,min,0,0);}
+    else d.setHours(11,0,0,0);
+    return d.toISOString();
+  }
+  return null;
+}
+
+// Build clean notes string from all note-like columns
+function buildNotes(obj, headers){
+  const parts=[];
+  // Collect note-bearing columns
+  const noteCols=['notes','note','remarks','remark','comments','comment','description','details'];
+  const seen=new Set();
+  for(const h of headers){
+    const norm=normaliseHeader(h);
+    if(noteCols.some(n=>norm===n||norm.includes(n))){
+      const v=(obj[h]||'').trim();
+      if(v&&!seen.has(v)){seen.add(v);parts.push(v);}
+    }
+  }
+  return parts.join('\n').trim();
+}
+
+function parseCsvText(text){
+  // Split into lines respecting quoted newlines
+  const rows=[];let cur='',inQ=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(c==='"')inQ=!inQ;
+    if((c==='\n'||c==='\r')&&!inQ){if(cur.trim())rows.push(cur);cur='';}
+    else cur+=c;
+  }
+  if(cur.trim())rows.push(cur);
+
+  if(rows.length<2)return[];
+  const rawHeaders=parseCSVLine(rows[0]);
+  const headers=rawHeaders.map(h=>h.replace(/^"|"$/g,'').trim());
+
+  return rows.slice(1).map(row=>{
+    const vals=parseCSVLine(row);
+    const obj={};
+    headers.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/^"|"$/g,'').trim());
+
+    // phone — clean to digits only
+    const rawPhone=obj['Phone']||obj['phone']||obj['mobile']||obj['Mobile']||obj['contact']||'';
+    const phone=rawPhone.replace(/\D/g,'').replace(/^0+/,'');
+
+    // name
+    const name=(obj['Name']||obj['name']||obj['prospect_name']||'').trim();
+
+    // project
+    const project=(obj['Project']||obj['project']||'').trim();
+
+    // action/status raw
+    const actionRaw=(obj['Action/Status']||obj['Action']||obj['Status']||obj['action_status']||obj['action/status']||'').trim();
+
+    // budget — try to extract from notes if not a dedicated column
+    let budget=(obj['Budget']||obj['budget']||'').trim();
+    if(!budget){const bm=(obj['Notes']||obj['notes']||'').match(/budget[:\s]+([^\n;,]+)/i);if(bm)budget=bm[1].trim();}
+
+    // notes — build from all note columns, also prepend project/action info
+    const rawNote=buildNotes(obj,headers);
+    // Format notes nicely: break semicolons into separate lines
+    const noteLines=rawNote.split(/[;\n]/).map(l=>l.trim()).filter(Boolean);
+    // Deduplicate note lines
+    const uniqueNotes=[...new Set(noteLines)].join('\n');
+
+    const status=mapStatus(actionRaw);
+    const reminderDT=(['reminder','followup'].includes(status))?extractReminderDT(actionRaw):null;
+
+    // date added
+    const dateAdded=(obj['Date']||obj['date']||'').trim();
+
+    if(!name&&!phone)return null;
+
+    return{
+      id:uid(), name:name||('Unknown ('+phone+')'), phone, project, budget,
+      source:'',
+      status,
+      reminderDT,
+      reminderNote:actionRaw,
+      timeline: uniqueNotes?[{text:uniqueNotes,type:'import',date:now()}]:[],
+      createdAt:now(), updatedAt:now(), dateAdded,
+    };
+  }).filter(Boolean);
+}
+
+// ═══════════════════════════════════════════
+//  IMPORT FLOW
+// ═══════════════════════════════════════════
+function dzOver(e){e.preventDefault();document.getElementById('dz').classList.add('drag')}
+function dzLeave(){document.getElementById('dz').classList.remove('drag')}
+function dzDrop(e){e.preventDefault();dzLeave();if(e.dataTransfer.files[0])readFile(e.dataTransfer.files[0])}
+function loadCsv(input){if(input.files[0])readFile(input.files[0])}
+function readFile(f){const r=new FileReader();r.onload=e=>afterRead(e.target.result);r.readAsText(f)}
+
+function afterRead(text){
+  csvParsed=parseCsvText(text);
+  if(!csvParsed.length){toast('No valid rows found','err');return;}
+
+  // Build phone map of existing prospects
+  const existingByPhone={};
+  prospects.forEach(p=>{if(p.phone)existingByPhone[p.phone]=p});
+
+  csvDups=csvParsed.filter(p=>p.phone&&existingByPhone[p.phone]);
+  csvNew=csvParsed.filter(p=>!p.phone||!existingByPhone[p.phone]);
+  dupDecisions={};
+  csvDups.forEach(p=>dupDecisions[p.phone]='skip'); // default skip
+
+  if(csvDups.length>0){
+    renderDupStep(existingByPhone);
+  } else {
+    renderPreviewStep();
+  }
+}
+
+function renderDupStep(existingByPhone){
+  document.getElementById('imp-step1').style.display='none';
+  document.getElementById('imp-step2').style.display='block';
+
+  const existingByPhone2={};
+  prospects.forEach(p=>{if(p.phone)existingByPhone2[p.phone]=p});
+
+  document.getElementById('dup-list').innerHTML=csvDups.map(p=>{
+    const ex=existingByPhone2[p.phone];
+    const exSM=SM[ex.status]||{};
+    return`<div class="dup-card">
+      <div class="dup-row">
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:13px">${esc(p.name)} · ${p.phone}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Existing: <span style="font-weight:600;color:${exSM.c||'inherit'}">${exSM.l||ex.status}</span> · Added ${fdt(ex.createdAt)}</div>
+          ${ex.timeline&&ex.timeline.length?`<div style="font-size:11px;color:var(--text2);margin-top:2px;font-style:italic">${esc(ex.timeline[ex.timeline.length-1].text.split('\n')[0].slice(0,80))}</div>`:''}
+          ${p.timeline&&p.timeline.length?`<div style="font-size:11px;color:var(--blue);margin-top:2px">New note: ${esc(p.timeline[0].text.split('\n')[0].slice(0,80))}</div>`:''}
+        </div>
+      </div>
+      <div class="dup-opts">
+        <button class="dup-opt sel-skip sel" id="dup-skip-${p.phone}" onclick="setDup('${p.phone}','skip')">Skip</button>
+        <button class="dup-opt sel-merge" id="dup-merge-${p.phone}" onclick="setDup('${p.phone}','merge')">Merge Notes</button>
+        <button class="dup-opt sel-replace" id="dup-replace-${p.phone}" onclick="setDup('${p.phone}','replace')">Replace</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setDup(phone,action){
+  dupDecisions[phone]=action;
+  const opts=['skip','merge','replace'];
+  opts.forEach(o=>{
+    const el=document.getElementById(`dup-${o}-${phone}`);
+    if(el){el.className='dup-opt sel-'+o+(action===o?' sel':'');}
+  });
+}
+function setAllDup(action){
+  csvDups.forEach(p=>{setDup(p.phone,action)});
+}
+
+function proceedImport(){
+  document.getElementById('imp-step2').style.display='none';
+  renderPreviewStep();
+}
+
+function renderPreviewStep(){
+  document.getElementById('imp-step1').style.display='none';
+  document.getElementById('imp-step2').style.display='none';
+  document.getElementById('imp-step3').style.display='block';
+
+  const total=csvNew.length+(csvDups.filter(p=>dupDecisions[p.phone]!=='skip').length);
+  document.getElementById('imp-preview-label').textContent=`Ready to import ${total} prospects (${csvNew.length} new, ${csvDups.filter(p=>dupDecisions[p.phone]!=='skip').length} updates)`;
+  document.getElementById('imp-confirm-btn').textContent=`Import ${total} Prospects`;
+
+  const all=[...csvNew,...csvDups.filter(p=>dupDecisions[p.phone]!=='skip')];
+  document.getElementById('imp-preview-list').innerHTML=all.slice(0,30).map(p=>{
+    const sm=SM[p.status]||{};
+    const ac=avc(p.name);
+    const isDup=csvDups.some(d=>d.phone===p.phone);
+    const action=isDup?dupDecisions[p.phone]:'new';
+    const actionLabel={new:'➕ New',merge:'🔀 Merge',replace:'♻️ Replace'}[action]||action;
+    return`<div class="parsed-row">
+      <div style="width:34px;height:34px;border-radius:50%;background:${ac.bg};color:${ac.c};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0">${ini(p.name)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:13px">${esc(p.name)}</div>
+        <div style="font-size:11px;color:var(--text2)">${p.phone||'No phone'} ${p.project?'· '+p.project:''} ${p.budget?'· '+p.budget:''}</div>
+        ${p.timeline&&p.timeline.length?`<div style="font-size:11px;color:var(--text2);margin-top:2px;white-space:pre-wrap">${esc(p.timeline[0].text.slice(0,120))}${p.timeline[0].text.length>120?'…':''}</div>`:''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+        <span class="chip ${sm.ch||'n'}">${sm.i||''} ${sm.l||p.status}</span>
+        <span style="font-size:10px;font-weight:700;color:${isDup?'var(--amber)':'var(--green)'}">${actionLabel}</span>
+      </div>
+    </div>`;
+  }).join('')+(all.length>30?`<div style="font-size:12px;color:var(--text3);padding:8px">…and ${all.length-30} more</div>`:'');
+}
+
+async function confirmImport(){
+  const existingByPhone={};
+  prospects.forEach(p=>{if(p.phone)existingByPhone[p.phone]=p});
+
+  let added=0,updated=0;
+
+  // New prospects
+  for(const p of csvNew){
+    prospects.unshift(p);
+    await dbPut(p);
+    added++;
+  }
+
+  // Duplicates
+  for(const p of csvDups){
+    const dec=dupDecisions[p.phone];
+    if(dec==='skip')continue;
+    const ex=existingByPhone[p.phone];
+    if(!ex)continue;
+
+    if(dec==='merge'){
+      // Merge: keep existing status, append new notes that aren't already there
+      if(p.timeline&&p.timeline.length){
+        const newNote=p.timeline[0].text;
+        const alreadyHas=ex.timeline&&ex.timeline.some(t=>t.text===newNote);
+        if(!alreadyHas){
+          if(!ex.timeline)ex.timeline=[];
+          ex.timeline.push({text:newNote,type:'import',date:now()});
+        }
+      }
+      // merge project/budget if empty
+      if(!ex.project&&p.project)ex.project=p.project;
+      if(!ex.budget&&p.budget)ex.budget=p.budget;
+      ex.updatedAt=now();
+      await dbPut(ex);
+    } else if(dec==='replace'){
+      // Replace: update status & notes from CSV, keep id
+      ex.status=p.status;
+      ex.reminderDT=p.reminderDT||ex.reminderDT;
+      ex.reminderNote=p.reminderNote||ex.reminderNote;
+      ex.project=p.project||ex.project;
+      ex.budget=p.budget||ex.budget;
+      if(p.timeline&&p.timeline.length){
+        if(!ex.timeline)ex.timeline=[];
+        const newNote=p.timeline[0].text;
+        const alreadyHas=ex.timeline.some(t=>t.text===newNote);
+        if(!alreadyHas)ex.timeline.push({text:newNote,type:'import',date:now()});
+      }
+      ex.updatedAt=now();
+      await dbPut(ex);
+    }
+    updated++;
+  }
+
+  resetImport();
+  renderAll();
+  toast(`✅ ${added} added, ${updated} updated!`,'ok');
+  gp('dashboard',null);
+}
+
+function resetImport(){
+  csvParsed=[];csvDups=[];csvNew=[];dupDecisions={};
+  document.getElementById('imp-step1').style.display='block';
+  document.getElementById('imp-step2').style.display='none';
+  document.getElementById('imp-step3').style.display='none';
+  document.getElementById('cfi').value='';
+}
+
+// ═══════════════════════════════════════════
+//  BULK PASTE
+// ═══════════════════════════════════════════
+function parseBulk(){
+  const raw=document.getElementById('bt').value;
+  const lines=raw.split('\n').map(l=>l.trim()).filter(Boolean);
+  bulkParsed=lines.map(line=>{
+    const pm=line.match(/\b[6-9]\d{9}\b/);
+    const phone=pm?pm[0]:'';
+    const name=line.replace(phone,'').replace(/[,\-–|]/g,'').trim()||'Unknown';
+    return{id:uid(),name,phone,project:'',budget:'',source:'',status:'today',timeline:[],createdAt:now(),updatedAt:now()};
+  }).filter(p=>p.phone);
+  const btn=document.getElementById('bc-btn');
+  btn.textContent=`Add ${bulkParsed.length} →`;
+  btn.disabled=bulkParsed.length===0;
+  document.getElementById('bp').innerHTML=bulkParsed.slice(0,20).map(p=>`
+    <div class="parsed-row">
+      <div style="width:30px;height:30px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0">${ini(p.name)}</div>
+      <div><div style="font-weight:600;font-size:13px">${esc(p.name)}</div><div style="font-size:12px;color:var(--text2)">${p.phone}</div></div>
+    </div>`).join('')+(bulkParsed.length>20?`<div style="font-size:12px;color:var(--text3);padding:8px">…and ${bulkParsed.length-20} more</div>`:'');
+}
+
+async function confirmBulk(){
+  if(!bulkParsed.length)return;
+  // deduplicate against existing
+  const phones=new Set(prospects.map(p=>p.phone));
+  const fresh=bulkParsed.filter(p=>!phones.has(p.phone));
+  const skipped=bulkParsed.length-fresh.length;
+  for(const p of fresh){prospects.unshift(p);await dbPut(p);}
+  bulkParsed=[];
+  document.getElementById('bt').value='';
+  document.getElementById('bp').innerHTML='';
+  document.getElementById('bc-btn').disabled=true;
+  document.getElementById('bc-btn').textContent='Add 0 →';
+  renderAll();
+  toast(`${fresh.length} added${skipped?', '+skipped+' duplicates skipped':''}!`,'ok');
+}
+
+// ═══════════════════════════════════════════
+//  SINGLE ADD
+// ═══════════════════════════════════════════
+async function addSingle(){
+  const name=document.getElementById('sn').value.trim();
+  const phone=document.getElementById('sp').value.replace(/\D/g,'');
+  if(!name||!phone){toast('Name and phone required','err');return;}
+  if(prospects.some(p=>p.phone===phone)){toast('Phone already exists','warn');return;}
+  const note=document.getElementById('sno').value.trim();
+  const p={id:uid(),name,phone,project:document.getElementById('spr').value.trim(),budget:document.getElementById('sb').value.trim(),source:document.getElementById('ss').value.trim(),status:'today',timeline:note?[{text:note,type:'note',date:now()}]:[],createdAt:now(),updatedAt:now()};
+  prospects.unshift(p);await dbPut(p);
+  ['sn','sp','spr','sb','ss','sno'].forEach(id=>document.getElementById(id).value='');
+  renderAll();
+  toast(name+' added!','ok');
+}
+
+// ═══════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════
+function openP(id){
+  const p=prospects.find(x=>x.id===id);if(!p)return;
+  openId=id;
+  const ac=avc(p.name);
+  const av=document.getElementById('pm-av');
+  av.style.cssText=`background:${ac.bg};color:${ac.c};width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0`;
+  av.textContent=ini(p.name);
+  document.getElementById('pm-n').textContent=p.name;
+  document.getElementById('pm-p').textContent=[p.phone,p.project,p.budget].filter(Boolean).join(' · ');
+  document.getElementById('pm-call').href='tel:+91'+p.phone.replace(/\D/g,'');
+  document.getElementById('pm-call').onclick=null;
+  document.getElementById('pm-wa').onclick=()=>doWA(id);
+  document.getElementById('pm-remflds').style.display='none';
+  document.getElementById('pm-ni').value='';
+  document.getElementById('pm-rd').value='';
+  document.getElementById('pm-rt').value='';
+  document.getElementById('pm-rn').value='';
+  document.getElementById('pm-proj').value=p.project||'';
+  document.getElementById('pm-bud').value=p.budget||'';
+  // highlight current
+  document.querySelectorAll('#pmodal .sgrid .sbtn').forEach(b=>{
+    b.className='sbtn';
+    const fn=b.getAttribute('onclick')||'';
+    if(fn.includes("'"+p.status+"'"))b.classList.add('sel-'+p.status);
+  });
+  renderTL(p);
+  document.getElementById('pmodal').classList.add('open');
+}
+
+function renderTL(p){
+  const tl=p.timeline||[];
+  const el=document.getElementById('pm-tl');
+  if(!tl.length){el.innerHTML='<div style="color:var(--text3);font-size:13px">No activity yet</div>';return;}
+  el.innerHTML=[...tl].reverse().map(t=>`<div class="tli ${t.type||'note'}"><div>${esc(t.text)}</div><div class="tdate">${fdts(t.date)}</div></div>`).join('');
+}
+
+function closePM(e){if(e.target.id==='pmodal')document.getElementById('pmodal').classList.remove('open')}
+
+async function chSt(st){
+  const p=prospects.find(x=>x.id===openId);if(!p)return;
+  if(st==='reminder'){document.getElementById('pm-remflds').style.display='block';return;}
+  document.getElementById('pm-remflds').style.display='none';
+  p.status=st;p.updatedAt=now();
+  tlAdd(p,'Moved to '+(SM[st]?.l||st),'status');
+  await dbPut(p);renderAll();
+  toast('Moved to '+(SM[st]?.l||st),'ok');
+  openP(openId);
+}
+
+async function saveRem(){
+  const p=prospects.find(x=>x.id===openId);if(!p)return;
+  const d=document.getElementById('pm-rd').value;
+  if(!d){toast('Pick a date','err');return;}
+  const t=document.getElementById('pm-rt').value||'09:00';
+  const note=document.getElementById('pm-rn').value.trim();
+  p.status='reminder';
+  p.reminderDT=new Date(d+'T'+t+':00').toISOString();
+  p.reminderNote=note;
+  p.updatedAt=now();
+  tlAdd(p,'Reminder: '+fdts(p.reminderDT)+(note?' — '+note:''),'status');
+  await dbPut(p);renderAll();
+  toast('Reminder set!','ok');
+  document.getElementById('pm-remflds').style.display='none';
+  openP(openId);
+}
+
+async function addNote(){
+  const p=prospects.find(x=>x.id===openId);if(!p)return;
+  const txt=document.getElementById('pm-ni').value.trim();if(!txt)return;
+  tlAdd(p,txt,'note');p.updatedAt=now();
+  await dbPut(p);
+  document.getElementById('pm-ni').value='';
+  renderTL(p);renderAll();
+  toast('Note saved','ok');
+}
+
+async function saveDetails(){
+  const p=prospects.find(x=>x.id===openId);if(!p)return;
+  p.project=document.getElementById('pm-proj').value.trim();
+  p.budget=document.getElementById('pm-bud').value.trim();
+  p.updatedAt=now();
+  await dbPut(p);renderAll();
+  toast('Saved','ok');
+}
+
+async function delCurr(){
+  if(!openId||!confirm('Delete this prospect?'))return;
+  prospects=prospects.filter(x=>x.id!==openId);
+  await dbDel(openId);
+  document.getElementById('pmodal').classList.remove('open');
+  openId=null;renderAll();
+  toast('Deleted','warn');
+}
+
+function tlAdd(p,text,type='note'){if(!p.timeline)p.timeline=[];p.timeline.push({text,type,date:now()})}
+
+// ═══════════════════════════════════════════
+//  CALL / WA
+// ═══════════════════════════════════════════
+function doCall(id){const p=prospects.find(x=>x.id===id);if(!p?.phone)return;const a=document.createElement('a');a.href='tel:+91'+p.phone.replace(/\D/g,'');a.click()}
+function doWA(id){const p=prospects.find(x=>x.id===id);if(!p)return;const ph=p.phone.replace(/\D/g,'');window.open('https://wa.me/91'+ph+'?text='+encodeURIComponent('Hi '+p.name.split(' ')[0]+', '),'_blank')}
+
+// ═══════════════════════════════════════════
+//  BULK RETRY DNP
+// ═══════════════════════════════════════════
+async function bulkToToday(){
+  const list=prospects.filter(p=>p.status==='dnp');
+  if(!list.length){toast('No DNP prospects','warn');return;}
+  for(const p of list){p.status='today';p.updatedAt=now();tlAdd(p,'Moved back to Today','status');await dbPut(p);}
+  renderAll();toast(list.length+' moved to Today','ok');
+}
+
+// ═══════════════════════════════════════════
+//  RENDER SECTIONS
+// ═══════════════════════════════════════════
+function setRemTab(tab,btn){
+  remTab=tab;
+  document.querySelectorAll('#rem-tabs .tbb').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  rs('reminder');
+}
+
+function rs(status){
+  const qEl=document.getElementById('q-'+status);
+  const q=qEl?qEl.value.toLowerCase():'';
+  let list;
+  if(status==='reminder'){
+    list=prospects.filter(p=>p.status==='reminder');
+    if(remTab!=='all')list=list.filter(p=>remSt(p)===remTab);
+    list.sort((a,b)=>new Date(a.reminderDT||0)-new Date(b.reminderDT||0));
+  } else {
+    list=prospects.filter(p=>p.status===status);
+  }
+  if(q)list=list.filter(p=>(p.name+p.phone+(p.project||'')+(p.budget||'')).toLowerCase().includes(q));
+
+  const el=document.getElementById('list-'+status);if(!el)return;
+  if(!list.length){
+    const icons={today:'📋',dnp:'📵',ni:'🚫',followup:'🔄',reminder:'⏰',future:'🌱',cold:'❄️'};
+    el.innerHTML=`<div class="empty"><div class="empty-ico">${icons[status]||'📋'}</div><div class="empty-txt">Nothing here</div><div class="empty-sub">Prospects will appear when moved here</div></div>`;
+    return;
+  }
+  el.innerHTML='<div class="plist">'+list.map(p=>{
+    const sm=SM[p.status]||{};
+    const ac=avc(p.name);
+    const rs2=p.status==='reminder'?remSt(p):null;
+    // show all notes nicely, not just last
+    const allNotes=p.timeline?p.timeline.filter(t=>t.type==='import'||t.type==='note').map(t=>t.text).join('\n'):'';
+    return`<div class="pc" onclick="openP('${p.id}')">
+      <div class="pav" style="background:${ac.bg};color:${ac.c}">${ini(p.name)}</div>
+      <div class="pb">
+        <div class="pn">${esc(p.name)}</div>
+        <div class="pp">${p.phone}${p.project?' · '+esc(p.project):''}${p.dateAdded?' · '+p.dateAdded:''}</div>
+        <div class="pm">
+          ${p.budget?`<span class="chip n">${esc(p.budget)}</span>`:''}
+          ${p.source?`<span class="chip n">${esc(p.source)}</span>`:''}
+          <span style="font-size:11px;color:var(--text3)">${ago(p.updatedAt)}</span>
+        </div>
+        ${allNotes?`<div class="pnote">${esc(allNotes)}</div>`:''}
+        ${p.status==='reminder'&&p.reminderDT?`<div class="prem ${rs2==='overdue'?'ov':''}">${rs2==='overdue'?'⚠ OVERDUE: ':'📅 '}${fdts(p.reminderDT)}${p.reminderNote?' — '+esc(p.reminderNote):''}</div>`:''}
+      </div>
+      <div class="pact" onclick="event.stopPropagation()">
+        <a class="bico" href="tel:+91${p.phone.replace(/\D/g,'')}" onclick="event.stopPropagation()">📞</a>
+        <button class="bico" onclick="doWA('${p.id}')">💬</button>
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+}
+
+// ═══════════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════════
+function renderDash(){
+  const cnt=s=>prospects.filter(p=>p.status===s).length;
+  document.getElementById('dg').innerHTML=[
+    {k:'tot',l:'Total',n:prospects.length,go:'today'},
+    {k:'s-today',l:"Today's List",n:cnt('today'),go:'today'},
+    {k:'s-dnp',l:'DNP',n:cnt('dnp'),go:'dnp'},
+    {k:'s-ni',l:'Not Interested',n:cnt('ni'),go:'ni'},
+    {k:'s-followup',l:'Follow Up',n:cnt('followup'),go:'followup'},
+    {k:'s-reminder',l:'Reminders',n:cnt('reminder'),go:'reminder'},
+    {k:'s-future',l:'Future/Investor',n:cnt('future'),go:'future'},
+    {k:'s-cold',l:'Cold Pool',n:cnt('cold'),go:'cold'},
+  ].map(({k,l,n,go})=>`<div class="dc ${k}" onclick="gp('${go}',null)"><div class="dn">${n}</div><div class="dl">${l}</div></div>`).join('');
+
+  const rems=prospects.filter(p=>p.status==='reminder'&&(remSt(p)==='overdue'||remSt(p)==='today')).sort((a,b)=>new Date(a.reminderDT)-new Date(b.reminderDT));
+  const remEl=document.getElementById('dash-rems');
+  remEl.innerHTML=rems.length===0?`<div style="color:var(--text3);font-size:13px;padding:6px 0">No reminders due today ✓</div>`:
+    rems.map(p=>{const rs2=remSt(p);return`<div class="alert-item ${rs2==='overdue'?'ov':''}" onclick="openP('${p.id}')">
+      <span style="font-size:17px">${rs2==='overdue'?'🔴':'🟡'}</span>
+      <div style="flex:1"><div style="font-weight:700">${esc(p.name)}</div><div style="font-size:12px;color:var(--text2)">${p.reminderNote?esc(p.reminderNote.slice(0,60)):''}</div></div>
+      <div style="text-align:right;flex-shrink:0"><div style="font-size:11px;font-weight:700;color:${rs2==='overdue'?'var(--red)':'var(--amber)'}">${rs2==='overdue'?'⚠ OVERDUE':'TODAY'}</div><div style="font-size:11px;color:var(--text3)">${fdts(p.reminderDT)}</div></div>
+      <a class="alert-act ${rs2==='overdue'?'red':''}" href="tel:+91${p.phone.replace(/\D/g,'')}" onclick="event.stopPropagation()">📞 Call</a>
+    </div>`}).join('');
+
+  const recent=[...prospects].filter(p=>p.updatedAt).sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt)).slice(0,6);
+  const recEl=document.getElementById('dash-recent');
+  recEl.innerHTML=recent.length===0?`<div style="color:var(--text3);font-size:13px;padding:6px 0">No activity — import a CSV or add prospects to get started</div>`:
+    '<div class="plist">'+recent.map(p=>{const sm=SM[p.status]||{};const ac=avc(p.name);return`<div class="pc" onclick="openP('${p.id}')">
+      <div class="pav" style="background:${ac.bg};color:${ac.c}">${ini(p.name)}</div>
+      <div class="pb"><div class="pn">${esc(p.name)}</div><div class="pp">${p.phone}${p.project?' · '+esc(p.project):''}</div>
+      <div class="pm"><span class="chip ${sm.ch||'n'}">${sm.i||''} ${sm.l||p.status}</span>${p.budget?`<span class="chip n">${esc(p.budget)}</span>`:''}<span style="font-size:11px;color:var(--text3)">${ago(p.updatedAt)}</span></div></div>
+    </div>`}).join('')+'</div>';
+}
+
+// ═══════════════════════════════════════════
+//  BADGES
+// ═══════════════════════════════════════════
+function updBadges(){
+  const cnt=s=>prospects.filter(p=>p.status===s).length;
+  ['today','dnp','ni','followup','reminder','future','cold'].forEach(s=>{
+    const el=document.getElementById('b-'+s);if(el)el.textContent=cnt(s);
+  });
+  const ov=prospects.filter(p=>p.status==='reminder'&&remSt(p)==='overdue').length;
+  const rb=document.getElementById('b-reminder');
+  if(rb)rb.style.background=ov?'var(--red)':'var(--amber)';
+}
+
+// ═══════════════════════════════════════════
+//  BROADCAST
+// ═══════════════════════════════════════════
+function bcPreview(){
+  const msg=document.getElementById('bcmsg').value;
+  document.getElementById('bc-prev').textContent=msg.replace('{name}','Rahul')||'Preview will appear here…';
+}
+function renderBC(){
+  const q=(document.getElementById('q-bc').value||'').toLowerCase();
+  const list=prospects.filter(p=>p.status!=='ni'&&(!q||(p.name+p.phone).toLowerCase().includes(q)));
+  const el=document.getElementById('bc-list');
+  el.innerHTML=list.map(p=>{const sm=SM[p.status]||{};const sel=bcSel.has(p.id);return`<div class="pc${sel?' pc-sel':''}" style="${sel?'border-color:var(--blue);background:var(--blue-bg)':''}" onclick="bcToggle('${p.id}')">
+    <input type="checkbox" ${sel?'checked':''} style="width:15px;height:15px;accent-color:var(--blue);flex-shrink:0" onclick="event.stopPropagation();bcToggle('${p.id}')">
+    <div class="pb"><div class="pn">${esc(p.name)}</div><div class="pm"><span class="chip ${sm.ch||'n'}">${sm.i||''} ${sm.l||p.status}</span><span style="font-size:12px;color:var(--text2);margin-left:4px">${p.phone}</span></div></div>
+  </div>`}).join('');
+  bcUpdBar();
+}
+function bcToggle(id){if(bcSel.has(id))bcSel.delete(id);else bcSel.add(id);renderBC()}
+function bcAll(){prospects.filter(p=>p.status!=='ni').forEach(p=>bcSel.add(p.id));renderBC()}
+function bcClear(){bcSel.clear();renderBC()}
+function bcByStatus(s){bcSel.clear();prospects.filter(p=>p.status===s).forEach(p=>bcSel.add(p.id));renderBC()}
+function bcUpdBar(){const bar=document.getElementById('bc-bar');document.getElementById('bc-cnt').textContent=bcSel.size;bar.style.display=bcSel.size>0?'flex':'none'}
+function sendBC(){
+  const msg=document.getElementById('bcmsg').value.trim();
+  if(!msg){toast('Write a message first','err');return;}
+  if(!bcSel.size){toast('Select at least one prospect','err');return;}
+  const sel=prospects.filter(p=>bcSel.has(p.id));
+  let i=0;
+  function next(){if(i>=sel.length){toast(`Sent to ${sel.length}`,'ok');return;}
+    const p=sel[i++];const ph=p.phone.replace(/\D/g,'');
+    window.open('https://wa.me/91'+ph+'?text='+encodeURIComponent(msg.replace('{name}',p.name.split(' ')[0])),'_blank');
+    setTimeout(next,700);}
+  next();
+}
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+const TITLES={dashboard:'Dashboard',today:"Today's List",dnp:'Did Not Pick',ni:'Not Interested',followup:'Follow Up',reminder:'Reminders',future:'Future / Investors',cold:'Cold Pool',add:'Add Prospect',broadcast:'Broadcast',import:'Import CSV'};
+function gp(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name)?.classList.add('active');
+  document.querySelectorAll('.ni').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.getElementById('tb-title').textContent=TITLES[name]||name;
+  curPage=name;closeSB();
+  if(name==='dashboard')renderDash();
+  else if(name==='reminder')rs('reminder');
+  else if(name==='broadcast')renderBC();
+  else if(['today','dnp','ni','followup','future','cold'].includes(name))rs(name);
+}
+function openSB(){document.getElementById('sidebar').classList.add('open');document.getElementById('mob-overlay').style.display='block'}
+function closeSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('mob-overlay').style.display='none'}
+
+// ═══════════════════════════════════════════
+//  ADD TAB
+// ═══════════════════════════════════════════
+function setAddTab(t){
+  ['s','b'].forEach(x=>{document.getElementById('add-'+x).style.display=x===t?'block':'none';document.getElementById('tadd-'+x).classList.toggle('active',x===t)});
+}
+
+// ═══════════════════════════════════════════
+//  DATES
+// ═══════════════════════════════════════════
+function renderDates(){
+  const d=new Date();
+  document.getElementById('sb-date').textContent=d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('tb-date').textContent=d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  const h=d.getHours();
+  document.getElementById('dash-greeting').textContent=(h<12?'Good morning':h<17?'Good afternoon':'Good evening')+' 👋';
+}
+
+// ═══════════════════════════════════════════
+//  RENDER ALL
+// ═══════════════════════════════════════════
+function renderAll(){
+  updBadges();
+  if(curPage==='dashboard')renderDash();
+  else if(curPage==='reminder')rs('reminder');
+  else if(curPage==='broadcast')renderBC();
+  else if(['today','dnp','ni','followup','future','cold'].includes(curPage))rs(curPage);
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+function toast(msg,type=''){
+  const el=document.createElement('div');el.className='toast '+(type==='ok'?'ok':type==='warn'?'warn':type==='err'?'err':'');
+  el.textContent=msg;document.getElementById('tc').appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('show'));
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400)},3200);
+}
+
+// ═══════════════════════════════════════════
+//  REMINDER CHECKER
+// ═══════════════════════════════════════════
+function checkRems(){
+  const now2=new Date();
+  prospects.filter(p=>p.status==='reminder'&&p.reminderDT).forEach(p=>{
+    const diff=new Date(p.reminderDT)-now2;
+    if(diff>0&&diff<60000)toast('⏰ Call '+p.name+' NOW!','warn');
+  });
+}
+
+// ═══════════════════════════════════════════
+//  KEYBOARD
+// ═══════════════════════════════════════════
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('pmodal').classList.remove('open')});
+document.getElementById('sp')?.addEventListener('keydown',e=>{if(e.key==='Enter')addSingle()});
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+async function init(){
+  await openDB();
+  prospects=await dbAll();
+  renderDates();
+  updBadges();
+  renderDash();
+  setInterval(renderDates,60000);
+  setInterval(checkRems,60000);
+}
+init();
+</script>
+</body>
+</html>
