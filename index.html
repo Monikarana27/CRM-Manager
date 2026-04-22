@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>ProspectFlow</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
   --bg:#f5f4f0; --bg2:#ffffff; --bg3:#eeecea; --bg4:#e4e2de;
@@ -29,14 +30,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px}
 
-/* ── LAYOUT ── */
 .app{display:flex;min-height:100vh}
 .sidebar{width:224px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;transition:transform .3s;overflow-y:auto}
 .main-area{margin-left:224px;flex:1;display:flex;flex-direction:column;min-height:100vh}
 @media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main-area{margin-left:0}.mob-overlay{display:block!important}}
 .mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:49}
 
-/* ── SIDEBAR ── */
 .sb-brand{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
 .sb-logo{font-size:17px;font-weight:800;letter-spacing:-.4px}
 .sb-date{font-size:11px;color:var(--text3);margin-top:3px;font-weight:500}
@@ -55,21 +54,39 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .nbadge.teal{background:var(--teal)}
 .nsec{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);padding:10px 10px 3px}
 
-/* ── TOPBAR ── */
 .topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 18px;height:54px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:40}
 .mob-btn{display:none;background:none;border:none;cursor:pointer;font-size:20px;color:var(--text);padding:4px}
 @media(max-width:768px){.mob-btn{display:block}}
 .topbar-title{font-size:15px;font-weight:700;flex:1}
 .topbar-date{font-size:12px;font-weight:600;color:var(--text2);background:var(--bg3);padding:4px 11px;border-radius:20px}
 
-/* ── PAGES ── */
+/* Global search */
+.gs-wrap{position:relative;display:flex;align-items:center}
+.gs-btn{background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--rs);padding:6px 11px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text2);display:flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap}
+.gs-btn:hover{background:var(--bg4);color:var(--text)}
+.gs-input-wrap{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1.5px solid var(--blue);border-radius:var(--rs);padding:4px 10px;box-shadow:var(--sh2)}
+.gs-input{border:none;outline:none;font-family:inherit;font-size:13px;color:var(--text);background:transparent;width:180px}
+.gs-input::placeholder{color:var(--text3)}
+.gs-clear{background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 2px;line-height:1}
+.gs-clear:hover{color:var(--text)}
+@media(max-width:480px){.gs-input{width:110px}}
+
+/* Search results dropdown */
+.gs-results{position:absolute;top:calc(100% + 8px);right:0;background:var(--bg2);border:1.5px solid var(--border2);border-radius:var(--r);box-shadow:var(--sh3);width:320px;max-height:400px;overflow-y:auto;z-index:300}
+.gs-result-item{display:flex;align-items:center;gap:10px;padding:10px 13px;cursor:pointer;transition:background .12s;border-bottom:1px solid var(--border)}
+.gs-result-item:last-child{border-bottom:none}
+.gs-result-item:hover{background:var(--bg3)}
+.gs-result-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0}
+.gs-result-name{font-weight:700;font-size:13px}
+.gs-result-sub{font-size:11px;color:var(--text2);margin-top:1px}
+.gs-empty{padding:20px;text-align:center;color:var(--text3);font-size:13px}
+
 .page{display:none;padding:18px;max-width:980px;width:100%;margin:0 auto}
 .page.active{display:block}
 .ph{margin-bottom:18px}
 .pt{font-size:21px;font-weight:800;letter-spacing:-.4px}
 .ps{font-size:13px;color:var(--text2);margin-top:2px}
 
-/* ── DASHBOARD CARDS ── */
 .dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px}
 .dc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 15px;cursor:pointer;transition:all .15s;box-shadow:var(--sh);text-align:center}
 .dc:hover{box-shadow:var(--sh2);transform:translateY(-1px)}
@@ -84,13 +101,11 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .dc.s-future{border-top:3px solid var(--purple)}.dc.s-future .dn,.dc.s-future .dl{color:var(--purple)}
 .dc.s-cold{border-top:3px solid var(--teal)}.dc.s-cold .dn,.dc.s-cold .dl{color:var(--teal)}
 
-/* ── ALERT ITEMS ── */
 .alert-item{background:var(--amber-bg);border:1px solid rgba(217,119,6,.2);border-left:4px solid var(--amber);border-radius:var(--rs);padding:11px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13px;font-weight:500;cursor:pointer}
 .alert-item.ov{background:var(--red-bg);border-color:rgba(220,38,38,.2);border-left-color:var(--red)}
 .alert-act{border:none;border-radius:6px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;background:var(--amber);color:white;white-space:nowrap}
 .alert-act.red{background:var(--red)}
 
-/* ── PROSPECT CARDS ── */
 .plist{display:flex;flex-direction:column;gap:8px}
 .pc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;display:flex;align-items:flex-start;gap:11px;cursor:pointer;transition:all .15s;box-shadow:var(--sh)}
 .pc:hover{border-color:var(--border2);box-shadow:var(--sh2)}
@@ -111,11 +126,22 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .pnote{font-size:12px;color:var(--text2);margin-top:5px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
 .prem{font-size:11px;font-weight:700;color:var(--amber);margin-top:3px}
 .prem.ov{color:var(--red)}
+
+/* Conversation log on cards */
+.conv-log{margin-top:8px;display:flex;flex-direction:column;gap:5px;border-top:1px solid var(--border);padding-top:8px}
+.conv-entry{display:flex;gap:8px;align-items:flex-start}
+.conv-date{font-size:10px;font-weight:700;color:var(--text3);white-space:nowrap;padding-top:2px;min-width:64px}
+.conv-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);flex-shrink:0;margin-top:4px}
+.conv-dot.status{background:var(--amber)}
+.conv-dot.import{background:var(--green)}
+.conv-text{font-size:12px;color:var(--text2);line-height:1.5;white-space:pre-wrap;word-break:break-word;flex:1}
+
+/* Modal timeline — date label style */
+.tli-date-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
 .pact{display:flex;gap:5px;flex-shrink:0;align-items:flex-start;padding-top:2px}
 .bico{padding:7px;border-radius:var(--rs);background:var(--bg3);border:1px solid var(--border);cursor:pointer;font-size:13px;transition:all .15s;line-height:1;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
 .bico:hover{background:var(--bg4)}
 
-/* ── BUTTONS ── */
 .btn{padding:8px 15px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .15s;font-family:inherit;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .btn-dark{background:var(--text);color:white}
 .btn-dark:hover{background:#333}
@@ -127,11 +153,12 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .btn-red:hover{background:var(--red);color:white}
 .btn-green{background:var(--green-bg);color:var(--green);border-color:rgba(22,163,74,.2)}
 .btn-green:hover{background:var(--green);color:white}
+.btn-excel{background:#1D6F42;color:white;border-color:#1D6F42}
+.btn-excel:hover{background:#155534}
 .btn-sm{padding:5px 10px;font-size:11px}
 .btn-xs{padding:3px 8px;font-size:11px}
 .w100{width:100%}
 
-/* ── FORMS ── */
 .fg{margin-bottom:12px}
 .fl{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.4px}
 .fi{width:100%;padding:9px 12px;border-radius:var(--rs);border:1.5px solid var(--border2);background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:border-color .15s}
@@ -142,7 +169,6 @@ select.fi{cursor:pointer}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:480px){.frow{grid-template-columns:1fr}}
 
-/* ── STATUS GRID ── */
 .sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}
 @media(max-width:420px){.sgrid{grid-template-columns:repeat(2,1fr)}}
 .sbtn{padding:9px 6px;border-radius:var(--rs);border:2px solid var(--border);background:var(--bg);color:var(--text2);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;line-height:1.3}
@@ -155,7 +181,6 @@ select.fi{cursor:pointer}
 .sbtn.sel-future{background:var(--purple-lt);border-color:var(--purple);color:var(--purple)}
 .sbtn.sel-cold{background:var(--teal-lt);border-color:var(--teal);color:var(--teal)}
 
-/* ── MODAL ── */
 .mwrap{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:14px}
 .mwrap.open{display:flex}
 .modal{background:var(--bg2);border-radius:18px;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;box-shadow:var(--sh3);border:1px solid var(--border)}
@@ -168,7 +193,6 @@ select.fi{cursor:pointer}
 .sdiv{display:flex;align-items:center;gap:8px;margin:14px 0 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3)}
 .sdiv::before,.sdiv::after{content:'';flex:1;height:1px;background:var(--border)}
 
-/* ── TIMELINE ── */
 .tl{display:flex;flex-direction:column;gap:7px;max-height:260px;overflow-y:auto}
 .tli{background:var(--bg);border-radius:var(--rs);padding:9px 12px;border-left:3px solid var(--border2);font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
 .tli.note{border-left-color:var(--blue)}
@@ -176,18 +200,15 @@ select.fi{cursor:pointer}
 .tli.import{border-left-color:var(--green)}
 .tdate{font-size:11px;color:var(--text3);margin-top:3px}
 
-/* ── SEARCH / FILTER ── */
 .sbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
 .sinput{flex:1;min-width:160px;padding:8px 12px;border-radius:var(--rs);border:1.5px solid var(--border2);background:var(--bg2);font-family:inherit;font-size:13px;color:var(--text);outline:none}
 .sinput:focus{border-color:var(--blue)}
 .sinput::placeholder{color:var(--text3)}
 
-/* ── TABS ── */
 .tabs{display:flex;gap:4px;background:var(--bg3);border-radius:var(--rs);padding:4px;margin-bottom:14px;flex-wrap:wrap}
 .tbb{flex:1;padding:6px 8px;border-radius:7px;border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;text-align:center;min-width:60px}
 .tbb.active{background:var(--bg2);color:var(--text);box-shadow:var(--sh)}
 
-/* ── CSV IMPORT ── */
 .dropzone{border:2px dashed var(--border2);border-radius:var(--r);padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg2)}
 .dropzone:hover,.dropzone.drag{border-color:var(--blue);background:var(--blue-bg)}
 .dup-card{border-radius:var(--rs);border:1.5px solid var(--border2);padding:10px 13px;margin-bottom:7px;background:var(--bg2)}
@@ -200,22 +221,26 @@ select.fi{cursor:pointer}
 .dup-opt.sel-replace{border-color:var(--amber);background:var(--amber-lt);color:var(--amber)}
 .parsed-row{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rs);margin-bottom:6px;background:var(--bg2)}
 
-/* ── BROADCAST ── */
 .wa-prev{background:var(--bg3);border-radius:var(--rs);padding:11px 13px;font-size:13px;color:var(--text2);margin-top:8px;border-left:3px solid #25d366;white-space:pre-wrap;min-height:40px}
 
-/* ── EMPTY ── */
 .empty{text-align:center;padding:44px 20px;color:var(--text3)}
 .empty-ico{font-size:38px;margin-bottom:9px}
 .empty-txt{font-size:14px;font-weight:500}
 .empty-sub{font-size:12px;margin-top:3px}
 
-/* ── TOAST ── */
 #tc{position:fixed;bottom:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
 .toast{background:var(--text);color:white;border-radius:var(--rs);padding:10px 16px;font-size:13px;font-weight:500;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:auto;max-width:280px;box-shadow:var(--sh2)}
 .toast.show{opacity:1;transform:translateY(0)}
 .toast.ok{background:var(--green)}
 .toast.warn{background:var(--amber)}
 .toast.err{background:var(--red)}
+
+/* Export page */
+.export-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--sh);margin-bottom:14px}
+.export-stat{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin:14px 0}
+.estat{background:var(--bg3);border-radius:var(--rs);padding:10px;text-align:center}
+.estat-n{font-size:22px;font-weight:800;letter-spacing:-0.5px}
+.estat-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text2);margin-top:2px}
 </style>
 </head>
 <body>
@@ -246,6 +271,7 @@ select.fi{cursor:pointer}
     <button class="ni" onclick="gp('add',this)"><span class="ico">➕</span>Add Prospects</button>
     <button class="ni" onclick="gp('broadcast',this)"><span class="ico">📢</span>Broadcast</button>
     <button class="ni" onclick="gp('import',this)"><span class="ico">📂</span>Import CSV</button>
+    <button class="ni" onclick="gp('export',this)"><span class="ico">📊</span>Export Excel</button>
   </nav>
 </aside>
 
@@ -255,6 +281,15 @@ select.fi{cursor:pointer}
     <button class="mob-btn" onclick="openSB()">☰</button>
     <div class="topbar-title" id="tb-title">Dashboard</div>
     <div class="topbar-date" id="tb-date"></div>
+    <div class="gs-wrap" id="gs-wrap">
+      <button class="gs-btn" id="gs-toggle-btn" onclick="toggleGS()">🔍 Search</button>
+      <div class="gs-input-wrap" id="gs-input-wrap" style="display:none">
+        <span style="color:var(--text3);font-size:13px">🔍</span>
+        <input class="gs-input" id="gs-input" placeholder="Name or number…" oninput="runGS()" autocomplete="off">
+        <button class="gs-clear" onclick="closeGS()">✕</button>
+      </div>
+      <div class="gs-results" id="gs-results" style="display:none"></div>
+    </div>
   </div>
 
   <!-- DASHBOARD -->
@@ -378,8 +413,6 @@ select.fi{cursor:pointer}
   <div class="page" id="page-import">
     <div style="padding:18px;max-width:780px;margin:0 auto">
       <div class="ph"><div class="pt">📂 Import CSV</div><div class="ps">Supports your exact column format: Date, Name, Phone, Project, Action/Status, Notes</div></div>
-
-      <!-- Step 1: Upload -->
       <div id="imp-step1">
         <div class="dropzone" id="dz" onclick="document.getElementById('cfi').click()" ondragover="dzOver(event)" ondragleave="dzLeave()" ondrop="dzDrop(event)">
           <div style="font-size:38px;margin-bottom:10px">📂</div>
@@ -389,8 +422,6 @@ select.fi{cursor:pointer}
         </div>
         <input type="file" id="cfi" accept=".csv,.txt" style="display:none" onchange="loadCsv(this)">
       </div>
-
-      <!-- Step 2: Duplicates -->
       <div id="imp-step2" style="display:none">
         <div style="background:var(--amber-bg);border:1px solid rgba(217,119,6,.25);border-radius:var(--rs);padding:12px 15px;margin-bottom:14px;font-size:13px">
           <strong>⚠️ Duplicates found</strong> — same phone number already exists. Choose what to do with each:
@@ -406,8 +437,6 @@ select.fi{cursor:pointer}
           <button class="btn btn-ghost" onclick="resetImport()">Cancel</button>
         </div>
       </div>
-
-      <!-- Step 3: Preview new -->
       <div id="imp-step3" style="display:none">
         <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px" id="imp-preview-label"></div>
         <div id="imp-preview-list" style="max-height:400px;overflow-y:auto"></div>
@@ -415,6 +444,50 @@ select.fi{cursor:pointer}
           <button class="btn btn-dark" onclick="confirmImport()" id="imp-confirm-btn">Import All</button>
           <button class="btn btn-ghost" onclick="resetImport()">Cancel</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPORT EXCEL -->
+  <div class="page" id="page-export">
+    <div style="padding:18px;max-width:700px;margin:0 auto">
+      <div class="ph"><div class="pt">📊 Export to Excel</div><div class="ps">Download all your prospect data as a .xlsx file — every note, status, reminder included</div></div>
+
+      <div class="export-card">
+        <div style="font-weight:700;font-size:15px;margin-bottom:4px">📋 What gets exported</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Name · Phone · Project · Budget · Source · Status · Reminder Date · Reminder Note · All Notes/Timeline · Date Added · Last Updated</div>
+
+        <div class="export-stat" id="export-stats"></div>
+
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+          <div style="background:var(--bg3);border-radius:var(--rs);padding:12px 15px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <div>
+              <div style="font-weight:700;font-size:14px">📗 Combined Sheet</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px">All prospects in one sheet, sorted by status</div>
+            </div>
+            <button class="btn btn-excel" onclick="exportExcel('combined')">⬇ Download</button>
+          </div>
+
+          <div style="background:var(--bg3);border-radius:var(--rs);padding:12px 15px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <div>
+              <div style="font-weight:700;font-size:14px">📚 Per-Bucket Sheets</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px">Separate sheet for Today, DNP, Follow Up, Reminders, etc.</div>
+            </div>
+            <button class="btn btn-excel" onclick="exportExcel('buckets')">⬇ Download</button>
+          </div>
+
+          <div style="background:var(--bg3);border-radius:var(--rs);padding:12px 15px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <div>
+              <div style="font-weight:700;font-size:14px">📦 Full Export</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px">Combined + per-bucket sheets in one file</div>
+            </div>
+            <button class="btn btn-excel" onclick="exportExcel('full')">⬇ Download</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:12px;color:var(--text3);text-align:center;margin-top:8px">
+        File downloads directly to your device — no internet needed after page loads
       </div>
     </div>
   </div>
@@ -441,7 +514,7 @@ select.fi{cursor:pointer}
         <input class="sinput w100" style="margin-bottom:8px" placeholder="Search…" oninput="renderBC()" id="q-bc">
         <div id="bc-list" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
       </div>
-      <div id="bc-bar" style="display:none;background:var(--blue-bg);border:1px solid var(--blue-lt);border-radius:var(--rs);padding:11px 15px;margin-top:10px;display:none;align-items:center;justify-content:space-between">
+      <div id="bc-bar" style="display:none;background:var(--blue-bg);border:1px solid var(--blue-lt);border-radius:var(--rs);padding:11px 15px;margin-top:10px;align-items:center;justify-content:space-between">
         <span style="font-size:13px;font-weight:600;color:var(--blue)"><span id="bc-cnt">0</span> selected</span>
         <button class="btn btn-blue" onclick="sendBC()">📤 Send via WhatsApp</button>
       </div>
@@ -547,13 +620,13 @@ function ago(s){if(!s)return'';const d=Date.now()-new Date(s).getTime(),m=Math.f
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
 const SM={
-  today:  {l:'Today',     c:'var(--green)', ch:'today-p', i:'📋'},
-  dnp:    {l:'DNP',       c:'var(--red)',   ch:'dnp',     i:'📵'},
-  ni:     {l:'Not Interested',c:'var(--slate)',ch:'ni',   i:'🚫'},
-  followup:{l:'Follow Up',c:'var(--blue)',  ch:'followup',i:'🔄'},
-  reminder:{l:'Reminder', c:'var(--amber)', ch:'reminder',i:'⏰'},
-  future: {l:'Future',    c:'var(--purple)',ch:'future',  i:'🌱'},
-  cold:   {l:'Cold Pool', c:'var(--teal)',  ch:'cold',    i:'❄️'},
+  today:  {l:'Today',          c:'var(--green)', ch:'today-p', i:'📋'},
+  dnp:    {l:'DNP',            c:'var(--red)',   ch:'dnp',     i:'📵'},
+  ni:     {l:'Not Interested', c:'var(--slate)', ch:'ni',      i:'🚫'},
+  followup:{l:'Follow Up',     c:'var(--blue)',  ch:'followup',i:'🔄'},
+  reminder:{l:'Reminder',      c:'var(--amber)', ch:'reminder',i:'⏰'},
+  future: {l:'Future',         c:'var(--purple)',ch:'future',  i:'🌱'},
+  cold:   {l:'Cold Pool',      c:'var(--teal)',  ch:'cold',    i:'❄️'},
 };
 
 function remSt(p){
@@ -563,27 +636,127 @@ function remSt(p){
 }
 
 // ═══════════════════════════════════════════
-//  CSV PARSER  (handles quoted commas, semicolons in notes)
+//  EXCEL EXPORT
+// ═══════════════════════════════════════════
+function prospectToRow(p){
+  const allNotes=(p.timeline||[]).map(t=>`[${t.type||'note'}] ${t.text}`).join('\n---\n');
+  return{
+    'Name': p.name||'',
+    'Phone': p.phone||'',
+    'Project': p.project||'',
+    'Budget': p.budget||'',
+    'Source': p.source||'',
+    'Status': SM[p.status]?.l||p.status||'',
+    'Reminder Date': p.reminderDT ? fdts(p.reminderDT) : '',
+    'Reminder Note': p.reminderNote||'',
+    'Notes / Timeline': allNotes,
+    'Date Added': p.dateAdded||fdt(p.createdAt)||'',
+    'Last Updated': fdt(p.updatedAt)||'',
+  };
+}
+
+function applyHeaderStyle(ws, headers){
+  headers.forEach((h, i)=>{
+    const cellRef = XLSX.utils.encode_cell({r:0, c:i});
+    if(!ws[cellRef]) return;
+    ws[cellRef].s = {
+      font:{bold:true, color:{rgb:'FFFFFF'}, name:'Arial', sz:11},
+      fill:{fgColor:{rgb:'1D6F42'}},
+      alignment:{horizontal:'center', vertical:'center', wrapText:true},
+      border:{bottom:{style:'thin',color:{rgb:'CCCCCC'}}}
+    };
+  });
+}
+
+function setColWidths(ws){
+  ws['!cols']=[
+    {wch:24}, // Name
+    {wch:14}, // Phone
+    {wch:18}, // Project
+    {wch:12}, // Budget
+    {wch:16}, // Source
+    {wch:16}, // Status
+    {wch:20}, // Reminder Date
+    {wch:28}, // Reminder Note
+    {wch:50}, // Notes
+    {wch:16}, // Date Added
+    {wch:16}, // Last Updated
+  ];
+}
+
+function exportExcel(mode){
+  if(!prospects.length){toast('No prospects to export','warn');return;}
+
+  const wb = XLSX.utils.book_new();
+  const headers = ['Name','Phone','Project','Budget','Source','Status','Reminder Date','Reminder Note','Notes / Timeline','Date Added','Last Updated'];
+  const buckets = ['today','dnp','ni','followup','reminder','future','cold'];
+
+  if(mode==='combined'||mode==='full'){
+    const allRows = [...prospects].sort((a,b)=>buckets.indexOf(a.status)-buckets.indexOf(b.status)).map(prospectToRow);
+    const ws = XLSX.utils.json_to_sheet(allRows, {header:headers});
+    applyHeaderStyle(ws, headers);
+    setColWidths(ws);
+    ws['!freeze']={xSplit:0, ySplit:1}; // freeze header row
+    XLSX.utils.book_append_sheet(wb, ws, 'All Prospects');
+  }
+
+  if(mode==='buckets'||mode==='full'){
+    const bucketNames={today:"Today's List",dnp:'Did Not Pick',ni:'Not Interested',followup:'Follow Up',reminder:'Reminders',future:'Future Investors',cold:'Cold Pool'};
+    buckets.forEach(bucket=>{
+      const rows = prospects.filter(p=>p.status===bucket).map(prospectToRow);
+      if(!rows.length){
+        // still add empty sheet with headers
+        const ws = XLSX.utils.aoa_to_sheet([headers]);
+        applyHeaderStyle(ws, headers);
+        setColWidths(ws);
+        XLSX.utils.book_append_sheet(wb, ws, bucketNames[bucket]);
+        return;
+      }
+      const ws = XLSX.utils.json_to_sheet(rows, {header:headers});
+      applyHeaderStyle(ws, headers);
+      setColWidths(ws);
+      ws['!freeze']={xSplit:0, ySplit:1};
+      XLSX.utils.book_append_sheet(wb, ws, bucketNames[bucket]);
+    });
+  }
+
+  const date = new Date().toISOString().split('T')[0];
+  const suffix = mode==='combined'?'Combined':mode==='buckets'?'ByBucket':'Full';
+  XLSX.writeFile(wb, `ProspectFlow_${suffix}_${date}.xlsx`);
+  toast('Excel downloaded!','ok');
+}
+
+function renderExportPage(){
+  const cnt=s=>prospects.filter(p=>p.status===s).length;
+  const el=document.getElementById('export-stats');
+  if(!el)return;
+  el.innerHTML=[
+    {l:'Total',n:prospects.length,c:'var(--text)'},
+    {l:"Today",n:cnt('today'),c:'var(--green)'},
+    {l:'DNP',n:cnt('dnp'),c:'var(--red)'},
+    {l:'Follow Up',n:cnt('followup'),c:'var(--blue)'},
+    {l:'Reminders',n:cnt('reminder'),c:'var(--amber)'},
+    {l:'Future',n:cnt('future'),c:'var(--purple)'},
+    {l:'Cold',n:cnt('cold'),c:'var(--teal)'},
+    {l:'Not Interested',n:cnt('ni'),c:'var(--slate)'},
+  ].map(({l,n,c})=>`<div class="estat"><div class="estat-n" style="color:${c}">${n}</div><div class="estat-l">${l}</div></div>`).join('');
+}
+
+// ═══════════════════════════════════════════
+//  CSV PARSER
 // ═══════════════════════════════════════════
 function parseCSVLine(line){
   const cols=[];let cur='',inQ=false;
   for(let i=0;i<line.length;i++){
     const c=line[i];
-    if(c==='"'){
-      if(inQ&&line[i+1]==='"'){cur+='"';i++;}
-      else inQ=!inQ;
-    } else if(c===','&&!inQ){cols.push(cur.trim());cur='';}
+    if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
+    else if(c===','&&!inQ){cols.push(cur.trim());cur='';}
     else cur+=c;
   }
   cols.push(cur.trim());
   return cols;
 }
-
-function normaliseHeader(h){
-  return h.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
-}
-
-// Map Action/Status column to internal bucket
+function normaliseHeader(h){return h.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'')}
 function mapStatus(raw){
   if(!raw)return'today';
   const r=raw.toLowerCase();
@@ -598,25 +771,20 @@ function mapStatus(raw){
   if(r.includes('pitched'))return'followup';
   return'today';
 }
-
-// Extract a reminder date/time from the Action/Status text
 function extractReminderDT(raw){
   if(!raw)return null;
-  // Patterns: "Call again 27-Mar-2026", "Confirm visit 01-Apr-2026", "call tomorrow at 11:20 AM", "Call Friday ~12 PM"
   const ddmmyyyy=/(\d{1,2})[\/\-](\w{3,9})[\/\-](\d{2,4})/i;
   const mths={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
   const m=raw.match(ddmmyyyy);
   if(m){
     const day=parseInt(m[1]),mon=mths[m[2].toLowerCase().slice(0,3)],yr=m[3].length===2?2000+parseInt(m[3]):parseInt(m[3]);
     if(mon!==undefined){
-      // extract time if any
       const tm=raw.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
       let h=9,min=0;
       if(tm){h=parseInt(tm[1]);min=tm[2]?parseInt(tm[2]):0;if(tm[3].toLowerCase()==='pm'&&h<12)h+=12;if(tm[3].toLowerCase()==='am'&&h===12)h=0;}
       return new Date(yr,mon,day,h,min).toISOString();
     }
   }
-  // "tomorrow"
   if(/tomorrow/i.test(raw)){
     const tm=raw.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
     const d=new Date();d.setDate(d.getDate()+1);
@@ -626,84 +794,35 @@ function extractReminderDT(raw){
   }
   return null;
 }
-
-// Build clean notes string from all note-like columns
-function buildNotes(obj, headers){
-  const parts=[];
-  // Collect note-bearing columns
-  const noteCols=['notes','note','remarks','remark','comments','comment','description','details'];
-  const seen=new Set();
-  for(const h of headers){
-    const norm=normaliseHeader(h);
-    if(noteCols.some(n=>norm===n||norm.includes(n))){
-      const v=(obj[h]||'').trim();
-      if(v&&!seen.has(v)){seen.add(v);parts.push(v);}
-    }
-  }
+function buildNotes(obj,headers){
+  const parts=[];const noteCols=['notes','note','remarks','remark','comments','comment','description','details'];const seen=new Set();
+  for(const h of headers){const norm=normaliseHeader(h);if(noteCols.some(n=>norm===n||norm.includes(n))){const v=(obj[h]||'').trim();if(v&&!seen.has(v)){seen.add(v);parts.push(v);}}}
   return parts.join('\n').trim();
 }
-
 function parseCsvText(text){
-  // Split into lines respecting quoted newlines
   const rows=[];let cur='',inQ=false;
-  for(let i=0;i<text.length;i++){
-    const c=text[i];
-    if(c==='"')inQ=!inQ;
-    if((c==='\n'||c==='\r')&&!inQ){if(cur.trim())rows.push(cur);cur='';}
-    else cur+=c;
-  }
+  for(let i=0;i<text.length;i++){const c=text[i];if(c==='"')inQ=!inQ;if((c==='\n'||c==='\r')&&!inQ){if(cur.trim())rows.push(cur);cur='';}else cur+=c;}
   if(cur.trim())rows.push(cur);
-
   if(rows.length<2)return[];
-  const rawHeaders=parseCSVLine(rows[0]);
-  const headers=rawHeaders.map(h=>h.replace(/^"|"$/g,'').trim());
-
+  const rawHeaders=parseCSVLine(rows[0]);const headers=rawHeaders.map(h=>h.replace(/^"|"$/g,'').trim());
   return rows.slice(1).map(row=>{
-    const vals=parseCSVLine(row);
-    const obj={};
+    const vals=parseCSVLine(row);const obj={};
     headers.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/^"|"$/g,'').trim());
-
-    // phone — clean to digits only
     const rawPhone=obj['Phone']||obj['phone']||obj['mobile']||obj['Mobile']||obj['contact']||'';
     const phone=rawPhone.replace(/\D/g,'').replace(/^0+/,'');
-
-    // name
     const name=(obj['Name']||obj['name']||obj['prospect_name']||'').trim();
-
-    // project
     const project=(obj['Project']||obj['project']||'').trim();
-
-    // action/status raw
     const actionRaw=(obj['Action/Status']||obj['Action']||obj['Status']||obj['action_status']||obj['action/status']||'').trim();
-
-    // budget — try to extract from notes if not a dedicated column
     let budget=(obj['Budget']||obj['budget']||'').trim();
     if(!budget){const bm=(obj['Notes']||obj['notes']||'').match(/budget[:\s]+([^\n;,]+)/i);if(bm)budget=bm[1].trim();}
-
-    // notes — build from all note columns, also prepend project/action info
     const rawNote=buildNotes(obj,headers);
-    // Format notes nicely: break semicolons into separate lines
     const noteLines=rawNote.split(/[;\n]/).map(l=>l.trim()).filter(Boolean);
-    // Deduplicate note lines
     const uniqueNotes=[...new Set(noteLines)].join('\n');
-
     const status=mapStatus(actionRaw);
     const reminderDT=(['reminder','followup'].includes(status))?extractReminderDT(actionRaw):null;
-
-    // date added
     const dateAdded=(obj['Date']||obj['date']||'').trim();
-
     if(!name&&!phone)return null;
-
-    return{
-      id:uid(), name:name||('Unknown ('+phone+')'), phone, project, budget,
-      source:'',
-      status,
-      reminderDT,
-      reminderNote:actionRaw,
-      timeline: uniqueNotes?[{text:uniqueNotes,type:'import',date:now()}]:[],
-      createdAt:now(), updatedAt:now(), dateAdded,
-    };
+    return{id:uid(),name:name||('Unknown ('+phone+')'),phone,project,budget,source:'',status,reminderDT,reminderNote:actionRaw,timeline:uniqueNotes?[{text:uniqueNotes,type:'import',date:now()}]:[],createdAt:now(),updatedAt:now(),dateAdded};
   }).filter(Boolean);
 }
 
@@ -715,163 +834,55 @@ function dzLeave(){document.getElementById('dz').classList.remove('drag')}
 function dzDrop(e){e.preventDefault();dzLeave();if(e.dataTransfer.files[0])readFile(e.dataTransfer.files[0])}
 function loadCsv(input){if(input.files[0])readFile(input.files[0])}
 function readFile(f){const r=new FileReader();r.onload=e=>afterRead(e.target.result);r.readAsText(f)}
-
 function afterRead(text){
   csvParsed=parseCsvText(text);
   if(!csvParsed.length){toast('No valid rows found','err');return;}
-
-  // Build phone map of existing prospects
-  const existingByPhone={};
-  prospects.forEach(p=>{if(p.phone)existingByPhone[p.phone]=p});
-
+  const existingByPhone={};prospects.forEach(p=>{if(p.phone)existingByPhone[p.phone]=p});
   csvDups=csvParsed.filter(p=>p.phone&&existingByPhone[p.phone]);
   csvNew=csvParsed.filter(p=>!p.phone||!existingByPhone[p.phone]);
-  dupDecisions={};
-  csvDups.forEach(p=>dupDecisions[p.phone]='skip'); // default skip
-
-  if(csvDups.length>0){
-    renderDupStep(existingByPhone);
-  } else {
-    renderPreviewStep();
-  }
+  dupDecisions={};csvDups.forEach(p=>dupDecisions[p.phone]='skip');
+  if(csvDups.length>0){renderDupStep(existingByPhone);}else{renderPreviewStep();}
 }
-
 function renderDupStep(existingByPhone){
   document.getElementById('imp-step1').style.display='none';
   document.getElementById('imp-step2').style.display='block';
-
-  const existingByPhone2={};
-  prospects.forEach(p=>{if(p.phone)existingByPhone2[p.phone]=p});
-
+  const existingByPhone2={};prospects.forEach(p=>{if(p.phone)existingByPhone2[p.phone]=p});
   document.getElementById('dup-list').innerHTML=csvDups.map(p=>{
-    const ex=existingByPhone2[p.phone];
-    const exSM=SM[ex.status]||{};
-    return`<div class="dup-card">
-      <div class="dup-row">
-        <div style="flex:1">
-          <div style="font-weight:700;font-size:13px">${esc(p.name)} · ${p.phone}</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:2px">Existing: <span style="font-weight:600;color:${exSM.c||'inherit'}">${exSM.l||ex.status}</span> · Added ${fdt(ex.createdAt)}</div>
-          ${ex.timeline&&ex.timeline.length?`<div style="font-size:11px;color:var(--text2);margin-top:2px;font-style:italic">${esc(ex.timeline[ex.timeline.length-1].text.split('\n')[0].slice(0,80))}</div>`:''}
-          ${p.timeline&&p.timeline.length?`<div style="font-size:11px;color:var(--blue);margin-top:2px">New note: ${esc(p.timeline[0].text.split('\n')[0].slice(0,80))}</div>`:''}
-        </div>
-      </div>
-      <div class="dup-opts">
-        <button class="dup-opt sel-skip sel" id="dup-skip-${p.phone}" onclick="setDup('${p.phone}','skip')">Skip</button>
-        <button class="dup-opt sel-merge" id="dup-merge-${p.phone}" onclick="setDup('${p.phone}','merge')">Merge Notes</button>
-        <button class="dup-opt sel-replace" id="dup-replace-${p.phone}" onclick="setDup('${p.phone}','replace')">Replace</button>
-      </div>
-    </div>`;
+    const ex=existingByPhone2[p.phone];const exSM=SM[ex.status]||{};
+    return`<div class="dup-card"><div class="dup-row"><div style="flex:1"><div style="font-weight:700;font-size:13px">${esc(p.name)} · ${p.phone}</div><div style="font-size:11px;color:var(--text3);margin-top:2px">Existing: <span style="font-weight:600;color:${exSM.c||'inherit'}">${exSM.l||ex.status}</span> · Added ${fdt(ex.createdAt)}</div>${ex.timeline&&ex.timeline.length?`<div style="font-size:11px;color:var(--text2);margin-top:2px;font-style:italic">${esc(ex.timeline[ex.timeline.length-1].text.split('\n')[0].slice(0,80))}</div>`:''}${p.timeline&&p.timeline.length?`<div style="font-size:11px;color:var(--blue);margin-top:2px">New note: ${esc(p.timeline[0].text.split('\n')[0].slice(0,80))}</div>`:''}</div></div><div class="dup-opts"><button class="dup-opt sel-skip sel" id="dup-skip-${p.phone}" onclick="setDup('${p.phone}','skip')">Skip</button><button class="dup-opt sel-merge" id="dup-merge-${p.phone}" onclick="setDup('${p.phone}','merge')">Merge Notes</button><button class="dup-opt sel-replace" id="dup-replace-${p.phone}" onclick="setDup('${p.phone}','replace')">Replace</button></div></div>`;
   }).join('');
 }
-
 function setDup(phone,action){
   dupDecisions[phone]=action;
-  const opts=['skip','merge','replace'];
-  opts.forEach(o=>{
-    const el=document.getElementById(`dup-${o}-${phone}`);
-    if(el){el.className='dup-opt sel-'+o+(action===o?' sel':'');}
-  });
+  ['skip','merge','replace'].forEach(o=>{const el=document.getElementById(`dup-${o}-${phone}`);if(el){el.className='dup-opt sel-'+o+(action===o?' sel':'');}});
 }
-function setAllDup(action){
-  csvDups.forEach(p=>{setDup(p.phone,action)});
-}
-
-function proceedImport(){
-  document.getElementById('imp-step2').style.display='none';
-  renderPreviewStep();
-}
-
+function setAllDup(action){csvDups.forEach(p=>{setDup(p.phone,action)})}
+function proceedImport(){document.getElementById('imp-step2').style.display='none';renderPreviewStep();}
 function renderPreviewStep(){
   document.getElementById('imp-step1').style.display='none';
   document.getElementById('imp-step2').style.display='none';
   document.getElementById('imp-step3').style.display='block';
-
   const total=csvNew.length+(csvDups.filter(p=>dupDecisions[p.phone]!=='skip').length);
   document.getElementById('imp-preview-label').textContent=`Ready to import ${total} prospects (${csvNew.length} new, ${csvDups.filter(p=>dupDecisions[p.phone]!=='skip').length} updates)`;
   document.getElementById('imp-confirm-btn').textContent=`Import ${total} Prospects`;
-
   const all=[...csvNew,...csvDups.filter(p=>dupDecisions[p.phone]!=='skip')];
   document.getElementById('imp-preview-list').innerHTML=all.slice(0,30).map(p=>{
-    const sm=SM[p.status]||{};
-    const ac=avc(p.name);
-    const isDup=csvDups.some(d=>d.phone===p.phone);
-    const action=isDup?dupDecisions[p.phone]:'new';
-    const actionLabel={new:'➕ New',merge:'🔀 Merge',replace:'♻️ Replace'}[action]||action;
-    return`<div class="parsed-row">
-      <div style="width:34px;height:34px;border-radius:50%;background:${ac.bg};color:${ac.c};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0">${ini(p.name)}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:700;font-size:13px">${esc(p.name)}</div>
-        <div style="font-size:11px;color:var(--text2)">${p.phone||'No phone'} ${p.project?'· '+p.project:''} ${p.budget?'· '+p.budget:''}</div>
-        ${p.timeline&&p.timeline.length?`<div style="font-size:11px;color:var(--text2);margin-top:2px;white-space:pre-wrap">${esc(p.timeline[0].text.slice(0,120))}${p.timeline[0].text.length>120?'…':''}</div>`:''}
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-        <span class="chip ${sm.ch||'n'}">${sm.i||''} ${sm.l||p.status}</span>
-        <span style="font-size:10px;font-weight:700;color:${isDup?'var(--amber)':'var(--green)'}">${actionLabel}</span>
-      </div>
-    </div>`;
+    const sm=SM[p.status]||{};const ac=avc(p.name);const isDup=csvDups.some(d=>d.phone===p.phone);const action=isDup?dupDecisions[p.phone]:'new';const actionLabel={new:'➕ New',merge:'🔀 Merge',replace:'♻️ Replace'}[action]||action;
+    return`<div class="parsed-row"><div style="width:34px;height:34px;border-radius:50%;background:${ac.bg};color:${ac.c};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0">${ini(p.name)}</div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px">${esc(p.name)}</div><div style="font-size:11px;color:var(--text2)">${p.phone||'No phone'} ${p.project?'· '+p.project:''} ${p.budget?'· '+p.budget:''}</div>${p.timeline&&p.timeline.length?`<div style="font-size:11px;color:var(--text2);margin-top:2px;white-space:pre-wrap">${esc(p.timeline[0].text.slice(0,120))}${p.timeline[0].text.length>120?'…':''}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0"><span class="chip ${sm.ch||'n'}">${sm.i||''} ${sm.l||p.status}</span><span style="font-size:10px;font-weight:700;color:${isDup?'var(--amber)':'var(--green)'}">${actionLabel}</span></div></div>`;
   }).join('')+(all.length>30?`<div style="font-size:12px;color:var(--text3);padding:8px">…and ${all.length-30} more</div>`:'');
 }
-
 async function confirmImport(){
-  const existingByPhone={};
-  prospects.forEach(p=>{if(p.phone)existingByPhone[p.phone]=p});
-
+  const existingByPhone={};prospects.forEach(p=>{if(p.phone)existingByPhone[p.phone]=p});
   let added=0,updated=0;
-
-  // New prospects
-  for(const p of csvNew){
-    prospects.unshift(p);
-    await dbPut(p);
-    added++;
-  }
-
-  // Duplicates
+  for(const p of csvNew){prospects.unshift(p);await dbPut(p);added++;}
   for(const p of csvDups){
-    const dec=dupDecisions[p.phone];
-    if(dec==='skip')continue;
-    const ex=existingByPhone[p.phone];
-    if(!ex)continue;
-
-    if(dec==='merge'){
-      // Merge: keep existing status, append new notes that aren't already there
-      if(p.timeline&&p.timeline.length){
-        const newNote=p.timeline[0].text;
-        const alreadyHas=ex.timeline&&ex.timeline.some(t=>t.text===newNote);
-        if(!alreadyHas){
-          if(!ex.timeline)ex.timeline=[];
-          ex.timeline.push({text:newNote,type:'import',date:now()});
-        }
-      }
-      // merge project/budget if empty
-      if(!ex.project&&p.project)ex.project=p.project;
-      if(!ex.budget&&p.budget)ex.budget=p.budget;
-      ex.updatedAt=now();
-      await dbPut(ex);
-    } else if(dec==='replace'){
-      // Replace: update status & notes from CSV, keep id
-      ex.status=p.status;
-      ex.reminderDT=p.reminderDT||ex.reminderDT;
-      ex.reminderNote=p.reminderNote||ex.reminderNote;
-      ex.project=p.project||ex.project;
-      ex.budget=p.budget||ex.budget;
-      if(p.timeline&&p.timeline.length){
-        if(!ex.timeline)ex.timeline=[];
-        const newNote=p.timeline[0].text;
-        const alreadyHas=ex.timeline.some(t=>t.text===newNote);
-        if(!alreadyHas)ex.timeline.push({text:newNote,type:'import',date:now()});
-      }
-      ex.updatedAt=now();
-      await dbPut(ex);
-    }
+    const dec=dupDecisions[p.phone];if(dec==='skip')continue;const ex=existingByPhone[p.phone];if(!ex)continue;
+    if(dec==='merge'){if(p.timeline&&p.timeline.length){const newNote=p.timeline[0].text;const alreadyHas=ex.timeline&&ex.timeline.some(t=>t.text===newNote);if(!alreadyHas){if(!ex.timeline)ex.timeline=[];ex.timeline.push({text:newNote,type:'import',date:now()});}}if(!ex.project&&p.project)ex.project=p.project;if(!ex.budget&&p.budget)ex.budget=p.budget;ex.updatedAt=now();await dbPut(ex);}
+    else if(dec==='replace'){ex.status=p.status;ex.reminderDT=p.reminderDT||ex.reminderDT;ex.reminderNote=p.reminderNote||ex.reminderNote;ex.project=p.project||ex.project;ex.budget=p.budget||ex.budget;if(p.timeline&&p.timeline.length){if(!ex.timeline)ex.timeline=[];const newNote=p.timeline[0].text;const alreadyHas=ex.timeline.some(t=>t.text===newNote);if(!alreadyHas)ex.timeline.push({text:newNote,type:'import',date:now()});}ex.updatedAt=now();await dbPut(ex);}
     updated++;
   }
-
-  resetImport();
-  renderAll();
-  toast(`✅ ${added} added, ${updated} updated!`,'ok');
-  gp('dashboard',null);
+  resetImport();renderAll();toast(`✅ ${added} added, ${updated} updated!`,'ok');gp('dashboard',null);
 }
-
 function resetImport(){
   csvParsed=[];csvDups=[];csvNew=[];dupDecisions={};
   document.getElementById('imp-step1').style.display='block';
@@ -886,52 +897,30 @@ function resetImport(){
 function parseBulk(){
   const raw=document.getElementById('bt').value;
   const lines=raw.split('\n').map(l=>l.trim()).filter(Boolean);
-  bulkParsed=lines.map(line=>{
-    const pm=line.match(/\b[6-9]\d{9}\b/);
-    const phone=pm?pm[0]:'';
-    const name=line.replace(phone,'').replace(/[,\-–|]/g,'').trim()||'Unknown';
-    return{id:uid(),name,phone,project:'',budget:'',source:'',status:'today',timeline:[],createdAt:now(),updatedAt:now()};
-  }).filter(p=>p.phone);
-  const btn=document.getElementById('bc-btn');
-  btn.textContent=`Add ${bulkParsed.length} →`;
-  btn.disabled=bulkParsed.length===0;
-  document.getElementById('bp').innerHTML=bulkParsed.slice(0,20).map(p=>`
-    <div class="parsed-row">
-      <div style="width:30px;height:30px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0">${ini(p.name)}</div>
-      <div><div style="font-weight:600;font-size:13px">${esc(p.name)}</div><div style="font-size:12px;color:var(--text2)">${p.phone}</div></div>
-    </div>`).join('')+(bulkParsed.length>20?`<div style="font-size:12px;color:var(--text3);padding:8px">…and ${bulkParsed.length-20} more</div>`:'');
+  bulkParsed=lines.map(line=>{const pm=line.match(/\b[6-9]\d{9}\b/);const phone=pm?pm[0]:'';const name=line.replace(phone,'').replace(/[,\-–|]/g,'').trim()||'Unknown';return{id:uid(),name,phone,project:'',budget:'',source:'',status:'today',timeline:[],createdAt:now(),updatedAt:now()};}).filter(p=>p.phone);
+  const btn=document.getElementById('bc-btn');btn.textContent=`Add ${bulkParsed.length} →`;btn.disabled=bulkParsed.length===0;
+  document.getElementById('bp').innerHTML=bulkParsed.slice(0,20).map(p=>`<div class="parsed-row"><div style="width:30px;height:30px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0">${ini(p.name)}</div><div><div style="font-weight:600;font-size:13px">${esc(p.name)}</div><div style="font-size:12px;color:var(--text2)">${p.phone}</div></div></div>`).join('')+(bulkParsed.length>20?`<div style="font-size:12px;color:var(--text3);padding:8px">…and ${bulkParsed.length-20} more</div>`:'');
 }
-
 async function confirmBulk(){
   if(!bulkParsed.length)return;
-  // deduplicate against existing
-  const phones=new Set(prospects.map(p=>p.phone));
-  const fresh=bulkParsed.filter(p=>!phones.has(p.phone));
-  const skipped=bulkParsed.length-fresh.length;
+  const phones=new Set(prospects.map(p=>p.phone));const fresh=bulkParsed.filter(p=>!phones.has(p.phone));const skipped=bulkParsed.length-fresh.length;
   for(const p of fresh){prospects.unshift(p);await dbPut(p);}
-  bulkParsed=[];
-  document.getElementById('bt').value='';
-  document.getElementById('bp').innerHTML='';
-  document.getElementById('bc-btn').disabled=true;
-  document.getElementById('bc-btn').textContent='Add 0 →';
-  renderAll();
-  toast(`${fresh.length} added${skipped?', '+skipped+' duplicates skipped':''}!`,'ok');
+  bulkParsed=[];document.getElementById('bt').value='';document.getElementById('bp').innerHTML='';document.getElementById('bc-btn').disabled=true;document.getElementById('bc-btn').textContent='Add 0 →';
+  renderAll();toast(`${fresh.length} added${skipped?', '+skipped+' duplicates skipped':''}!`,'ok');
 }
 
 // ═══════════════════════════════════════════
 //  SINGLE ADD
 // ═══════════════════════════════════════════
 async function addSingle(){
-  const name=document.getElementById('sn').value.trim();
-  const phone=document.getElementById('sp').value.replace(/\D/g,'');
+  const name=document.getElementById('sn').value.trim();const phone=document.getElementById('sp').value.replace(/\D/g,'');
   if(!name||!phone){toast('Name and phone required','err');return;}
   if(prospects.some(p=>p.phone===phone)){toast('Phone already exists','warn');return;}
   const note=document.getElementById('sno').value.trim();
   const p={id:uid(),name,phone,project:document.getElementById('spr').value.trim(),budget:document.getElementById('sb').value.trim(),source:document.getElementById('ss').value.trim(),status:'today',timeline:note?[{text:note,type:'note',date:now()}]:[],createdAt:now(),updatedAt:now()};
   prospects.unshift(p);await dbPut(p);
   ['sn','sp','spr','sb','ss','sno'].forEach(id=>document.getElementById(id).value='');
-  renderAll();
-  toast(name+' added!','ok');
+  renderAll();toast(name+' added!','ok');
 }
 
 // ═══════════════════════════════════════════
@@ -939,98 +928,65 @@ async function addSingle(){
 // ═══════════════════════════════════════════
 function openP(id){
   const p=prospects.find(x=>x.id===id);if(!p)return;
-  openId=id;
-  const ac=avc(p.name);
+  openId=id;const ac=avc(p.name);
   const av=document.getElementById('pm-av');
   av.style.cssText=`background:${ac.bg};color:${ac.c};width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0`;
   av.textContent=ini(p.name);
   document.getElementById('pm-n').textContent=p.name;
   document.getElementById('pm-p').textContent=[p.phone,p.project,p.budget].filter(Boolean).join(' · ');
   document.getElementById('pm-call').href='tel:+91'+p.phone.replace(/\D/g,'');
-  document.getElementById('pm-call').onclick=null;
   document.getElementById('pm-wa').onclick=()=>doWA(id);
   document.getElementById('pm-remflds').style.display='none';
   document.getElementById('pm-ni').value='';
-  document.getElementById('pm-rd').value='';
-  document.getElementById('pm-rt').value='';
-  document.getElementById('pm-rn').value='';
-  document.getElementById('pm-proj').value=p.project||'';
-  document.getElementById('pm-bud').value=p.budget||'';
-  // highlight current
-  document.querySelectorAll('#pmodal .sgrid .sbtn').forEach(b=>{
-    b.className='sbtn';
-    const fn=b.getAttribute('onclick')||'';
-    if(fn.includes("'"+p.status+"'"))b.classList.add('sel-'+p.status);
-  });
+  document.getElementById('pm-rd').value='';document.getElementById('pm-rt').value='';document.getElementById('pm-rn').value='';
+  document.getElementById('pm-proj').value=p.project||'';document.getElementById('pm-bud').value=p.budget||'';
+  document.querySelectorAll('#pmodal .sgrid .sbtn').forEach(b=>{b.className='sbtn';const fn=b.getAttribute('onclick')||'';if(fn.includes("'"+p.status+"'"))b.classList.add('sel-'+p.status);});
   renderTL(p);
   document.getElementById('pmodal').classList.add('open');
 }
-
 function renderTL(p){
-  const tl=p.timeline||[];
-  const el=document.getElementById('pm-tl');
-  if(!tl.length){el.innerHTML='<div style="color:var(--text3);font-size:13px">No activity yet</div>';return;}
-  el.innerHTML=[...tl].reverse().map(t=>`<div class="tli ${t.type||'note'}"><div>${esc(t.text)}</div><div class="tdate">${fdts(t.date)}</div></div>`).join('');
+  const tl=p.timeline||[];const el=document.getElementById('pm-tl');
+  if(!tl.length){el.innerHTML='<div style="color:var(--text3);font-size:13px">No activity yet — add your first note below</div>';return;}
+  el.innerHTML=[...tl].reverse().map(t=>{
+    const typeIcon=t.type==='note'?'💬':t.type==='status'?'🔄':'📥';
+    return`<div class="tli ${t.type||'note'}">
+      <div class="tli-date-label">${typeIcon} ${fdts(t.date)}</div>
+      <div>${esc(t.text)}</div>
+    </div>`;
+  }).join('');
 }
-
 function closePM(e){if(e.target.id==='pmodal')document.getElementById('pmodal').classList.remove('open')}
-
 async function chSt(st){
   const p=prospects.find(x=>x.id===openId);if(!p)return;
   if(st==='reminder'){document.getElementById('pm-remflds').style.display='block';return;}
   document.getElementById('pm-remflds').style.display='none';
-  p.status=st;p.updatedAt=now();
-  tlAdd(p,'Moved to '+(SM[st]?.l||st),'status');
-  await dbPut(p);renderAll();
-  toast('Moved to '+(SM[st]?.l||st),'ok');
-  openP(openId);
+  p.status=st;p.updatedAt=now();tlAdd(p,'Moved to '+(SM[st]?.l||st),'status');
+  await dbPut(p);renderAll();toast('Moved to '+(SM[st]?.l||st),'ok');openP(openId);
 }
-
 async function saveRem(){
   const p=prospects.find(x=>x.id===openId);if(!p)return;
-  const d=document.getElementById('pm-rd').value;
-  if(!d){toast('Pick a date','err');return;}
-  const t=document.getElementById('pm-rt').value||'09:00';
-  const note=document.getElementById('pm-rn').value.trim();
-  p.status='reminder';
-  p.reminderDT=new Date(d+'T'+t+':00').toISOString();
-  p.reminderNote=note;
-  p.updatedAt=now();
+  const d=document.getElementById('pm-rd').value;if(!d){toast('Pick a date','err');return;}
+  const t=document.getElementById('pm-rt').value||'09:00';const note=document.getElementById('pm-rn').value.trim();
+  p.status='reminder';p.reminderDT=new Date(d+'T'+t+':00').toISOString();p.reminderNote=note;p.updatedAt=now();
   tlAdd(p,'Reminder: '+fdts(p.reminderDT)+(note?' — '+note:''),'status');
-  await dbPut(p);renderAll();
-  toast('Reminder set!','ok');
-  document.getElementById('pm-remflds').style.display='none';
-  openP(openId);
+  await dbPut(p);renderAll();toast('Reminder set!','ok');document.getElementById('pm-remflds').style.display='none';openP(openId);
 }
-
 async function addNote(){
   const p=prospects.find(x=>x.id===openId);if(!p)return;
   const txt=document.getElementById('pm-ni').value.trim();if(!txt)return;
-  tlAdd(p,txt,'note');p.updatedAt=now();
-  await dbPut(p);
-  document.getElementById('pm-ni').value='';
-  renderTL(p);renderAll();
-  toast('Note saved','ok');
+  tlAdd(p,txt,'note');p.updatedAt=now();await dbPut(p);
+  document.getElementById('pm-ni').value='';renderTL(p);renderAll();toast('Note saved','ok');
 }
-
 async function saveDetails(){
   const p=prospects.find(x=>x.id===openId);if(!p)return;
-  p.project=document.getElementById('pm-proj').value.trim();
-  p.budget=document.getElementById('pm-bud').value.trim();
-  p.updatedAt=now();
-  await dbPut(p);renderAll();
-  toast('Saved','ok');
+  p.project=document.getElementById('pm-proj').value.trim();p.budget=document.getElementById('pm-bud').value.trim();p.updatedAt=now();
+  await dbPut(p);renderAll();toast('Saved','ok');
 }
-
 async function delCurr(){
   if(!openId||!confirm('Delete this prospect?'))return;
-  prospects=prospects.filter(x=>x.id!==openId);
-  await dbDel(openId);
-  document.getElementById('pmodal').classList.remove('open');
-  openId=null;renderAll();
-  toast('Deleted','warn');
+  prospects=prospects.filter(x=>x.id!==openId);await dbDel(openId);
+  document.getElementById('pmodal').classList.remove('open');openId=null;renderAll();toast('Deleted','warn');
 }
-
 function tlAdd(p,text,type='note'){if(!p.timeline)p.timeline=[];p.timeline.push({text,type,date:now()})}
 
 // ═══════════════════════════════════════════
@@ -1043,8 +999,7 @@ function doWA(id){const p=prospects.find(x=>x.id===id);if(!p)return;const ph=p.p
 //  BULK RETRY DNP
 // ═══════════════════════════════════════════
 async function bulkToToday(){
-  const list=prospects.filter(p=>p.status==='dnp');
-  if(!list.length){toast('No DNP prospects','warn');return;}
+  const list=prospects.filter(p=>p.status==='dnp');if(!list.length){toast('No DNP prospects','warn');return;}
   for(const p of list){p.status='today';p.updatedAt=now();tlAdd(p,'Moved back to Today','status');await dbPut(p);}
   renderAll();toast(list.length+' moved to Today','ok');
 }
@@ -1053,49 +1008,42 @@ async function bulkToToday(){
 //  RENDER SECTIONS
 // ═══════════════════════════════════════════
 function setRemTab(tab,btn){
-  remTab=tab;
-  document.querySelectorAll('#rem-tabs .tbb').forEach(b=>b.classList.remove('active'));
-  if(btn)btn.classList.add('active');
-  rs('reminder');
+  remTab=tab;document.querySelectorAll('#rem-tabs .tbb').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');rs('reminder');
 }
-
 function rs(status){
-  const qEl=document.getElementById('q-'+status);
-  const q=qEl?qEl.value.toLowerCase():'';
+  const qEl=document.getElementById('q-'+status);const q=qEl?qEl.value.toLowerCase():'';
   let list;
-  if(status==='reminder'){
-    list=prospects.filter(p=>p.status==='reminder');
-    if(remTab!=='all')list=list.filter(p=>remSt(p)===remTab);
-    list.sort((a,b)=>new Date(a.reminderDT||0)-new Date(b.reminderDT||0));
-  } else {
-    list=prospects.filter(p=>p.status===status);
-  }
+  if(status==='reminder'){list=prospects.filter(p=>p.status==='reminder');if(remTab!=='all')list=list.filter(p=>remSt(p)===remTab);list.sort((a,b)=>new Date(a.reminderDT||0)-new Date(b.reminderDT||0));}
+  else{list=prospects.filter(p=>p.status===status);}
   if(q)list=list.filter(p=>(p.name+p.phone+(p.project||'')+(p.budget||'')).toLowerCase().includes(q));
-
   const el=document.getElementById('list-'+status);if(!el)return;
   if(!list.length){
     const icons={today:'📋',dnp:'📵',ni:'🚫',followup:'🔄',reminder:'⏰',future:'🌱',cold:'❄️'};
-    el.innerHTML=`<div class="empty"><div class="empty-ico">${icons[status]||'📋'}</div><div class="empty-txt">Nothing here</div><div class="empty-sub">Prospects will appear when moved here</div></div>`;
-    return;
+    el.innerHTML=`<div class="empty"><div class="empty-ico">${icons[status]||'📋'}</div><div class="empty-txt">Nothing here</div><div class="empty-sub">Prospects will appear when moved here</div></div>`;return;
   }
   el.innerHTML='<div class="plist">'+list.map(p=>{
-    const sm=SM[p.status]||{};
-    const ac=avc(p.name);
-    const rs2=p.status==='reminder'?remSt(p):null;
-    // show all notes nicely, not just last
-    const allNotes=p.timeline?p.timeline.filter(t=>t.type==='import'||t.type==='note').map(t=>t.text).join('\n'):'';
+    const sm=SM[p.status]||{};const ac=avc(p.name);const rs2=p.status==='reminder'?remSt(p):null;
+    // Build dated conversation log — all note/import entries, newest last (chronological)
+    const convEntries=(p.timeline||[]).filter(t=>t.type==='note'||t.type==='import');
+    const convLog=convEntries.length?`<div class="conv-log" onclick="event.stopPropagation();openP('${p.id}')">`+
+      convEntries.map(t=>{
+        const dotCls=t.type==='import'?'conv-dot import':'conv-dot';
+        return`<div class="conv-entry">
+          <div class="${dotCls}"></div>
+          <div style="flex:1;min-width:0">
+            <div class="tli-date-label">${fdts(t.date)}</div>
+            <div class="conv-text">${esc(t.text)}</div>
+          </div>
+        </div>`;
+      }).join('')+'</div>':'';
     return`<div class="pc" onclick="openP('${p.id}')">
       <div class="pav" style="background:${ac.bg};color:${ac.c}">${ini(p.name)}</div>
       <div class="pb">
         <div class="pn">${esc(p.name)}</div>
         <div class="pp">${p.phone}${p.project?' · '+esc(p.project):''}${p.dateAdded?' · '+p.dateAdded:''}</div>
-        <div class="pm">
-          ${p.budget?`<span class="chip n">${esc(p.budget)}</span>`:''}
-          ${p.source?`<span class="chip n">${esc(p.source)}</span>`:''}
-          <span style="font-size:11px;color:var(--text3)">${ago(p.updatedAt)}</span>
-        </div>
-        ${allNotes?`<div class="pnote">${esc(allNotes)}</div>`:''}
+        <div class="pm">${p.budget?`<span class="chip n">${esc(p.budget)}</span>`:''}${p.source?`<span class="chip n">${esc(p.source)}</span>`:''}<span style="font-size:11px;color:var(--text3)">${ago(p.updatedAt)}</span></div>
         ${p.status==='reminder'&&p.reminderDT?`<div class="prem ${rs2==='overdue'?'ov':''}">${rs2==='overdue'?'⚠ OVERDUE: ':'📅 '}${fdts(p.reminderDT)}${p.reminderNote?' — '+esc(p.reminderNote):''}</div>`:''}
+        ${convLog}
       </div>
       <div class="pact" onclick="event.stopPropagation()">
         <a class="bico" href="tel:+91${p.phone.replace(/\D/g,'')}" onclick="event.stopPropagation()">📞</a>
@@ -1146,21 +1094,15 @@ function renderDash(){
 // ═══════════════════════════════════════════
 function updBadges(){
   const cnt=s=>prospects.filter(p=>p.status===s).length;
-  ['today','dnp','ni','followup','reminder','future','cold'].forEach(s=>{
-    const el=document.getElementById('b-'+s);if(el)el.textContent=cnt(s);
-  });
+  ['today','dnp','ni','followup','reminder','future','cold'].forEach(s=>{const el=document.getElementById('b-'+s);if(el)el.textContent=cnt(s);});
   const ov=prospects.filter(p=>p.status==='reminder'&&remSt(p)==='overdue').length;
-  const rb=document.getElementById('b-reminder');
-  if(rb)rb.style.background=ov?'var(--red)':'var(--amber)';
+  const rb=document.getElementById('b-reminder');if(rb)rb.style.background=ov?'var(--red)':'var(--amber)';
 }
 
 // ═══════════════════════════════════════════
 //  BROADCAST
 // ═══════════════════════════════════════════
-function bcPreview(){
-  const msg=document.getElementById('bcmsg').value;
-  document.getElementById('bc-prev').textContent=msg.replace('{name}','Rahul')||'Preview will appear here…';
-}
+function bcPreview(){const msg=document.getElementById('bcmsg').value;document.getElementById('bc-prev').textContent=msg.replace('{name}','Rahul')||'Preview will appear here…';}
 function renderBC(){
   const q=(document.getElementById('q-bc').value||'').toLowerCase();
   const list=prospects.filter(p=>p.status!=='ni'&&(!q||(p.name+p.phone).toLowerCase().includes(q)));
@@ -1177,22 +1119,16 @@ function bcClear(){bcSel.clear();renderBC()}
 function bcByStatus(s){bcSel.clear();prospects.filter(p=>p.status===s).forEach(p=>bcSel.add(p.id));renderBC()}
 function bcUpdBar(){const bar=document.getElementById('bc-bar');document.getElementById('bc-cnt').textContent=bcSel.size;bar.style.display=bcSel.size>0?'flex':'none'}
 function sendBC(){
-  const msg=document.getElementById('bcmsg').value.trim();
-  if(!msg){toast('Write a message first','err');return;}
-  if(!bcSel.size){toast('Select at least one prospect','err');return;}
-  const sel=prospects.filter(p=>bcSel.has(p.id));
-  let i=0;
-  function next(){if(i>=sel.length){toast(`Sent to ${sel.length}`,'ok');return;}
-    const p=sel[i++];const ph=p.phone.replace(/\D/g,'');
-    window.open('https://wa.me/91'+ph+'?text='+encodeURIComponent(msg.replace('{name}',p.name.split(' ')[0])),'_blank');
-    setTimeout(next,700);}
+  const msg=document.getElementById('bcmsg').value.trim();if(!msg){toast('Write a message first','err');return;}if(!bcSel.size){toast('Select at least one prospect','err');return;}
+  const sel=prospects.filter(p=>bcSel.has(p.id));let i=0;
+  function next(){if(i>=sel.length){toast(`Sent to ${sel.length}`,'ok');return;}const p=sel[i++];const ph=p.phone.replace(/\D/g,'');window.open('https://wa.me/91'+ph+'?text='+encodeURIComponent(msg.replace('{name}',p.name.split(' ')[0])),'_blank');setTimeout(next,700);}
   next();
 }
 
 // ═══════════════════════════════════════════
 //  NAVIGATION
 // ═══════════════════════════════════════════
-const TITLES={dashboard:'Dashboard',today:"Today's List",dnp:'Did Not Pick',ni:'Not Interested',followup:'Follow Up',reminder:'Reminders',future:'Future / Investors',cold:'Cold Pool',add:'Add Prospect',broadcast:'Broadcast',import:'Import CSV'};
+const TITLES={dashboard:'Dashboard',today:"Today's List",dnp:'Did Not Pick',ni:'Not Interested',followup:'Follow Up',reminder:'Reminders',future:'Future / Investors',cold:'Cold Pool',add:'Add Prospect',broadcast:'Broadcast',import:'Import CSV',export:'Export Excel'};
 function gp(name,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+name)?.classList.add('active');
@@ -1203,43 +1139,32 @@ function gp(name,btn){
   if(name==='dashboard')renderDash();
   else if(name==='reminder')rs('reminder');
   else if(name==='broadcast')renderBC();
+  else if(name==='export')renderExportPage();
   else if(['today','dnp','ni','followup','future','cold'].includes(name))rs(name);
 }
 function openSB(){document.getElementById('sidebar').classList.add('open');document.getElementById('mob-overlay').style.display='block'}
 function closeSB(){document.getElementById('sidebar').classList.remove('open');document.getElementById('mob-overlay').style.display='none'}
 
-// ═══════════════════════════════════════════
-//  ADD TAB
-// ═══════════════════════════════════════════
 function setAddTab(t){
   ['s','b'].forEach(x=>{document.getElementById('add-'+x).style.display=x===t?'block':'none';document.getElementById('tadd-'+x).classList.toggle('active',x===t)});
 }
 
-// ═══════════════════════════════════════════
-//  DATES
-// ═══════════════════════════════════════════
 function renderDates(){
   const d=new Date();
   document.getElementById('sb-date').textContent=d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
   document.getElementById('tb-date').textContent=d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-  const h=d.getHours();
-  document.getElementById('dash-greeting').textContent=(h<12?'Good morning':h<17?'Good afternoon':'Good evening')+' 👋';
+  const h=d.getHours();document.getElementById('dash-greeting').textContent=(h<12?'Good morning':h<17?'Good afternoon':'Good evening')+' 👋';
 }
 
-// ═══════════════════════════════════════════
-//  RENDER ALL
-// ═══════════════════════════════════════════
 function renderAll(){
   updBadges();
   if(curPage==='dashboard')renderDash();
   else if(curPage==='reminder')rs('reminder');
   else if(curPage==='broadcast')renderBC();
+  else if(curPage==='export')renderExportPage();
   else if(['today','dnp','ni','followup','future','cold'].includes(curPage))rs(curPage);
 }
 
-// ═══════════════════════════════════════════
-//  TOAST
-// ═══════════════════════════════════════════
 function toast(msg,type=''){
   const el=document.createElement('div');el.className='toast '+(type==='ok'?'ok':type==='warn'?'warn':type==='err'?'err':'');
   el.textContent=msg;document.getElementById('tc').appendChild(el);
@@ -1247,34 +1172,79 @@ function toast(msg,type=''){
   setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400)},3200);
 }
 
-// ═══════════════════════════════════════════
-//  REMINDER CHECKER
-// ═══════════════════════════════════════════
 function checkRems(){
   const now2=new Date();
-  prospects.filter(p=>p.status==='reminder'&&p.reminderDT).forEach(p=>{
-    const diff=new Date(p.reminderDT)-now2;
-    if(diff>0&&diff<60000)toast('⏰ Call '+p.name+' NOW!','warn');
-  });
+  prospects.filter(p=>p.status==='reminder'&&p.reminderDT).forEach(p=>{const diff=new Date(p.reminderDT)-now2;if(diff>0&&diff<60000)toast('⏰ Call '+p.name+' NOW!','warn');});
 }
 
 // ═══════════════════════════════════════════
-//  KEYBOARD
+//  GLOBAL SEARCH
 // ═══════════════════════════════════════════
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('pmodal').classList.remove('open')});
-document.getElementById('sp')?.addEventListener('keydown',e=>{if(e.key==='Enter')addSingle()});
+function toggleGS(){
+  const inputWrap=document.getElementById('gs-input-wrap');
+  const btn=document.getElementById('gs-toggle-btn');
+  const isOpen=inputWrap.style.display!=='none';
+  if(isOpen){closeGS();}
+  else{
+    btn.style.display='none';
+    inputWrap.style.display='flex';
+    document.getElementById('gs-input').focus();
+  }
+}
+function closeGS(){
+  document.getElementById('gs-input-wrap').style.display='none';
+  document.getElementById('gs-toggle-btn').style.display='flex';
+  document.getElementById('gs-input').value='';
+  document.getElementById('gs-results').style.display='none';
+}
+function runGS(){
+  const q=document.getElementById('gs-input').value.trim().toLowerCase();
+  const res=document.getElementById('gs-results');
+  if(!q){res.style.display='none';return;}
+  const matches=prospects.filter(p=>
+    (p.name||'').toLowerCase().includes(q)||
+    (p.phone||'').replace(/\D/g,'').includes(q.replace(/\D/g,''))
+  ).slice(0,12);
+  if(!matches.length){
+    res.style.display='block';
+    res.innerHTML=`<div class="gs-empty">No results for "${esc(q)}"</div>`;
+    return;
+  }
+  res.style.display='block';
+  res.innerHTML=matches.map(p=>{
+    const ac=avc(p.name);const sm=SM[p.status]||{};
+    return`<div class="gs-result-item" onclick="gsOpen('${p.id}')">
+      <div class="gs-result-av" style="background:${ac.bg};color:${ac.c}">${ini(p.name)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="gs-result-name">${esc(p.name)}</div>
+        <div class="gs-result-sub">${p.phone}${p.project?' · '+esc(p.project):''}</div>
+      </div>
+      <span class="chip ${sm.ch||'n'}" style="flex-shrink:0">${sm.i||''} ${sm.l||p.status}</span>
+    </div>`;
+  }).join('');
+}
+function gsOpen(id){
+  closeGS();
+  openP(id);
+}
+// Close search results when clicking outside
+document.addEventListener('click',e=>{
+  const wrap=document.getElementById('gs-wrap');
+  if(wrap&&!wrap.contains(e.target))closeGS();
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    document.getElementById('pmodal').classList.remove('open');
+    closeGS();
+  }
+  // Ctrl/Cmd+K to open search
+  if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();toggleGS();}
+});
 
-// ═══════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════
 async function init(){
-  await openDB();
-  prospects=await dbAll();
-  renderDates();
-  updBadges();
-  renderDash();
-  setInterval(renderDates,60000);
-  setInterval(checkRems,60000);
+  await openDB();prospects=await dbAll();
+  renderDates();updBadges();renderDash();
+  setInterval(renderDates,60000);setInterval(checkRems,60000);
 }
 init();
 </script>
