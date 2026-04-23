@@ -906,7 +906,17 @@ function renderPreviewStep(){
 async function confirmImport(){
   const ep={};prospects.forEach(p=>{if(p.phone)ep[p.phone]=p});
   let added=0,updated=0;
-  for(const p of csvNew){prospects.unshift(p);await dbPut(p);added++;}
+  
+  // Batch insert all new prospects in ONE call
+  if(csvNew.length){
+    const rows = csvNew.map(p=>({id:p.id, user_id:currentUser.id, data:p, updated_at:new Date().toISOString()}));
+    const {error} = await SB.from('prospects').upsert(rows);
+    if(error){ toast('Import failed: '+error.message,'err'); return; }
+    csvNew.forEach(p=>prospects.unshift(p));
+    added = csvNew.length;
+  }
+
+  // Handle duplicates one by one (usually few)
   for(const p of csvDups){
     const dec=dupDecisions[p.phone];if(dec==='skip')continue;
     const ex=ep[p.phone];if(!ex)continue;
@@ -923,13 +933,6 @@ async function confirmImport(){
     updated++;
   }
   resetImport();renderAll();toast(`✅ ${added} added, ${updated} updated`,'ok');gp('dashboard',null);
-}
-function resetImport(){
-  csvParsed=[];csvDups=[];csvNew=[];dupDecisions={};
-  document.getElementById('imp-step1').style.display='block';
-  document.getElementById('imp-step2').style.display='none';
-  document.getElementById('imp-step3').style.display='none';
-  document.getElementById('cfi').value='';
 }
 
 // ═══════════════════════════════════════════════════
