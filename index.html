@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>ProspectFlow</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 <style>
 :root{
   --bg:#f5f4f0;--bg2:#fff;--bg3:#eeecea;--bg4:#e4e2de;
@@ -1218,16 +1218,14 @@ document.getElementById('auth-email')?.addEventListener('keydown',e=>{if(e.key==
 document.getElementById('auth-pass')?.addEventListener('keydown',e=>{if(e.key==='Enter')doAuth()});
 
 // ═══════════════════════════════════════════════════
-//  BOOT — FIX #3 (boot): error handling for unreachable Supabase
+//  BOOT
 // ═══════════════════════════════════════════════════
 async function boot(){
-  const cfg = getCfg();
-  if(!cfg){
-    document.getElementById('auth-screen').style.display='none';
-    document.getElementById('setup-screen').style.display='flex';
-    return;
-  }
-  initSupabase(cfg.url, cfg.key);
+  // Credentials hard-coded — setup screen no longer needed
+  const SUPABASE_URL = 'https://pvvzhvopnyiczdkjiiep.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_Op1hewKvAzzlFnXijYCMkQ_-p1_I7ql';
+  initSupabase(SUPABASE_URL, SUPABASE_KEY);
+  localStorage.setItem(CFG_KEY, JSON.stringify({url: SUPABASE_URL, key: SUPABASE_KEY}));
   // FIX #8: wrap session check in try/catch so network errors surface
   try{
     const {data:{session}, error} = await SB.auth.getSession();
