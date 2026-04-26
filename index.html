@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>LeadTrackr</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap');
 
@@ -695,7 +696,41 @@ select.fi{cursor:pointer}
   animation:spin .7s linear infinite;
 }
 
-/* ── CARD VARIANTS ── */
+/* ── COLUMN MAPPER ── */
+.col-map-row{
+  display:grid;grid-template-columns:1fr auto 1fr;
+  align-items:center;gap:10px;padding:10px 0;
+  border-bottom:1px solid var(--border);
+}
+.col-map-row:last-child{border-bottom:none}
+.col-name{
+  font-size:13px;font-weight:600;color:var(--text);
+  background:var(--bg3);padding:7px 11px;border-radius:7px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.col-sample{font-size:11px;color:var(--text3);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.col-arrow{color:var(--text3);font-size:16px;text-align:center}
+.col-select{
+  width:100%;padding:7px 10px;border-radius:7px;
+  border:1.5px solid var(--border2);background:var(--bg3);
+  color:var(--text);font-family:inherit;font-size:13px;
+  outline:none;cursor:pointer;
+}
+.col-select:focus{border-color:var(--gold)}
+.col-preview-table{border-collapse:collapse;width:100%;min-width:400px}
+.col-preview-table th{
+  font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.5px;color:var(--text3);padding:5px 10px;
+  text-align:left;border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+.col-preview-table td{
+  font-size:12px;padding:5px 10px;border-bottom:1px solid var(--border);
+  color:var(--text2);max-width:160px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+/* ── INFO CARD ── */
 .info-card{
   background:var(--bg3);border:1px solid var(--border);
   border-radius:12px;padding:14px 16px;margin-bottom:12px;
@@ -758,7 +793,7 @@ select.fi{cursor:pointer}
     <div class="nav-section-label">Tools</div>
     <button class="nav-btn" onclick="gp('add',this)"><span class="nav-ico">➕</span>Add Prospect</button>
     <button class="nav-btn" onclick="gp('broadcast',this)"><span class="nav-ico">📢</span>Broadcast</button>
-    <button class="nav-btn" onclick="gp('import',this)"><span class="nav-ico">📂</span>Import CSV</button>
+    <button class="nav-btn" onclick="gp('import',this)"><span class="nav-ico">📂</span>Import File</button>
   </nav>
   <div class="sb-bottom">
     <div class="sync-row"><div class="sync-dot" id="sync-dot"></div><span id="sync-label" style="font-size:11px">Synced</span></div>
@@ -882,22 +917,65 @@ select.fi{cursor:pointer}
     </div>
   </div>
 
-  <!-- IMPORT CSV -->
+  <!-- IMPORT FILE (Excel + CSV) -->
   <div class="page" id="page-import">
     <div style="max-width:760px;margin:0 auto">
-      <div class="ph"><div class="pt">📂 Import CSV</div><div class="ps">Columns: Date · Name · Phone · Project · Action/Status · Notes</div></div>
+      <div class="ph">
+        <div class="pt">📂 Import File</div>
+        <div class="ps">Excel (.xlsx) or CSV — system auto-detects your columns</div>
+      </div>
+
+      <!-- STEP 1: Upload -->
       <div id="imp-step1">
         <div class="dropzone" id="dz" onclick="document.getElementById('cfi').click()" ondragover="dzOver(event)" ondragleave="dzLeave()" ondrop="dzDrop(event)">
-          <div style="font-size:40px;margin-bottom:12px;opacity:.5">📂</div>
-          <div style="font-weight:600;font-size:16px;margin-bottom:6px;color:var(--text)">Drop your CSV here</div>
-          <div style="color:var(--text3);font-size:13px;margin-bottom:16px">or click to browse files</div>
+          <div style="font-size:44px;margin-bottom:12px">📊</div>
+          <div style="font-weight:700;font-size:17px;margin-bottom:6px;color:var(--text)">Drop your Excel or CSV file</div>
+          <div style="color:var(--text3);font-size:13px;margin-bottom:6px">Supports .xlsx, .xls, .csv — any column names</div>
+          <div style="color:var(--text3);font-size:12px;margin-bottom:18px">System will auto-detect Name, Phone, Notes and more</div>
           <button class="btn btn-ink" onclick="event.stopPropagation();document.getElementById('cfi').click()">Choose File</button>
         </div>
-        <input type="file" id="cfi" accept=".csv,.txt" style="display:none" onchange="loadCsv(this)">
+        <input type="file" id="cfi" accept=".xlsx,.xls,.csv,.txt" style="display:none" onchange="loadFile(this)">
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-top:16px">
+          <div class="info-card" style="text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">✅</div>
+            <div style="font-weight:600;font-size:13px">Any Excel file</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px">No need to convert to CSV</div>
+          </div>
+          <div class="info-card" style="text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">🔍</div>
+            <div style="font-weight:600;font-size:13px">Auto column detection</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px">You confirm the mapping</div>
+          </div>
+          <div class="info-card" style="text-align:center">
+            <div style="font-size:22px;margin-bottom:6px">🔒</div>
+            <div style="font-weight:600;font-size:13px">No duplicates</div>
+            <div style="font-size:12px;color:var(--text3);margin-top:2px">Same phone = skip/merge</div>
+          </div>
+        </div>
       </div>
+
+      <!-- STEP 1.5: Column Mapper -->
+      <div id="imp-step-map" style="display:none">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--sh);margin-bottom:12px">
+          <div style="font-weight:700;font-size:15px;margin-bottom:4px">Map Your Columns</div>
+          <div style="font-size:13px;color:var(--text3);margin-bottom:16px">We detected these columns from your file. Tell us what each one contains:</div>
+          <div id="col-mapper"></div>
+          <div style="background:var(--bg3);border-radius:10px;padding:12px;margin-top:12px">
+            <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Preview — first 3 rows from your file</div>
+            <div id="col-preview" style="overflow-x:auto;font-size:12px"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ink" onclick="applyMapping()">Continue with this mapping →</button>
+          <button class="btn btn-ghost" onclick="resetImport()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Duplicates -->
       <div id="imp-step2" style="display:none">
         <div class="info-card" style="background:var(--amber-bg);border-color:var(--amber-lt);color:var(--amber)">
-          <strong>Duplicates found</strong> — same phone already exists. Choose what to do with each:
+          <strong>⚠️ Duplicates found</strong> — same phone already exists. Choose what to do:
           <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
             <button class="btn btn-ghost btn-sm" onclick="setAllDup('skip')">Skip All</button>
             <button class="btn btn-ghost btn-sm" onclick="setAllDup('merge')">Merge Notes</button>
@@ -910,6 +988,8 @@ select.fi{cursor:pointer}
           <button class="btn btn-ghost" onclick="resetImport()">Cancel</button>
         </div>
       </div>
+
+      <!-- STEP 3: Preview + Confirm -->
       <div id="imp-step3" style="display:none">
         <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px" id="imp-preview-label"></div>
         <div id="imp-preview-list" style="max-height:380px;overflow-y:auto"></div>
@@ -1205,17 +1285,177 @@ function remSt(p){
 }
 
 // ══════════════════════════════════════════════
-//  CSV PARSER
+//  FILE IMPORT — Excel + CSV + Smart Column Mapper
 // ══════════════════════════════════════════════
-function parseCSVLine(line){
-  const cols=[];let cur='',inQ=false;
-  for(let i=0;i<line.length;i++){
-    const c=line[i];
-    if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
-    else if(c===','&&!inQ){cols.push(cur.trim());cur='';}
-    else cur+=c;
+let rawRows = [];      // [{col1:val, col2:val, ...}, ...]
+let rawHeaders = [];   // all column names from file
+let colMapping = {};   // { detected_col: 'name'|'phone'|'project'|'budget'|'notes'|'status'|'date'|'ignore' }
+
+const FIELD_OPTIONS = [
+  {v:'ignore',  l:'— Ignore this column —'},
+  {v:'name',    l:'👤 Name'},
+  {v:'phone',   l:'📞 Phone / Mobile'},
+  {v:'project', l:'🏠 Project / Property'},
+  {v:'budget',  l:'💰 Budget'},
+  {v:'notes',   l:'📝 Notes / Remarks'},
+  {v:'status',  l:'📋 Status / Action'},
+  {v:'source',  l:'🔗 Source / Reference'},
+  {v:'date',    l:'📅 Date'},
+];
+
+// Smart auto-detect what a column likely is based on its name
+function autoDetectField(colName) {
+  const c = colName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (/^name|prospect|client|customer|person|lead/.test(c)) return 'name';
+  if (/phone|mobile|contact|number|cell|ph$|mob/.test(c)) return 'phone';
+  if (/project|property|flat|plot|unit|bhk|villa|type/.test(c)) return 'project';
+  if (/budget|price|amount|value|cost/.test(c)) return 'budget';
+  if (/note|remark|comment|detail|description|observation/.test(c)) return 'notes';
+  if (/status|action|stage|followup|follow|disposition/.test(c)) return 'status';
+  if (/source|ref|reference|channel|medium|from/.test(c)) return 'source';
+  if (/date|time|when|day/.test(c)) return 'date';
+  return 'ignore';
+}
+
+// Read file — Excel or CSV
+function dzOver(e){e.preventDefault();document.getElementById('dz').classList.add('drag')}
+function dzLeave(){document.getElementById('dz').classList.remove('drag')}
+function dzDrop(e){e.preventDefault();dzLeave();if(e.dataTransfer.files[0])loadFile({files:e.dataTransfer.files})}
+function loadFile(input){if(input.files[0])readFile(input.files[0])}
+
+function readFile(file) {
+  const name = file.name.toLowerCase();
+  const isExcel = name.endsWith('.xlsx') || name.endsWith('.xls');
+  const reader = new FileReader();
+
+  if (isExcel) {
+    reader.onload = e => {
+      try {
+        const data = new Uint8Array(e.target.result);
+        const wb = XLSX.read(data, {type:'array'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(ws, {defval:''});
+        if (!json.length) { toast('File is empty or unreadable','err'); return; }
+        rawHeaders = Object.keys(json[0]);
+        rawRows = json;
+        showColumnMapper();
+      } catch(err) {
+        toast('Could not read Excel file: '+err.message,'err');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    // CSV
+    reader.onload = e => {
+      try {
+        const text = e.target.result;
+        const wb = XLSX.read(text, {type:'string'});
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const json = XLSX.utils.sheet_to_json(ws, {defval:''});
+        if (!json.length) { toast('File is empty','err'); return; }
+        rawHeaders = Object.keys(json[0]);
+        rawRows = json;
+        showColumnMapper();
+      } catch(err) {
+        toast('Could not read file: '+err.message,'err');
+      }
+    };
+    reader.readAsText(file);
   }
-  cols.push(cur.trim());return cols;
+}
+
+function showColumnMapper() {
+  document.getElementById('imp-step1').style.display = 'none';
+  document.getElementById('imp-step-map').style.display = 'block';
+
+  // Auto-detect mapping
+  colMapping = {};
+  rawHeaders.forEach(h => { colMapping[h] = autoDetectField(h); });
+
+  // Render mapper rows
+  document.getElementById('col-mapper').innerHTML = rawHeaders.map(h => {
+    const detected = colMapping[h];
+    const sampleVals = rawRows.slice(0,3).map(r => String(r[h]||'').slice(0,30)).filter(Boolean).join(', ');
+    return `<div class="col-map-row">
+      <div>
+        <div class="col-name">${esc(h)}</div>
+        <div class="col-sample">${esc(sampleVals||'(empty)')}</div>
+      </div>
+      <div class="col-arrow">→</div>
+      <select class="col-select" onchange="colMapping['${esc(h)}']=this.value">
+        ${FIELD_OPTIONS.map(o=>`<option value="${o.v}"${detected===o.v?' selected':''}>${o.l}</option>`).join('')}
+      </select>
+    </div>`;
+  }).join('');
+
+  // Preview table
+  const previewCols = rawHeaders.slice(0, 6);
+  const previewRows = rawRows.slice(0, 3);
+  document.getElementById('col-preview').innerHTML = `
+    <table class="col-preview-table">
+      <thead><tr>${previewCols.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead>
+      <tbody>${previewRows.map(r=>`<tr>${previewCols.map(h=>`<td>${esc(String(r[h]||''))}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table>`;
+
+  toast(`${rawRows.length} rows found — confirm column mapping`, 'ok');
+}
+
+function applyMapping() {
+  // Validate — must have at least name OR phone mapped
+  const vals = Object.values(colMapping);
+  if (!vals.includes('name') && !vals.includes('phone')) {
+    toast('Map at least one of: Name or Phone','err'); return;
+  }
+
+  // Build prospects from mapping
+  csvParsed = rawRows.map(row => {
+    const get = field => {
+      const col = rawHeaders.find(h => colMapping[h] === field);
+      return col ? String(row[col]||'').trim() : '';
+    };
+
+    const name = get('name');
+    const rawPhone = get('phone').replace(/\D/g,'').replace(/^0+/,'');
+    const project = get('project');
+    const budget = get('budget');
+    const source = get('source');
+    const dateAdded = get('date');
+    const actionRaw = get('status');
+    const rawNote = get('notes');
+
+    if (!name && !rawPhone) return null;
+
+    // Build clean notes — deduplicate lines
+    const noteLines = rawNote.split(/[;\n]/).map(l=>l.trim()).filter(Boolean);
+    const uniqueNotes = [...new Set(noteLines)].join('\n');
+
+    const status = mapStatus(actionRaw);
+    const reminderDT = status==='reminder' ? extractReminderDT(actionRaw) : null;
+
+    return {
+      id: uid(),
+      name: name || ('Unknown ('+rawPhone+')'),
+      phone: rawPhone,
+      project, budget, source, status,
+      reminderDT, reminderNote: actionRaw,
+      timeline: uniqueNotes ? [{text:uniqueNotes,type:'import',date:now()}] : [],
+      createdAt: now(), updatedAt: now(), dateAdded,
+    };
+  }).filter(Boolean);
+
+  document.getElementById('imp-step-map').style.display = 'none';
+  afterRead();
+}
+
+function afterRead() {
+  if (!csvParsed.length) { toast('No valid rows found','err'); resetImport(); return; }
+  const ep = {};
+  prospects.forEach(p => { if(p.phone) ep[p.phone] = p; });
+  csvDups = csvParsed.filter(p => p.phone && ep[p.phone]);
+  csvNew  = csvParsed.filter(p => !p.phone || !ep[p.phone]);
+  dupDecisions = {};
+  csvDups.forEach(p => dupDecisions[p.phone] = 'skip');
+  if (csvDups.length > 0) renderDupStep(ep); else renderPreviewStep();
 }
 
 function mapStatus(raw){
@@ -1248,50 +1488,6 @@ function extractReminderDT(raw){
   if(m2){const day=parseInt(m2[1]),mon=parseInt(m2[2])-1,yr=m2[3].length===2?2000+parseInt(m2[3]):parseInt(m2[3]);if(mon>=0&&mon<=11){const{h,min}=getTime(raw);return new Date(yr,mon,day,h,min).toISOString();}}
   if(/tomorrow/i.test(raw)){const d=new Date();d.setDate(d.getDate()+1);const{h,min}=getTime(raw);d.setHours(h,min,0,0);return d.toISOString();}
   return null;
-}
-
-function parseCsvText(text){
-  const rows=[];let cur='',inQ=false;
-  for(let i=0;i<text.length;i++){const c=text[i];if(c==='"')inQ=!inQ;if((c==='\n'||c==='\r')&&!inQ){if(cur.trim())rows.push(cur);cur='';}else cur+=c;}
-  if(cur.trim())rows.push(cur);
-  if(rows.length<2)return[];
-  const headers=parseCSVLine(rows[0]).map(h=>h.replace(/^"|"$/g,'').trim());
-  return rows.slice(1).map(row=>{
-    const vals=parseCSVLine(row);const obj={};
-    headers.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/^"|"$/g,'').trim());
-    const phone=(obj['Phone']||obj['phone']||obj['mobile']||'').replace(/\D/g,'').replace(/^0+/,'');
-    const name=(obj['Name']||obj['name']||'').trim();
-    const project=(obj['Project']||obj['project']||'').trim();
-    const actionRaw=(obj['Action/Status']||obj['Action']||obj['Status']||'').trim();
-    let budget=(obj['Budget']||obj['budget']||'').trim();
-    if(!budget){const bm=(obj['Notes']||obj['notes']||'').match(/budget[:\s]+([^\n;,]+)/i);if(bm)budget=bm[1].trim();}
-    const rawNote=(obj['Notes']||obj['notes']||'').trim();
-    const noteLines=rawNote.split(/[;\n]/).map(l=>l.trim()).filter(Boolean);
-    const uniqueNotes=[...new Set(noteLines)].join('\n');
-    const status=mapStatus(actionRaw);
-    const reminderDT=['reminder'].includes(status)?extractReminderDT(actionRaw):null;
-    if(!name&&!phone)return null;
-    return{id:uid(),name:name||('Unknown ('+phone+')'),phone,project,budget,source:'',status,reminderDT,reminderNote:actionRaw,timeline:uniqueNotes?[{text:uniqueNotes,type:'import',date:now()}]:[],createdAt:now(),updatedAt:now(),dateAdded:(obj['Date']||'').trim()};
-  }).filter(Boolean);
-}
-
-// ══════════════════════════════════════════════
-//  IMPORT FLOW
-// ══════════════════════════════════════════════
-function dzOver(e){e.preventDefault();document.getElementById('dz').classList.add('drag')}
-function dzLeave(){document.getElementById('dz').classList.remove('drag')}
-function dzDrop(e){e.preventDefault();dzLeave();if(e.dataTransfer.files[0])readFile(e.dataTransfer.files[0])}
-function loadCsv(input){if(input.files[0])readFile(input.files[0])}
-function readFile(f){const r=new FileReader();r.onload=e=>afterRead(e.target.result);r.readAsText(f)}
-
-function afterRead(text){
-  csvParsed=parseCsvText(text);
-  if(!csvParsed.length){toast('No valid rows found','err');return;}
-  const ep={};prospects.forEach(p=>{if(p.phone)ep[p.phone]=p});
-  csvDups=csvParsed.filter(p=>p.phone&&ep[p.phone]);
-  csvNew=csvParsed.filter(p=>!p.phone||!ep[p.phone]);
-  dupDecisions={};csvDups.forEach(p=>dupDecisions[p.phone]='skip');
-  if(csvDups.length>0)renderDupStep(ep);else renderPreviewStep();
 }
 
 function renderDupStep(ep){
@@ -1382,7 +1578,9 @@ async function confirmImport(){
 
 function resetImport(){
   csvParsed=[];csvDups=[];csvNew=[];dupDecisions={};
+  rawRows=[];rawHeaders=[];colMapping={};
   document.getElementById('imp-step1').style.display='block';
+  document.getElementById('imp-step-map').style.display='none';
   document.getElementById('imp-step2').style.display='none';
   document.getElementById('imp-step3').style.display='none';
   document.getElementById('cfi').value='';
@@ -1770,7 +1968,7 @@ const TITLES={
   dashboard:'Dashboard',today:"Today's List",dnp:'Did Not Pick',
   ni:'Not Interested',followup:'Follow Up',reminder:'Reminders',
   future:'Future / Investors',cold:'Cold Pool',
-  add:'Add Prospect',broadcast:'Broadcast',import:'Import CSV',
+  add:'Add Prospect',broadcast:'Broadcast',import:'Import File',
 };
 
 function gp(name,btn){
