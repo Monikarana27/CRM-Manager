@@ -1,352 +1,808 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>ProspectFlow</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<title>LeadTrackr</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 <style>
-:root{
-  --bg:#f5f4f0;--bg2:#fff;--bg3:#eeecea;--bg4:#e4e2de;
-  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.15);
-  --text:#1a1814;--text2:#6b6860;--text3:#a09e9a;
-  --blue:#2563eb;--blue-bg:#eff6ff;--blue-lt:#dbeafe;
-  --red:#dc2626;--red-bg:#fef2f2;--red-lt:#fee2e2;
-  --amber:#d97706;--amber-bg:#fffbeb;--amber-lt:#fde68a;
-  --green:#16a34a;--green-bg:#f0fdf4;--green-lt:#bbf7d0;
-  --purple:#7c3aed;--purple-bg:#f5f3ff;--purple-lt:#ddd6fe;
-  --slate:#475569;--slate-bg:#f8fafc;--slate-lt:#e2e8f0;
-  --teal:#0d9488;--teal-bg:#f0fdfa;--teal-lt:#ccfbf1;
-  --r:14px;--rs:9px;
-  --sh:0 1px 3px rgba(0,0,0,0.07),0 1px 2px rgba(0,0,0,0.04);
-  --sh2:0 4px 14px rgba(0,0,0,0.09),0 2px 4px rgba(0,0,0,0.05);
-  --sh3:0 20px 48px rgba(0,0,0,0.14),0 8px 16px rgba(0,0,0,0.07);
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display:ital@0;1&display=swap');
+
+/* ── TOKENS ── */
+[data-theme="light"] {
+  --bg:       #F7F5F2;
+  --bg2:      #FFFFFF;
+  --bg3:      #EFECE8;
+  --bg4:      #E5E1DB;
+  --border:   rgba(0,0,0,0.07);
+  --border2:  rgba(0,0,0,0.13);
+  --text:     #1C1A18;
+  --text2:    #6B6560;
+  --text3:    #A8A39D;
+  --ink:      #1C1A18;
+  --card:     #FFFFFF;
+  --sidebar:  #FFFFFF;
+  --topbar:   rgba(247,245,242,0.92);
+  --overlay:  rgba(0,0,0,0.38);
+  --sh:       0 1px 2px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+  --sh2:      0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --sh3:      0 24px 56px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.06);
+  --gold:     #B8963E;
+  --gold-bg:  #FBF5E8;
+  --gold-lt:  #F0DFB2;
+  --red:      #C0392B;
+  --red-bg:   #FDF3F2;
+  --red-lt:   #F9DEDA;
+  --amber:    #C87528;
+  --amber-bg: #FDF6EE;
+  --amber-lt: #F5DFB8;
+  --green:    #2D7A4F;
+  --green-bg: #F0F8F3;
+  --green-lt: #C0E4CF;
+  --blue:     #2A5FBF;
+  --blue-bg:  #EFF4FC;
+  --blue-lt:  #C0D3F2;
+  --purple:   #6B3FAF;
+  --purple-bg:#F5F0FB;
+  --purple-lt:#D8C8F0;
+  --slate:    #4A5568;
+  --slate-lt: #E2E8F0;
+  --teal:     #1A7A70;
+  --teal-bg:  #EFF8F7;
+  --teal-lt:  #C0E4E0;
+  --mode-ico: '☀️';
 }
+[data-theme="dark"] {
+  --bg:       #111110;
+  --bg2:      #1A1917;
+  --bg3:      #222120;
+  --bg4:      #2E2C2A;
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.13);
+  --text:     #F0EDE8;
+  --text2:    #9A968F;
+  --text3:    #5A5650;
+  --ink:      #F0EDE8;
+  --card:     #1A1917;
+  --sidebar:  #141312;
+  --topbar:   rgba(17,17,16,0.92);
+  --overlay:  rgba(0,0,0,0.65);
+  --sh:       0 1px 2px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
+  --sh2:      0 4px 16px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2);
+  --sh3:      0 24px 56px rgba(0,0,0,0.5), 0 8px 20px rgba(0,0,0,0.3);
+  --gold:     #C9A84C;
+  --gold-bg:  #1F1B11;
+  --gold-lt:  #3A3018;
+  --red:      #E05A4E;
+  --red-bg:   #1F1210;
+  --red-lt:   #3A1F1C;
+  --amber:    #E09040;
+  --amber-bg: #1F1710;
+  --amber-lt: #3A2C18;
+  --green:    #4CAF7A;
+  --green-bg: #101F16;
+  --green-lt: #1A3526;
+  --blue:     #5A8FE0;
+  --blue-bg:  #101820;
+  --blue-lt:  #1A2E40;
+  --purple:   #9B6FD8;
+  --purple-bg:#151020;
+  --purple-lt:#2A1F40;
+  --slate:    #8090A8;
+  --slate-lt: #1A2030;
+  --teal:     #4AAFA8;
+  --teal-bg:  #101A1A;
+  --teal-lt:  #1A3030;
+  --mode-ico: '🌙';
+}
+
+/* ── BASE ── */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{scroll-behavior:smooth}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{
+  font-family:'DM Sans',system-ui,sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;font-size:14px;line-height:1.55;
+  transition:background .25s,color .25s;
+}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px}
+::selection{background:var(--gold);color:var(--bg)}
 
-/* ── AUTH SCREEN ── */
-#auth-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px}
-.auth-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:32px 28px;width:100%;max-width:400px;box-shadow:var(--sh3)}
-.auth-logo{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
-.auth-sub{font-size:13px;color:var(--text2);margin-bottom:24px}
-.auth-tabs{display:flex;gap:4px;background:var(--bg3);border-radius:var(--rs);padding:4px;margin-bottom:20px}
-.auth-tab{flex:1;padding:7px;border-radius:7px;border:none;background:transparent;font-family:inherit;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s}
-.auth-tab.active{background:var(--bg2);color:var(--text);box-shadow:var(--sh)}
-.auth-err{background:var(--red-bg);border:1px solid var(--red-lt);border-radius:var(--rs);padding:10px 13px;font-size:13px;color:var(--red);margin-bottom:12px;display:none}
-.auth-ok{background:var(--green-bg);border:1px solid var(--green-lt);border-radius:var(--rs);padding:10px 13px;font-size:13px;color:var(--green);margin-bottom:12px;display:none}
-#setup-screen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:998;padding:20px}
-.setup-box{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:500px;box-shadow:var(--sh3)}
+/* ── LOADING SCREEN ── */
+#loading{
+  position:fixed;inset:0;background:var(--text);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;gap:20px;transition:opacity .4s;
+}
+#loading.hide{opacity:0;pointer-events:none}
+.load-logo{
+  font-family:'DM Serif Display',serif;
+  font-size:36px;color:var(--bg);letter-spacing:-.5px;
+}
+.load-ring{
+  width:36px;height:36px;
+  border:2.5px solid rgba(255,255,255,.15);
+  border-top-color:rgba(255,255,255,.8);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── AUTH ── */
+#auth-screen{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  z-index:900;padding:20px;
+}
+.auth-wrap{
+  width:100%;max-width:380px;
+}
+.auth-brand{
+  font-family:'DM Serif Display',serif;
+  font-size:32px;color:var(--text);letter-spacing:-.5px;
+  margin-bottom:4px;
+}
+.auth-brand span{color:var(--gold)}
+.auth-tagline{font-size:13px;color:var(--text3);margin-bottom:32px;font-weight:400}
+.auth-card{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:16px;padding:28px 24px;box-shadow:var(--sh2);
+}
+.auth-tabs{
+  display:flex;background:var(--bg3);border-radius:8px;
+  padding:3px;margin-bottom:20px;
+}
+.auth-tab{
+  flex:1;padding:7px;border-radius:6px;border:none;
+  background:transparent;font-family:inherit;
+  font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;
+  transition:all .2s;
+}
+.auth-tab.active{
+  background:var(--card);color:var(--text);
+  font-weight:600;box-shadow:var(--sh);
+}
+.auth-err{
+  background:var(--red-bg);border:1px solid var(--red-lt);
+  border-radius:8px;padding:9px 12px;font-size:13px;
+  color:var(--red);margin-bottom:12px;display:none;
+}
+.auth-ok{
+  background:var(--green-bg);border:1px solid var(--green-lt);
+  border-radius:8px;padding:9px 12px;font-size:13px;
+  color:var(--green);margin-bottom:12px;display:none;
+}
 
 /* ── LAYOUT ── */
 #app{display:none}
 .layout{display:flex;min-height:100vh}
-.sidebar{width:224px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;transition:transform .3s;overflow-y:auto}
-.main-area{margin-left:224px;flex:1;display:flex;flex-direction:column;min-height:100vh}
-@media(max-width:768px){.sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.main-area{margin-left:0}.mob-overlay{display:none}.mob-overlay.visible{display:block!important}}
-/* FIX #1: mob-overlay properly styled */
-.mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:49;cursor:pointer}
+.sidebar{
+  width:220px;flex-shrink:0;
+  background:var(--sidebar);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;
+  z-index:50;transition:transform .28s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;
+}
+.main-area{
+  margin-left:220px;flex:1;
+  display:flex;flex-direction:column;
+  min-height:100vh;
+}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-101%)}
+  .sidebar.open{transform:translateX(0)}
+  .main-area{margin-left:0}
+}
+.mob-overlay{
+  display:none;position:fixed;inset:0;
+  background:var(--overlay);z-index:49;cursor:pointer;
+  backdrop-filter:blur(2px);
+}
+.mob-overlay.vis{display:block}
 
-/* ── SIDEBAR ── */
-.sb-brand{padding:16px 14px 12px;border-bottom:1px solid var(--border)}
-.sb-logo{font-size:16px;font-weight:800;letter-spacing:-.4px}
-.sb-user{font-size:11px;color:var(--text3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sb-date{font-size:11px;color:var(--text3);margin-top:1px}
-.sb-nav{flex:1;padding:8px 7px}
-.ni{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--rs);cursor:pointer;color:var(--text2);font-weight:500;font-size:13px;transition:all .15s;user-select:none;margin-bottom:2px;border:none;background:none;width:100%;text-align:left}
-.ni:hover{background:var(--bg3);color:var(--text)}
-.ni.active{background:var(--text);color:#fff}
-.ni .ico{font-size:14px;width:18px;text-align:center;flex-shrink:0}
-.nbadge{margin-left:auto;font-size:10px;font-weight:700;padding:1px 7px;border-radius:20px;min-width:20px;text-align:center;color:white}
-.nbadge.red{background:var(--red)}.nbadge.amber{background:var(--amber)}.nbadge.blue{background:var(--blue)}.nbadge.green{background:var(--green)}.nbadge.purple{background:var(--purple)}.nbadge.slate{background:var(--slate)}.nbadge.teal{background:var(--teal)}
-.nsec{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text3);padding:10px 10px 3px}
-.sb-bottom{padding:10px 7px;border-top:1px solid var(--border)}
-.sync-indicator{display:flex;align-items:center;gap:6px;padding:7px 10px;border-radius:var(--rs);font-size:12px;font-weight:500;color:var(--text2)}
-.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0}
+/* ── SIDEBAR INNER ── */
+.sb-top{padding:20px 16px 16px;border-bottom:1px solid var(--border)}
+.sb-logo{
+  font-family:'DM Serif Display',serif;
+  font-size:20px;color:var(--text);letter-spacing:-.4px;
+  margin-bottom:2px;
+}
+.sb-logo span{color:var(--gold)}
+.sb-meta{font-size:11px;color:var(--text3);line-height:1.6}
+.sb-nav{flex:1;padding:10px 8px;overflow-y:auto}
+.nav-section-label{
+  font-size:10px;font-weight:600;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--text3);
+  padding:12px 8px 4px;
+}
+.nav-btn{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:8px;
+  cursor:pointer;color:var(--text2);font-weight:500;
+  font-size:13px;transition:all .15s;user-select:none;
+  margin-bottom:1px;border:none;background:none;
+  width:100%;text-align:left;font-family:inherit;
+}
+.nav-btn:hover{background:var(--bg3);color:var(--text)}
+.nav-btn.active{
+  background:var(--text);color:var(--bg);
+  font-weight:600;
+}
+.nav-ico{
+  font-size:14px;width:18px;
+  text-align:center;flex-shrink:0;
+  opacity:.8;
+}
+.nav-badge{
+  margin-left:auto;font-size:10px;font-weight:700;
+  padding:1px 6px;border-radius:20px;min-width:18px;
+  text-align:center;color:white;flex-shrink:0;
+}
+.nb-r{background:var(--red)}
+.nb-a{background:var(--amber)}
+.nb-b{background:var(--blue)}
+.nb-g{background:var(--green)}
+.nb-p{background:var(--purple)}
+.nb-s{background:var(--slate)}
+.nb-t{background:var(--teal)}
+.sb-bottom{padding:10px 8px 14px;border-top:1px solid var(--border)}
+.sync-row{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;font-size:12px;color:var(--text3);
+}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .3s}
 .sync-dot.ok{background:var(--green)}
 .sync-dot.syncing{background:var(--amber);animation:pulse .8s infinite}
 .sync-dot.err{background:var(--red)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
 /* ── TOPBAR ── */
-.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 18px;height:54px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:40}
-.mob-btn{display:none;background:none;border:none;cursor:pointer;font-size:20px;color:var(--text);padding:4px}
-@media(max-width:768px){.mob-btn{display:block}}
-.topbar-title{font-size:15px;font-weight:700;flex:1}
-.topbar-date{font-size:12px;font-weight:600;color:var(--text2);background:var(--bg3);padding:4px 11px;border-radius:20px}
+.topbar{
+  background:var(--topbar);
+  border-bottom:1px solid var(--border);
+  padding:0 20px;height:52px;
+  display:flex;align-items:center;gap:12px;
+  position:sticky;top:0;z-index:40;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.mob-menu-btn{
+  display:none;background:none;border:none;
+  cursor:pointer;font-size:18px;color:var(--text);
+  padding:4px;line-height:1;
+}
+@media(max-width:768px){.mob-menu-btn{display:flex}}
+.topbar-title{
+  font-family:'DM Serif Display',serif;
+  font-size:17px;color:var(--text);flex:1;
+  letter-spacing:-.3px;
+}
+.topbar-date{
+  font-size:11px;font-weight:500;color:var(--text3);
+  background:var(--bg3);padding:4px 10px;
+  border-radius:20px;border:1px solid var(--border);
+}
+.dark-toggle{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:8px;width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:14px;transition:all .15s;
+  flex-shrink:0;
+}
+.dark-toggle:hover{background:var(--bg4)}
 
 /* ── PAGES ── */
-.page{display:none;padding:18px;max-width:980px;width:100%;margin:0 auto}
-.page.active{display:block}
-.ph{margin-bottom:18px}
-.pt{font-size:21px;font-weight:800;letter-spacing:-.4px}
-.ps{font-size:13px;color:var(--text2);margin-top:2px}
+.page{display:none;padding:20px;max-width:960px;width:100%;margin:0 auto}
+.page.active{display:block;animation:fadeUp .22s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── DASHBOARD ── */
-.dg{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:20px}
-.dc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 15px;cursor:pointer;transition:all .15s;box-shadow:var(--sh);text-align:center}
-.dc:hover{box-shadow:var(--sh2);transform:translateY(-1px)}
-.dn{font-size:26px;font-weight:800;letter-spacing:-1px;margin-bottom:3px}
-.dl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
-.dc.tot{border-top:3px solid var(--text)}.dc.tot .dn{color:var(--text)}.dc.tot .dl{color:var(--text2)}
-.dc.s-today{border-top:3px solid var(--green)}.dc.s-today .dn,.dc.s-today .dl{color:var(--green)}
-.dc.s-dnp{border-top:3px solid var(--red)}.dc.s-dnp .dn,.dc.s-dnp .dl{color:var(--red)}
-.dc.s-ni{border-top:3px solid var(--slate)}.dc.s-ni .dn,.dc.s-ni .dl{color:var(--slate)}
-.dc.s-followup{border-top:3px solid var(--blue)}.dc.s-followup .dn,.dc.s-followup .dl{color:var(--blue)}
-.dc.s-reminder{border-top:3px solid var(--amber)}.dc.s-reminder .dn,.dc.s-reminder .dl{color:var(--amber)}
-.dc.s-future{border-top:3px solid var(--purple)}.dc.s-future .dn,.dc.s-future .dl{color:var(--purple)}
-.dc.s-cold{border-top:3px solid var(--teal)}.dc.s-cold .dn,.dc.s-cold .dl{color:var(--teal)}
+/* ── PAGE HEADERS ── */
+.ph{margin-bottom:20px}
+.ph-row{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.pt{
+  font-family:'DM Serif Display',serif;
+  font-size:24px;color:var(--text);letter-spacing:-.4px;
+  line-height:1.2;
+}
+.ps{font-size:13px;color:var(--text3);margin-top:3px}
 
-/* ── ALERTS ── */
-.alert-item{background:var(--amber-bg);border:1px solid rgba(217,119,6,.2);border-left:4px solid var(--amber);border-radius:var(--rs);padding:11px 14px;display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13px;font-weight:500;cursor:pointer}
-.alert-item.ov{background:var(--red-bg);border-color:rgba(220,38,38,.2);border-left-color:var(--red)}
-.alert-act{border:none;border-radius:6px;padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;background:var(--amber);color:white;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center}
-.alert-act.red{background:var(--red)}
+/* ── DASHBOARD GRID ── */
+.dash-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+  gap:8px;margin-bottom:24px;
+}
+.dc{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:14px 12px;cursor:pointer;
+  transition:all .18s;box-shadow:var(--sh);text-align:center;
+  position:relative;overflow:hidden;
+}
+.dc::before{
+  content:'';position:absolute;top:0;left:0;right:0;
+  height:2px;background:var(--dc-color,var(--border));
+  border-radius:12px 12px 0 0;
+}
+.dc:hover{box-shadow:var(--sh2);transform:translateY(-2px)}
+.dc:active{transform:translateY(0)}
+.dc-n{
+  font-family:'DM Serif Display',serif;
+  font-size:28px;letter-spacing:-1.5px;
+  margin-bottom:2px;color:var(--dc-color,var(--text));
+  line-height:1;
+}
+.dc-l{
+  font-size:10px;font-weight:600;letter-spacing:.5px;
+  text-transform:uppercase;color:var(--text3);
+}
+.dc.tot{--dc-color:var(--text)}.dc.tot .dc-n{color:var(--text)}
+.dc.s-today{--dc-color:var(--green)}
+.dc.s-dnp{--dc-color:var(--red)}
+.dc.s-ni{--dc-color:var(--slate)}
+.dc.s-followup{--dc-color:var(--blue)}
+.dc.s-reminder{--dc-color:var(--amber)}
+.dc.s-future{--dc-color:var(--purple)}
+.dc.s-cold{--dc-color:var(--teal)}
+
+/* ── SECTION DIVIDERS ── */
+.sec-row{
+  display:flex;align-items:center;gap:10px;
+  margin:20px 0 10px;
+}
+.sec-label{
+  font-size:11px;font-weight:600;letter-spacing:.8px;
+  text-transform:uppercase;color:var(--text3);white-space:nowrap;
+}
+.sec-line{flex:1;height:1px;background:var(--border)}
+.sec-count{
+  font-size:11px;font-weight:600;color:var(--text3);
+  background:var(--bg3);padding:2px 8px;border-radius:20px;
+  border:1px solid var(--border);white-space:nowrap;
+}
+
+/* ── ALERT ITEMS ── */
+.alert-item{
+  background:var(--amber-bg);
+  border:1px solid var(--amber-lt);
+  border-left:3px solid var(--amber);
+  border-radius:10px;padding:12px 14px;
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:8px;cursor:pointer;
+  transition:all .15s;
+}
+.alert-item:hover{box-shadow:var(--sh)}
+.alert-item.ov{
+  background:var(--red-bg);
+  border-color:var(--red-lt);border-left-color:var(--red);
+}
+.alert-name{font-weight:600;font-size:13px}
+.alert-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.alert-tag{
+  font-size:10px;font-weight:700;letter-spacing:.3px;
+  padding:3px 8px;border-radius:4px;white-space:nowrap;
+  flex-shrink:0;
+}
+.tag-ov{background:var(--red);color:white}
+.tag-today{background:var(--amber);color:white}
+.alert-call{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:7px;padding:5px 10px;
+  font-size:12px;font-weight:600;
+  color:var(--text);text-decoration:none;
+  display:inline-flex;align-items:center;gap:4px;
+  transition:all .15s;flex-shrink:0;
+}
+.alert-call:hover{background:var(--green);color:white;border-color:var(--green)}
 
 /* ── PROSPECT CARDS ── */
-.plist{display:flex;flex-direction:column;gap:8px}
-.pc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;display:flex;align-items:flex-start;gap:11px;cursor:pointer;transition:all .15s;box-shadow:var(--sh)}
+.plist{display:flex;flex-direction:column;gap:6px}
+.pc{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:13px 14px;
+  display:flex;align-items:flex-start;gap:12px;
+  cursor:pointer;transition:all .15s;box-shadow:var(--sh);
+}
 .pc:hover{border-color:var(--border2);box-shadow:var(--sh2)}
-.pav{width:37px;height:37px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+.pc:active{transform:scale(.99)}
+.pav{
+  width:36px;height:36px;border-radius:10px;
+  flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-weight:700;font-size:12px;
+  letter-spacing:0;
+}
 .pb{flex:1;min-width:0}
-.pn{font-weight:700;font-size:14px;margin-bottom:1px}
-.pp{font-size:12px;color:var(--text2);margin-bottom:4px}
-.pm{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
-.chip{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap}
-.chip.today-p{background:var(--green-lt);color:var(--green)}
-.chip.dnp{background:var(--red-lt);color:var(--red)}
-.chip.ni{background:var(--slate-lt);color:var(--slate)}
-.chip.followup{background:var(--blue-lt);color:var(--blue)}
-.chip.reminder{background:var(--amber-lt);color:var(--amber)}
-.chip.future{background:var(--purple-lt);color:var(--purple)}
-.chip.cold{background:var(--teal-lt);color:var(--teal)}
-.chip.n{background:var(--bg3);color:var(--text2)}
-.pnote{font-size:12px;color:var(--text2);margin-top:5px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
-.prem{font-size:11px;font-weight:700;color:var(--amber);margin-top:3px}
+.pname{font-weight:600;font-size:14px;margin-bottom:2px;line-height:1.3}
+.pphone{font-size:12px;color:var(--text3);margin-bottom:5px}
+.pmeta{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.chip{
+  font-size:10px;font-weight:600;padding:2px 7px;
+  border-radius:5px;white-space:nowrap;letter-spacing:.2px;
+}
+.ch-tp{background:var(--green-lt);color:var(--green)}
+.ch-dnp{background:var(--red-lt);color:var(--red)}
+.ch-ni{background:var(--slate-lt);color:var(--slate)}
+.ch-fu{background:var(--blue-lt);color:var(--blue)}
+.ch-rm{background:var(--amber-lt);color:var(--amber)}
+.ch-ft{background:var(--purple-lt);color:var(--purple)}
+.ch-co{background:var(--teal-lt);color:var(--teal)}
+.ch-n{background:var(--bg3);color:var(--text3)}
+.pnote{
+  font-size:12px;color:var(--text3);margin-top:6px;
+  line-height:1.5;white-space:pre-wrap;word-break:break-word;
+  border-left:2px solid var(--border);padding-left:8px;
+}
+.prem{
+  font-size:11px;font-weight:600;color:var(--amber);
+  margin-top:5px;display:flex;align-items:center;gap:5px;
+}
 .prem.ov{color:var(--red)}
-.pact{display:flex;gap:5px;flex-shrink:0;align-items:flex-start;padding-top:2px}
-.bico{padding:7px;border-radius:var(--rs);background:var(--bg3);border:1px solid var(--border);cursor:pointer;font-size:13px;transition:all .15s;line-height:1;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
-.bico:hover{background:var(--bg4)}
-
-/* ── BUTTONS ── */
-.btn{padding:8px 15px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .15s;font-family:inherit;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none}
-.btn-dark{background:var(--text);color:white}.btn-dark:hover{background:#333}
-.btn-blue{background:var(--blue);color:white}.btn-blue:hover{background:#1d4ed8}
-.btn-ghost{background:var(--bg3);color:var(--text2);border-color:var(--border)}.btn-ghost:hover{background:var(--bg4);color:var(--text)}
-.btn-red{background:var(--red-bg);color:var(--red);border-color:rgba(220,38,38,.2)}.btn-red:hover{background:var(--red);color:white}
-.btn-sm{padding:5px 10px;font-size:11px}
-.w100{width:100%}
+.pact{
+  display:flex;flex-direction:column;gap:5px;
+  flex-shrink:0;align-items:flex-end;padding-top:1px;
+}
+.act-btn{
+  padding:6px;border-radius:7px;
+  background:var(--bg3);border:1px solid var(--border);
+  cursor:pointer;font-size:13px;transition:all .15s;
+  line-height:1;text-decoration:none;
+  display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;
+}
+.act-btn:hover{background:var(--bg4)}
 
 /* ── FORMS ── */
 .fg{margin-bottom:12px}
-.fl{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.4px}
-.fi{width:100%;padding:9px 12px;border-radius:var(--rs);border:1.5px solid var(--border2);background:var(--bg);color:var(--text);font-family:inherit;font-size:14px;outline:none;transition:border-color .15s}
-.fi:focus{border-color:var(--blue);background:white}
+.fl{
+  font-size:11px;font-weight:600;color:var(--text3);
+  margin-bottom:5px;display:block;
+  text-transform:uppercase;letter-spacing:.6px;
+}
+.fi{
+  width:100%;padding:9px 12px;border-radius:8px;
+  border:1.5px solid var(--border2);background:var(--bg3);
+  color:var(--text);font-family:inherit;font-size:14px;
+  outline:none;transition:border-color .15s,background .15s;
+}
+.fi:focus{border-color:var(--gold);background:var(--bg2)}
 .fi::placeholder{color:var(--text3)}
-textarea.fi{min-height:72px;resize:vertical}
+textarea.fi{min-height:70px;resize:vertical;line-height:1.5}
 select.fi{cursor:pointer}
 .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:480px){.frow{grid-template-columns:1fr}}
+@media(max-width:460px){.frow{grid-template-columns:1fr}}
 
-/* ── STATUS GRID ── */
-.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}
-@media(max-width:420px){.sgrid{grid-template-columns:repeat(2,1fr)}}
-.sbtn{padding:9px 6px;border-radius:var(--rs);border:2px solid var(--border);background:var(--bg);color:var(--text2);font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;line-height:1.3}
-.sbtn:hover{border-color:var(--border2);background:var(--bg3)}
-.sbtn.sel-today{background:var(--green-lt);border-color:var(--green);color:var(--green)}
-.sbtn.sel-dnp{background:var(--red-lt);border-color:var(--red);color:var(--red)}
-.sbtn.sel-ni{background:var(--slate-lt);border-color:var(--slate);color:var(--slate)}
-.sbtn.sel-followup{background:var(--blue-lt);border-color:var(--blue);color:var(--blue)}
-.sbtn.sel-reminder{background:var(--amber-lt);border-color:var(--amber);color:var(--amber)}
-.sbtn.sel-future{background:var(--purple-lt);border-color:var(--purple);color:var(--purple)}
-.sbtn.sel-cold{background:var(--teal-lt);border-color:var(--teal);color:var(--teal)}
+/* ── BUTTONS ── */
+.btn{
+  padding:9px 16px;border-radius:8px;
+  font-size:13px;font-weight:600;cursor:pointer;
+  border:1px solid transparent;transition:all .15s;
+  font-family:inherit;display:inline-flex;align-items:center;
+  gap:6px;white-space:nowrap;text-decoration:none;
+  letter-spacing:.1px;
+}
+.btn-ink{background:var(--text);color:var(--bg)}
+.btn-ink:hover{opacity:.88}
+.btn-ghost{
+  background:var(--bg3);color:var(--text2);
+  border-color:var(--border);
+}
+.btn-ghost:hover{background:var(--bg4);color:var(--text)}
+.btn-red{
+  background:var(--red-bg);color:var(--red);
+  border-color:var(--red-lt);
+}
+.btn-red:hover{background:var(--red);color:white}
+.btn-gold{background:var(--gold);color:white}
+.btn-gold:hover{opacity:.9}
+.btn-sm{padding:5px 10px;font-size:11px;border-radius:6px}
+.btn-xs{padding:3px 8px;font-size:10px;border-radius:5px}
+.w100{width:100%;justify-content:center}
+
+/* ── STATUS BUTTONS ── */
+.status-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:6px;margin-bottom:14px;
+}
+@media(max-width:400px){.status-grid{grid-template-columns:repeat(2,1fr)}}
+.status-btn{
+  padding:8px 6px;border-radius:8px;
+  border:1.5px solid var(--border);
+  background:var(--bg3);color:var(--text3);
+  font-family:inherit;font-size:11px;
+  font-weight:600;cursor:pointer;text-align:center;
+  transition:all .15s;line-height:1.4;
+}
+.status-btn:hover{border-color:var(--border2);background:var(--bg4);color:var(--text)}
+.sb-today{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.sb-dnp{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.sb-ni{background:var(--slate-lt);border-color:var(--slate);color:var(--slate)}
+.sb-followup{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+.sb-reminder{background:var(--amber-bg);border-color:var(--amber);color:var(--amber)}
+.sb-future{background:var(--purple-bg);border-color:var(--purple);color:var(--purple)}
+.sb-cold{background:var(--teal-bg);border-color:var(--teal);color:var(--teal)}
 
 /* ── MODAL ── */
-.mwrap{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:14px}
+.mwrap{
+  position:fixed;inset:0;z-index:200;
+  background:var(--overlay);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:none;align-items:flex-end;justify-content:center;
+  padding:0;
+}
+@media(min-width:640px){
+  .mwrap{align-items:center;padding:16px}
+}
 .mwrap.open{display:flex}
-.modal{background:var(--bg2);border-radius:18px;width:100%;max-width:540px;max-height:92vh;overflow-y:auto;box-shadow:var(--sh3);border:1px solid var(--border)}
-.mhd{padding:16px 18px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:11px;position:sticky;top:0;background:var(--bg2);z-index:1}
-.mav{width:42px;height:42px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
-.mn{font-size:16px;font-weight:800;flex:1}
-.mp{font-size:12px;color:var(--text2);margin-top:1px}
-.mclose{background:var(--bg3);border:1px solid var(--border);border-radius:7px;padding:5px 11px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text2);flex-shrink:0}
-.mbody{padding:16px 18px}
-.sdiv{display:flex;align-items:center;gap:8px;margin:14px 0 8px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3)}
+.modal{
+  background:var(--card);
+  border-radius:20px 20px 0 0;
+  width:100%;max-width:560px;
+  max-height:92vh;overflow-y:auto;
+  box-shadow:var(--sh3);
+  border:1px solid var(--border);
+  border-bottom:none;
+}
+@media(min-width:640px){
+  .modal{border-radius:18px;border-bottom:1px solid var(--border)}
+}
+.modal-handle{
+  width:36px;height:4px;background:var(--bg4);
+  border-radius:2px;margin:10px auto 0;
+  display:block;
+}
+@media(min-width:640px){.modal-handle{display:none}}
+.mhd{
+  padding:14px 18px 12px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+  position:sticky;top:0;background:var(--card);z-index:1;
+}
+.mav{
+  width:40px;height:40px;border-radius:10px;
+  flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-weight:700;font-size:14px;
+}
+.mn{font-size:16px;font-weight:700;flex:1;font-family:'DM Serif Display',serif;letter-spacing:-.3px}
+.mp{font-size:11px;color:var(--text3);margin-top:1px}
+.mclose{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:7px;padding:5px 10px;cursor:pointer;
+  font-size:12px;font-weight:600;color:var(--text2);
+  flex-shrink:0;
+}
+.mbody{padding:16px 18px 24px}
+.sdiv{
+  display:flex;align-items:center;gap:8px;
+  margin:16px 0 10px;font-size:10px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.8px;color:var(--text3);
+}
 .sdiv::before,.sdiv::after{content:'';flex:1;height:1px;background:var(--border)}
 
 /* ── TIMELINE ── */
-.tl{display:flex;flex-direction:column;gap:7px;max-height:260px;overflow-y:auto}
-.tli{background:var(--bg);border-radius:var(--rs);padding:9px 12px;border-left:3px solid var(--border2);font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.tl{display:flex;flex-direction:column;gap:6px;max-height:240px;overflow-y:auto}
+.tli{
+  background:var(--bg3);border-radius:8px;
+  padding:9px 12px;border-left:2px solid var(--border2);
+  font-size:13px;line-height:1.5;
+  white-space:pre-wrap;word-break:break-word;
+}
 .tli.note{border-left-color:var(--blue)}
-.tli.status{border-left-color:var(--amber)}
+.tli.status{border-left-color:var(--gold)}
 .tli.import{border-left-color:var(--green)}
-.tdate{font-size:11px;color:var(--text3);margin-top:3px}
+.tdate{font-size:10px;color:var(--text3);margin-top:3px}
 
 /* ── SEARCH ── */
 .sbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
-.sinput{flex:1;min-width:160px;padding:8px 12px;border-radius:var(--rs);border:1.5px solid var(--border2);background:var(--bg2);font-family:inherit;font-size:13px;color:var(--text);outline:none}
-.sinput:focus{border-color:var(--blue)}
+.sinput{
+  flex:1;min-width:160px;padding:8px 12px;border-radius:8px;
+  border:1.5px solid var(--border);background:var(--card);
+  font-family:inherit;font-size:13px;color:var(--text);outline:none;
+  transition:border-color .15s;
+}
+.sinput:focus{border-color:var(--gold)}
 .sinput::placeholder{color:var(--text3)}
 
 /* ── TABS ── */
-.tabs{display:flex;gap:4px;background:var(--bg3);border-radius:var(--rs);padding:4px;margin-bottom:14px;flex-wrap:wrap}
-.tbb{flex:1;padding:6px 8px;border-radius:7px;border:none;background:transparent;font-family:inherit;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;text-align:center;min-width:60px}
-.tbb.active{background:var(--bg2);color:var(--text);box-shadow:var(--sh)}
+.tabs{
+  display:flex;gap:3px;background:var(--bg3);
+  border-radius:8px;padding:3px;margin-bottom:14px;flex-wrap:wrap;
+}
+.tbb{
+  flex:1;padding:6px 8px;border-radius:6px;border:none;
+  background:transparent;font-family:inherit;
+  font-size:12px;font-weight:500;color:var(--text3);
+  cursor:pointer;transition:all .15s;text-align:center;min-width:56px;
+}
+.tbb.active{background:var(--card);color:var(--text);font-weight:600;box-shadow:var(--sh)}
 
 /* ── CSV ── */
-.dropzone{border:2px dashed var(--border2);border-radius:var(--r);padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg2)}
-.dropzone:hover,.dropzone.drag{border-color:var(--blue);background:var(--blue-bg)}
-.dup-card{border-radius:var(--rs);border:1.5px solid var(--border2);padding:10px 13px;margin-bottom:7px;background:var(--bg2)}
-.dup-opts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
-.dup-opt{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--bg3);color:var(--text2);transition:all .15s}
+.dropzone{
+  border:1.5px dashed var(--border2);border-radius:14px;
+  padding:36px 20px;text-align:center;cursor:pointer;
+  transition:all .2s;background:var(--card);
+}
+.dropzone:hover,.dropzone.drag{border-color:var(--gold);background:var(--gold-bg)}
+.dup-card{
+  border-radius:10px;border:1.5px solid var(--border);
+  padding:12px;margin-bottom:8px;background:var(--card);
+}
+.dup-opts{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.dup-opt{
+  padding:4px 11px;border-radius:5px;font-size:11px;font-weight:600;
+  cursor:pointer;border:1.5px solid var(--border);
+  background:var(--bg3);color:var(--text2);transition:all .15s;
+}
 .dup-opt.sel-skip{border-color:var(--slate);background:var(--slate-lt);color:var(--slate)}
 .dup-opt.sel-merge{border-color:var(--green);background:var(--green-lt);color:var(--green)}
 .dup-opt.sel-replace{border-color:var(--amber);background:var(--amber-lt);color:var(--amber)}
-.parsed-row{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rs);margin-bottom:6px;background:var(--bg2)}
+.parsed-row{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 12px;border:1px solid var(--border);
+  border-radius:9px;margin-bottom:6px;background:var(--card);
+}
 
 /* ── BROADCAST ── */
-.wa-prev{background:var(--bg3);border-radius:var(--rs);padding:11px 13px;font-size:13px;color:var(--text2);margin-top:8px;border-left:3px solid #25d366;white-space:pre-wrap;min-height:40px}
-
-/* ── BROADCAST link list (FIX #7) ── */
-.bc-link-list{display:flex;flex-direction:column;gap:6px;margin-top:10px;max-height:300px;overflow-y:auto}
-.bc-link-item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:9px 12px;font-size:13px}
-.bc-link-item a{color:var(--blue);font-weight:600;text-decoration:none;white-space:nowrap}
+.wa-prev{
+  background:var(--bg3);border-radius:9px;padding:11px 13px;
+  font-size:13px;color:var(--text2);margin-top:8px;
+  border-left:3px solid #25D366;white-space:pre-wrap;min-height:40px;
+  line-height:1.5;
+}
+.bc-link-item{
+  display:flex;align-items:center;gap:10px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:9px;padding:10px 12px;font-size:13px;
+  margin-bottom:6px;
+}
+.bc-link-item a{
+  color:var(--green);font-weight:600;
+  text-decoration:none;margin-left:auto;white-space:nowrap;
+  font-size:12px;
+}
 .bc-link-item a:hover{text-decoration:underline}
 
-/* ── EMPTY ── */
-.empty{text-align:center;padding:44px 20px;color:var(--text3)}
-.empty-ico{font-size:38px;margin-bottom:9px}
-.empty-txt{font-size:14px;font-weight:500}
-.empty-sub{font-size:12px;margin-top:3px}
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:48px 20px;color:var(--text3)}
+.empty-ico{font-size:40px;margin-bottom:10px;opacity:.6}
+.empty-txt{font-size:14px;font-weight:500;color:var(--text2)}
+.empty-sub{font-size:12px;margin-top:4px;color:var(--text3)}
 
 /* ── TOAST ── */
-#tc{position:fixed;bottom:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
-.toast{background:var(--text);color:white;border-radius:var(--rs);padding:10px 16px;font-size:13px;font-weight:500;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:auto;max-width:280px;box-shadow:var(--sh2)}
+#tc{
+  position:fixed;bottom:20px;right:20px;z-index:9999;
+  display:flex;flex-direction:column;gap:6px;pointer-events:none;
+}
+.toast{
+  background:var(--text);color:var(--bg);
+  border-radius:9px;padding:10px 16px;font-size:13px;
+  font-weight:500;opacity:0;transform:translateY(6px);
+  transition:all .28s;pointer-events:auto;
+  max-width:280px;box-shadow:var(--sh2);
+}
 .toast.show{opacity:1;transform:translateY(0)}
-.toast.ok{background:var(--green)}.toast.warn{background:var(--amber)}.toast.err{background:var(--red)}
+.toast.ok{background:var(--green)}
+.toast.warn{background:var(--amber)}
+.toast.err{background:var(--red)}
 
 /* ── SPINNER ── */
-.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{
+  display:inline-block;width:16px;height:16px;
+  border:2px solid rgba(255,255,255,.25);
+  border-top-color:white;border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+
+/* ── CARD VARIANTS ── */
+.info-card{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:12px;padding:14px 16px;margin-bottom:12px;
+  font-size:13px;line-height:1.6;color:var(--text2);
+}
 </style>
 </head>
 <body>
 
-<!-- ══ AUTH SCREEN ══ -->
-<div id="auth-screen">
-  <div class="auth-box">
-    <div class="auth-logo">ProspectFlow</div>
-    <div class="auth-sub">Your sales pipeline — everywhere</div>
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Login</button>
-      <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
-    </div>
-    <div class="auth-err" id="auth-err"></div>
-    <div class="auth-ok" id="auth-ok"></div>
-    <div class="fg"><label class="fl">Email</label><input class="fi" id="auth-email" type="email" placeholder="you@email.com" autocomplete="email"></div>
-    <div class="fg"><label class="fl">Password</label><input class="fi" id="auth-pass" type="password" placeholder="Min 6 characters" autocomplete="current-password"></div>
-    <div class="fg" id="name-field" style="display:none"><label class="fl">Your Name</label><input class="fi" id="auth-name" placeholder="Monika Rana"></div>
-    <button class="btn btn-dark w100" id="auth-btn" onclick="doAuth()" style="justify-content:center;font-size:14px;padding:11px">Login</button>
-    <div style="margin-top:12px;font-size:12px;color:var(--text3);text-align:center" id="auth-hint"></div>
-  </div>
+<!-- LOADING -->
+<div id="loading">
+  <div class="load-logo">Lead<span style="opacity:.5">Trackr</span></div>
+  <div class="load-ring"></div>
 </div>
 
-<!-- ══ SETUP SCREEN ══ -->
-<div id="setup-screen">
-  <div class="setup-box">
-    <div style="font-size:20px;font-weight:800;margin-bottom:4px">Connect Supabase</div>
-    <div style="font-size:13px;color:var(--text2);margin-bottom:20px">One-time setup — your data lives in your own Supabase project</div>
-    <div class="fg"><label class="fl">Supabase Project URL</label><input class="fi" id="sb-url" placeholder="https://xxxx.supabase.co"></div>
-    <div class="fg"><label class="fl">Supabase Anon Key</label><input class="fi" id="sb-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."></div>
-    <button class="btn btn-dark w100" onclick="saveSupabaseCfg()" style="justify-content:center;margin-bottom:12px">Save & Connect</button>
-    <div style="background:var(--bg3);border-radius:var(--rs);padding:13px 15px;font-size:12px;color:var(--text2);line-height:1.9">
-      <strong>How to get these (free, 2 min):</strong><br>
-      1. Go to <a href="https://supabase.com" target="_blank" style="color:var(--blue)">supabase.com</a> → New project<br>
-      2. Settings → API → copy <strong>Project URL</strong> and <strong>anon public</strong> key<br>
-      3. Go to SQL Editor → run the setup SQL below → Done
-    </div>
-    <div style="margin-top:10px">
-      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Run this SQL in Supabase → SQL Editor</div>
-      <pre id="setup-sql" style="background:var(--bg4);border-radius:var(--rs);padding:12px;font-size:11px;overflow-x:auto;line-height:1.6;color:var(--text);cursor:pointer" onclick="copySql()" title="Click to copy"></pre>
-      <div style="font-size:11px;color:var(--text3);margin-top:4px">Click the SQL above to copy it</div>
+<!-- AUTH -->
+<div id="auth-screen" style="display:none">
+  <div class="auth-wrap">
+    <div class="auth-brand">Lead<span>Trackr</span></div>
+    <div class="auth-tagline">Your real estate pipeline — always in control</div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Create Account</button>
+      </div>
+      <div class="auth-err" id="auth-err"></div>
+      <div class="auth-ok" id="auth-ok"></div>
+      <div class="fg"><label class="fl">Email</label><input class="fi" id="auth-email" type="email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="fg"><label class="fl">Password</label><input class="fi" id="auth-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+      <div class="fg" id="name-field" style="display:none"><label class="fl">Your Name</label><input class="fi" id="auth-name" placeholder="Monika Rana"></div>
+      <button class="btn btn-ink w100" id="auth-btn" onclick="doAuth()" style="font-size:14px;padding:11px;margin-top:4px">Sign In</button>
     </div>
   </div>
 </div>
 
-<!-- ══ MAIN APP ══ -->
+<!-- APP -->
 <div id="app">
-<!-- FIX #1: Mobile overlay now exists in HTML -->
-<div id="mob-overlay" class="mob-overlay" onclick="closeSB()"></div>
-
+<div class="mob-overlay" id="mob-overlay" onclick="closeSB()"></div>
 <div class="layout">
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
-  <div class="sb-brand">
-    <div class="sb-logo">ProspectFlow</div>
-    <div class="sb-user" id="sb-user"></div>
-    <div class="sb-date" id="sb-date"></div>
+  <div class="sb-top">
+    <div class="sb-logo">Lead<span>Trackr</span></div>
+    <div class="sb-meta" id="sb-user-meta"></div>
   </div>
   <nav class="sb-nav">
-    <div class="nsec">Overview</div>
-    <button class="ni active" onclick="gp('dashboard',this)"><span class="ico">◼</span>Dashboard</button>
-    <div class="nsec">Buckets</div>
-    <button class="ni" onclick="gp('today',this)"><span class="ico">📋</span>Today's List<span class="nbadge green" id="b-today">0</span></button>
-    <button class="ni" onclick="gp('dnp',this)"><span class="ico">📵</span>DNP<span class="nbadge red" id="b-dnp">0</span></button>
-    <button class="ni" onclick="gp('ni',this)"><span class="ico">🚫</span>Not Interested<span class="nbadge slate" id="b-ni">0</span></button>
-    <button class="ni" onclick="gp('followup',this)"><span class="ico">🔄</span>Follow Up<span class="nbadge blue" id="b-followup">0</span></button>
-    <button class="ni" onclick="gp('reminder',this)"><span class="ico">⏰</span>Reminders<span class="nbadge amber" id="b-reminder">0</span></button>
-    <button class="ni" onclick="gp('future',this)"><span class="ico">🌱</span>Future/Investor<span class="nbadge purple" id="b-future">0</span></button>
-    <button class="ni" onclick="gp('cold',this)"><span class="ico">❄️</span>Cold Pool<span class="nbadge teal" id="b-cold">0</span></button>
-    <div class="nsec">Tools</div>
-    <button class="ni" onclick="gp('add',this)"><span class="ico">➕</span>Add Prospect</button>
-    <button class="ni" onclick="gp('broadcast',this)"><span class="ico">📢</span>Broadcast</button>
-    <button class="ni" onclick="gp('import',this)"><span class="ico">📂</span>Import CSV</button>
+    <div class="nav-section-label">Overview</div>
+    <button class="nav-btn active" onclick="gp('dashboard',this)"><span class="nav-ico">▪</span>Dashboard</button>
+
+    <div class="nav-section-label">Pipeline</div>
+    <button class="nav-btn" onclick="gp('today',this)"><span class="nav-ico">📋</span>Today's List<span class="nav-badge nb-g" id="b-today">0</span></button>
+    <button class="nav-btn" onclick="gp('dnp',this)"><span class="nav-ico">📵</span>DNP<span class="nav-badge nb-r" id="b-dnp">0</span></button>
+    <button class="nav-btn" onclick="gp('ni',this)"><span class="nav-ico">🚫</span>Not Interested<span class="nav-badge nb-s" id="b-ni">0</span></button>
+    <button class="nav-btn" onclick="gp('followup',this)"><span class="nav-ico">🔄</span>Follow Up<span class="nav-badge nb-b" id="b-followup">0</span></button>
+    <button class="nav-btn" onclick="gp('reminder',this)"><span class="nav-ico">⏰</span>Reminders<span class="nav-badge nb-a" id="b-reminder">0</span></button>
+    <button class="nav-btn" onclick="gp('future',this)"><span class="nav-ico">🌱</span>Future / Investor<span class="nav-badge nb-p" id="b-future">0</span></button>
+    <button class="nav-btn" onclick="gp('cold',this)"><span class="nav-ico">❄️</span>Cold Pool<span class="nav-badge nb-t" id="b-cold">0</span></button>
+
+    <div class="nav-section-label">Tools</div>
+    <button class="nav-btn" onclick="gp('add',this)"><span class="nav-ico">➕</span>Add Prospect</button>
+    <button class="nav-btn" onclick="gp('broadcast',this)"><span class="nav-ico">📢</span>Broadcast</button>
+    <button class="nav-btn" onclick="gp('import',this)"><span class="nav-ico">📂</span>Import CSV</button>
   </nav>
   <div class="sb-bottom">
-    <div class="sync-indicator"><div class="sync-dot" id="sync-dot"></div><span id="sync-label">Synced</span></div>
-    <button class="ni" onclick="signOut()"><span class="ico">🚪</span>Sign Out</button>
+    <div class="sync-row"><div class="sync-dot" id="sync-dot"></div><span id="sync-label" style="font-size:11px">Synced</span></div>
+    <button class="nav-btn" onclick="signOut()"><span class="nav-ico">🚪</span>Sign Out</button>
   </div>
 </aside>
 
 <!-- MAIN -->
 <div class="main-area">
   <div class="topbar">
-    <button class="mob-btn" onclick="openSB()">☰</button>
+    <button class="mob-menu-btn" onclick="openSB()">☰</button>
     <div class="topbar-title" id="tb-title">Dashboard</div>
     <div class="topbar-date" id="tb-date"></div>
+    <button class="dark-toggle" onclick="toggleDark()" id="dark-btn" title="Toggle dark mode">☀️</button>
   </div>
 
   <!-- DASHBOARD -->
   <div class="page active" id="page-dashboard">
-    <div class="ph"><div class="pt" id="dash-greeting">Good morning 👋</div><div class="ps">Here's your pipeline at a glance</div></div>
-    <div class="dg" id="dg"></div>
-    <div style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:8px;margin:16px 0 8px"><span>🚨 Reminders Due</span><span style="flex:1;height:1px;background:var(--red-lt);display:block"></span></div>
+    <div class="ph">
+      <div class="pt" id="dash-greeting">Good morning</div>
+      <div class="ps">Here's your pipeline today</div>
+    </div>
+    <div class="dash-grid" id="dg"></div>
+    <div class="sec-row"><span class="sec-label">🔴 Reminders Due</span><span class="sec-line"></span></div>
     <div id="dash-rems"></div>
-    <div style="font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--text3);display:flex;align-items:center;gap:8px;margin:18px 0 8px"><span>Recent Activity</span><span style="flex:1;height:1px;background:var(--border);display:block"></span></div>
+    <div class="sec-row" style="margin-top:20px"><span class="sec-label">Recent Activity</span><span class="sec-line"></span></div>
     <div id="dash-recent"></div>
   </div>
 
   <!-- TODAY -->
   <div class="page" id="page-today">
-    <div class="ph" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
-      <div><div class="pt">📋 Today's Calling List</div><div class="ps">Call each and move to a bucket</div></div>
-      <button class="btn btn-blue btn-sm" onclick="gp('add',null)">+ Add</button>
+    <div class="ph ph-row">
+      <div><div class="pt">📋 Today's List</div><div class="ps">Call each. Move them to a bucket.</div></div>
+      <button class="btn btn-ink btn-sm" onclick="gp('add',null)">+ Add</button>
     </div>
-    <div class="sbar"><input class="sinput" placeholder="Search…" oninput="rs('today')" id="q-today"></div>
+    <div class="sbar"><input class="sinput" placeholder="Search name or phone…" oninput="rs('today')" id="q-today"></div>
     <div id="list-today"></div>
   </div>
 
   <!-- DNP -->
   <div class="page" id="page-dnp">
-    <div class="ph" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">
+    <div class="ph ph-row">
       <div><div class="pt">📵 Did Not Pick</div><div class="ps">Call back later</div></div>
-      <button class="btn btn-ghost btn-sm" onclick="bulkToToday()">↩ Move All → Today</button>
+      <button class="btn btn-ghost btn-sm" onclick="bulkToToday()">↩ Move All to Today</button>
     </div>
     <div class="sbar"><input class="sinput" placeholder="Search…" oninput="rs('dnp')" id="q-dnp"></div>
     <div id="list-dnp"></div>
@@ -354,14 +810,14 @@ select.fi{cursor:pointer}
 
   <!-- NI -->
   <div class="page" id="page-ni">
-    <div class="ph"><div class="pt">🚫 Not Interested</div><div class="ps">Said no — archived</div></div>
+    <div class="ph"><div class="pt">🚫 Not Interested</div><div class="ps">Said no — archived for reference</div></div>
     <div class="sbar"><input class="sinput" placeholder="Search…" oninput="rs('ni')" id="q-ni"></div>
     <div id="list-ni"></div>
   </div>
 
   <!-- FOLLOW UP -->
   <div class="page" id="page-followup">
-    <div class="ph"><div class="pt">🔄 Follow Up</div><div class="ps">Interested — stay in touch</div></div>
+    <div class="ph"><div class="pt">🔄 Follow Up</div><div class="ps">Interested — sent proposal or explained</div></div>
     <div class="sbar"><input class="sinput" placeholder="Search…" oninput="rs('followup')" id="q-followup"></div>
     <div id="list-followup"></div>
   </div>
@@ -394,26 +850,33 @@ select.fi{cursor:pointer}
 
   <!-- ADD -->
   <div class="page" id="page-add">
-    <div style="max-width:680px;margin:0 auto">
-      <div class="ph"><div class="pt">➕ Add Prospect</div><div class="ps">Single or bulk — lands in Today's List</div></div>
+    <div style="max-width:640px;margin:0 auto">
+      <div class="ph"><div class="pt">➕ Add Prospect</div><div class="ps">Goes to Today's List for calling</div></div>
       <div class="tabs">
-        <button class="tbb active" id="tadd-s" onclick="setAddTab('s')">Single</button>
+        <button class="tbb active" id="tadd-s" onclick="setAddTab('s')">Single Entry</button>
         <button class="tbb" id="tadd-b" onclick="setAddTab('b')">Bulk Paste</button>
       </div>
       <div id="add-s">
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--sh)">
-          <div class="frow"><div class="fg"><label class="fl">Name *</label><input class="fi" id="sn" placeholder="Rahul Sharma"></div><div class="fg"><label class="fl">Phone *</label><input class="fi" id="sp" placeholder="98XXXXXXXX" type="tel"></div></div>
-          <div class="frow"><div class="fg"><label class="fl">Project</label><input class="fi" id="spr" placeholder="Pyramid, Plots…"></div><div class="fg"><label class="fl">Budget</label><input class="fi" id="sb2" placeholder="80L, 1.5Cr…"></div></div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--sh)">
+          <div class="frow">
+            <div class="fg"><label class="fl">Name *</label><input class="fi" id="sn" placeholder="Rahul Sharma"></div>
+            <div class="fg"><label class="fl">Phone *</label><input class="fi" id="sp" placeholder="98XXXXXXXX" type="tel"></div>
+          </div>
+          <div class="frow">
+            <div class="fg"><label class="fl">Project</label><input class="fi" id="spr" placeholder="Pyramid, Plots…"></div>
+            <div class="fg"><label class="fl">Budget</label><input class="fi" id="sb2" placeholder="80L, 1.5Cr…"></div>
+          </div>
           <div class="fg"><label class="fl">Source</label><input class="fi" id="ss" placeholder="Reference, MagicBricks…"></div>
-          <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="sno" placeholder="Any details…" style="min-height:60px"></textarea></div>
-          <button class="btn btn-dark w100" onclick="addSingle()" style="justify-content:center">Add to Today's List →</button>
+          <div class="fg"><label class="fl">Notes</label><textarea class="fi" id="sno" placeholder="Any initial details…"></textarea></div>
+          <button class="btn btn-ink w100" onclick="addSingle()" style="margin-top:4px">Add to Today's List →</button>
         </div>
       </div>
       <div id="add-b" style="display:none">
-        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--sh)">
-          <div class="fg"><label class="fl">Paste names & numbers (one per line)</label><textarea class="fi" id="bt" placeholder="Rahul Sharma, 9876543210&#10;Priya Mehta 8765432109&#10;9543210987" oninput="parseBulk()" style="min-height:110px"></textarea></div>
-          <div id="bp" style="max-height:280px;overflow-y:auto;margin-top:10px"></div>
-          <button class="btn btn-dark w100" style="margin-top:10px;justify-content:center" onclick="confirmBulk()" id="bc-btn" disabled>Add 0 →</button>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--sh)">
+          <div class="info-card">Paste one prospect per line. Phone number is auto-detected. Format: Name, 9876543210 or just the number.</div>
+          <div class="fg"><label class="fl">Paste Here</label><textarea class="fi" id="bt" placeholder="Rahul Sharma 9876543210&#10;Priya Mehta, 8765432109&#10;9543210987" oninput="parseBulk()" style="min-height:120px"></textarea></div>
+          <div id="bp" style="max-height:260px;overflow-y:auto;margin-top:10px"></div>
+          <button class="btn btn-ink w100" style="margin-top:10px" onclick="confirmBulk()" id="bc-btn" disabled>Add 0 Prospects →</button>
         </div>
       </div>
     </div>
@@ -421,37 +884,37 @@ select.fi{cursor:pointer}
 
   <!-- IMPORT CSV -->
   <div class="page" id="page-import">
-    <div style="max-width:780px;margin:0 auto">
-      <div class="ph"><div class="pt">📂 Import CSV</div><div class="ps">Format: Date · Name · Phone · Project · Action/Status · Notes</div></div>
+    <div style="max-width:760px;margin:0 auto">
+      <div class="ph"><div class="pt">📂 Import CSV</div><div class="ps">Columns: Date · Name · Phone · Project · Action/Status · Notes</div></div>
       <div id="imp-step1">
         <div class="dropzone" id="dz" onclick="document.getElementById('cfi').click()" ondragover="dzOver(event)" ondragleave="dzLeave()" ondrop="dzDrop(event)">
-          <div style="font-size:38px;margin-bottom:10px">📂</div>
-          <div style="font-weight:700;font-size:16px;margin-bottom:6px">Drop CSV here or click to browse</div>
-          <div style="color:var(--text2);font-size:12px;margin-bottom:14px">Works with your format: Date · Name · Phone · Project · Action/Status · Notes</div>
-          <button class="btn btn-blue" onclick="event.stopPropagation();document.getElementById('cfi').click()" style="justify-content:center">Choose File</button>
+          <div style="font-size:40px;margin-bottom:12px;opacity:.5">📂</div>
+          <div style="font-weight:600;font-size:16px;margin-bottom:6px;color:var(--text)">Drop your CSV here</div>
+          <div style="color:var(--text3);font-size:13px;margin-bottom:16px">or click to browse files</div>
+          <button class="btn btn-ink" onclick="event.stopPropagation();document.getElementById('cfi').click()">Choose File</button>
         </div>
         <input type="file" id="cfi" accept=".csv,.txt" style="display:none" onchange="loadCsv(this)">
       </div>
       <div id="imp-step2" style="display:none">
-        <div style="background:var(--amber-bg);border:1px solid rgba(217,119,6,.25);border-radius:var(--rs);padding:12px 15px;margin-bottom:14px;font-size:13px">
-          <strong>⚠️ Duplicates found</strong> — same phone already exists. Choose action for each:
-          <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap">
+        <div class="info-card" style="background:var(--amber-bg);border-color:var(--amber-lt);color:var(--amber)">
+          <strong>Duplicates found</strong> — same phone already exists. Choose what to do with each:
+          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
             <button class="btn btn-ghost btn-sm" onclick="setAllDup('skip')">Skip All</button>
-            <button class="btn btn-ghost btn-sm" onclick="setAllDup('merge')">Merge Notes All</button>
+            <button class="btn btn-ghost btn-sm" onclick="setAllDup('merge')">Merge Notes</button>
             <button class="btn btn-ghost btn-sm" onclick="setAllDup('replace')">Replace All</button>
           </div>
         </div>
-        <div id="dup-list" style="max-height:360px;overflow-y:auto"></div>
+        <div id="dup-list" style="max-height:360px;overflow-y:auto;margin-top:10px"></div>
         <div style="display:flex;gap:8px;margin-top:12px">
-          <button class="btn btn-dark" onclick="proceedImport()" style="justify-content:center">Proceed</button>
+          <button class="btn btn-ink" onclick="proceedImport()">Continue →</button>
           <button class="btn btn-ghost" onclick="resetImport()">Cancel</button>
         </div>
       </div>
       <div id="imp-step3" style="display:none">
         <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px" id="imp-preview-label"></div>
-        <div id="imp-preview-list" style="max-height:400px;overflow-y:auto"></div>
+        <div id="imp-preview-list" style="max-height:380px;overflow-y:auto"></div>
         <div style="display:flex;gap:8px;margin-top:12px">
-          <button class="btn btn-dark" onclick="confirmImport()" id="imp-confirm-btn" style="justify-content:center">Import All</button>
+          <button class="btn btn-ink" onclick="confirmImport()" id="imp-confirm-btn">Import All</button>
           <button class="btn btn-ghost" onclick="resetImport()">Cancel</button>
         </div>
       </div>
@@ -460,16 +923,16 @@ select.fi{cursor:pointer}
 
   <!-- BROADCAST -->
   <div class="page" id="page-broadcast">
-    <div style="max-width:700px;margin:0 auto">
-      <div class="ph"><div class="pt">📢 Broadcast</div><div class="ps">Send personalised WhatsApp messages to selected prospects</div></div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:15px;box-shadow:var(--sh);margin-bottom:12px">
-        <div class="fg"><label class="fl">Message — use {name} to personalise</label><textarea class="fi" id="bcmsg" placeholder="Hi {name}, wanted to share something exciting…" style="min-height:90px" oninput="bcPreview()"></textarea></div>
+    <div style="max-width:680px;margin:0 auto">
+      <div class="ph"><div class="pt">📢 Broadcast</div><div class="ps">Personalised WhatsApp messages to selected prospects</div></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:var(--sh);margin-bottom:10px">
+        <div class="fg"><label class="fl">Message — use {name} to personalise</label><textarea class="fi" id="bcmsg" placeholder="Hi {name}, I have an exciting property opportunity for you…" style="min-height:90px" oninput="bcPreview()"></textarea></div>
         <div class="wa-prev" id="bc-prev">Preview will appear here…</div>
       </div>
-      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:15px;box-shadow:var(--sh)">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;box-shadow:var(--sh)">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-          <div style="font-weight:700">Select Recipients</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <div style="font-weight:600;font-size:14px">Select Recipients</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
             <button class="btn btn-ghost btn-sm" onclick="bcAll()">All</button>
             <button class="btn btn-ghost btn-sm" onclick="bcByStatus('followup')">Follow-up</button>
             <button class="btn btn-ghost btn-sm" onclick="bcByStatus('future')">Future</button>
@@ -477,18 +940,17 @@ select.fi{cursor:pointer}
             <button class="btn btn-ghost btn-sm" onclick="bcClear()">Clear</button>
           </div>
         </div>
-        <input class="sinput w100" style="margin-bottom:8px" placeholder="Search…" oninput="renderBC()" id="q-bc">
-        <div id="bc-list" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
+        <input class="sinput" style="width:100%;margin-bottom:8px" placeholder="Search prospects…" oninput="renderBC()" id="q-bc">
+        <div id="bc-list" style="max-height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:5px"></div>
       </div>
-      <!-- FIX #7: WhatsApp links shown as a list instead of auto-opening tabs -->
-      <div id="bc-bar" style="display:none;background:var(--blue-bg);border:1px solid var(--blue-lt);border-radius:var(--rs);padding:11px 15px;margin-top:10px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <span style="font-size:13px;font-weight:600;color:var(--blue)"><span id="bc-cnt">0</span> selected</span>
-          <button class="btn btn-blue" onclick="sendBC()" style="justify-content:center">📤 Generate WhatsApp Links</button>
+      <div id="bc-bar" style="display:none;background:var(--green-bg);border:1px solid var(--green-lt);border-radius:10px;padding:12px 16px;margin-top:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <span style="font-size:13px;font-weight:600;color:var(--green)"><span id="bc-cnt">0</span> selected</span>
+          <button class="btn btn-ink btn-sm" onclick="sendBC()">Generate Links →</button>
         </div>
         <div id="bc-links-out" style="display:none">
-          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">Tap each link to open WhatsApp:</div>
-          <div class="bc-link-list" id="bc-links-list"></div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Tap each to open WhatsApp</div>
+          <div id="bc-links-list"></div>
         </div>
       </div>
     </div>
@@ -501,47 +963,59 @@ select.fi{cursor:pointer}
 <!-- PROSPECT MODAL -->
 <div class="mwrap" id="pmodal" onclick="closePM(event)">
   <div class="modal">
+    <div class="modal-handle"></div>
     <div class="mhd">
       <div class="mav" id="pm-av"></div>
-      <div style="flex:1"><div class="mn" id="pm-n"></div><div class="mp" id="pm-p"></div></div>
-      <button class="mclose" onclick="document.getElementById('pmodal').classList.remove('open')">✕</button>
+      <div style="flex:1">
+        <div class="mn" id="pm-n"></div>
+        <div class="mp" id="pm-p"></div>
+      </div>
+      <button class="mclose" onclick="document.getElementById('pmodal').classList.remove('open')">Close</button>
     </div>
     <div class="mbody">
-      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px">
-        <a class="btn btn-blue" id="pm-call" style="text-decoration:none;justify-content:center">📞 Call</a>
-        <button class="btn" style="background:#25d366;color:white" id="pm-wa">💬 WhatsApp</button>
-        <button class="btn btn-red btn-sm" onclick="delCurr()">🗑 Delete</button>
+
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+        <a class="btn btn-ink" id="pm-call" style="text-decoration:none">📞 Call</a>
+        <button class="btn" style="background:#25D366;color:white;border-color:#25D366" id="pm-wa">💬 WhatsApp</button>
+        <button class="btn btn-red btn-sm" style="margin-left:auto" onclick="delCurr()">Delete</button>
       </div>
+
       <div class="sdiv">Move to Bucket</div>
-      <div class="sgrid">
-        <button class="sbtn" onclick="chSt('today')">📋 Today</button>
-        <button class="sbtn" onclick="chSt('dnp')">📵 DNP</button>
-        <button class="sbtn" onclick="chSt('ni')">🚫 Not Interested</button>
-        <button class="sbtn" onclick="chSt('followup')">🔄 Follow Up</button>
-        <button class="sbtn" onclick="chSt('reminder')">⏰ Reminder</button>
-        <button class="sbtn" onclick="chSt('future')">🌱 Future</button>
-        <button class="sbtn" onclick="chSt('cold')">❄️ Cold Pool</button>
+      <div class="status-grid">
+        <button class="status-btn" onclick="chSt('today')">📋<br>Today</button>
+        <button class="status-btn" onclick="chSt('dnp')">📵<br>DNP</button>
+        <button class="status-btn" onclick="chSt('ni')">🚫<br>Not Interested</button>
+        <button class="status-btn" onclick="chSt('followup')">🔄<br>Follow Up</button>
+        <button class="status-btn" onclick="chSt('reminder')">⏰<br>Reminder</button>
+        <button class="status-btn" onclick="chSt('future')">🌱<br>Future</button>
+        <button class="status-btn" onclick="chSt('cold')">❄️<br>Cold</button>
       </div>
-      <div id="pm-remflds" style="display:none;margin-bottom:12px">
-        <div class="frow">
-          <div class="fg"><label class="fl">Date *</label><input class="fi" type="date" id="pm-rd"></div>
-          <div class="fg"><label class="fl">Time</label><input class="fi" type="time" id="pm-rt"></div>
+
+      <div id="pm-remflds" style="display:none;margin-bottom:14px">
+        <div style="background:var(--amber-bg);border:1px solid var(--amber-lt);border-radius:10px;padding:14px">
+          <div class="frow">
+            <div class="fg"><label class="fl">Date *</label><input class="fi" type="date" id="pm-rd"></div>
+            <div class="fg"><label class="fl">Time</label><input class="fi" type="time" id="pm-rt"></div>
+          </div>
+          <div class="fg" style="margin-bottom:10px"><label class="fl">What's the plan?</label><input class="fi" id="pm-rn" placeholder="Site visit, callback, meeting…"></div>
+          <button class="btn btn-ink w100" onclick="saveRem()">Set Reminder →</button>
         </div>
-        <div class="fg"><label class="fl">What's the plan?</label><input class="fi" id="pm-rn" placeholder="Meeting, callback, site visit…"></div>
-        <button class="btn btn-dark w100" onclick="saveRem()" style="justify-content:center">Save Reminder</button>
       </div>
+
       <div class="sdiv">Add Note</div>
-      <div style="display:flex;gap:7px;margin-bottom:12px">
-        <input class="fi" style="flex:1" id="pm-ni" placeholder="Call went well, asked for details…">
-        <button class="btn btn-blue" onclick="addNote()" style="justify-content:center">Save</button>
+      <div style="display:flex;gap:7px;margin-bottom:14px">
+        <input class="fi" style="flex:1" id="pm-ni" placeholder="What happened on this call?…">
+        <button class="btn btn-ink" onclick="addNote()">Save</button>
       </div>
+
       <div class="sdiv">Details</div>
       <div class="frow" style="margin-bottom:8px">
-        <div class="fg"><label class="fl">Project</label><input class="fi" id="pm-proj" placeholder="Pyramid…"></div>
-        <div class="fg"><label class="fl">Budget</label><input class="fi" id="pm-bud" placeholder="80L…"></div>
+        <div class="fg"><label class="fl">Project</label><input class="fi" id="pm-proj" placeholder="Pyramid, Plots…"></div>
+        <div class="fg"><label class="fl">Budget</label><input class="fi" id="pm-bud" placeholder="80L, 1.2Cr…"></div>
       </div>
       <button class="btn btn-ghost btn-sm" onclick="saveDetails()">Save Details</button>
-      <div class="sdiv">Activity Timeline</div>
+
+      <div class="sdiv">Activity</div>
       <div class="tl" id="pm-tl"></div>
     </div>
   </div>
@@ -550,157 +1024,55 @@ select.fi{cursor:pointer}
 <div id="tc"></div>
 
 <script>
-// ═══════════════════════════════════════════════════
-//  CONFIG
-// ═══════════════════════════════════════════════════
-const CFG_KEY = 'pf_supabase_cfg';
-const SETUP_SQL = `-- Run this once in Supabase SQL Editor
-create table if not exists prospects (
-  id text primary key,
-  user_id uuid references auth.users(id) on delete cascade not null,
-  data jsonb not null,
-  updated_at timestamptz default now()
-);
-alter table prospects enable row level security;
-create policy "Users own their prospects" on prospects
-  for all using (auth.uid() = user_id);
-create index if not exists prospects_user_id_idx on prospects(user_id);`;
-
-let SB = null;
-let currentUser = null;
-let prospects = [], openId = null, bcSel = new Set(), remTab = 'overdue', curPage = 'dashboard';
-let csvParsed = [], csvDups = [], csvNew = [], dupDecisions = {};
-let bulkParsed = [];
-
-document.getElementById('setup-sql').textContent = SETUP_SQL;
-function copySql(){
-  navigator.clipboard.writeText(SETUP_SQL).then(()=>toast('SQL copied!','ok'));
+// ══════════════════════════════════════════════
+//  DARK MODE
+// ══════════════════════════════════════════════
+function toggleDark(){
+  const d=document.documentElement;
+  const isDark=d.getAttribute('data-theme')==='dark';
+  d.setAttribute('data-theme',isDark?'light':'dark');
+  document.getElementById('dark-btn').textContent=isDark?'☀️':'🌙';
+  localStorage.setItem('lt_theme',isDark?'light':'dark');
 }
+(function(){
+  const t=localStorage.getItem('lt_theme')||'light';
+  document.documentElement.setAttribute('data-theme',t);
+  // set icon after DOM ready
+  document.addEventListener('DOMContentLoaded',()=>{
+    const btn=document.getElementById('dark-btn');
+    if(btn)btn.textContent=t==='dark'?'🌙':'☀️';
+  });
+})();
 
-// ═══════════════════════════════════════════════════
-//  SUPABASE INIT
-// ═══════════════════════════════════════════════════
-function getCfg(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY)||'null'); }catch{ return null; } }
+// ══════════════════════════════════════════════
+//  CONFIG — hardcoded Supabase keys
+// ══════════════════════════════════════════════
+const SUPABASE_URL = 'https://pvvzhvopnyiczdkjiiep.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2dnpodm9wbnlpY3pka2ppaWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MTAzMjAsImV4cCI6MjA5MjQ4NjMyMH0.6AABJrOXYqBSvMbvAohitsEy0SAa8k2fcAjkRyAI1I0';
 
-function initSupabase(url, key){
-  SB = supabase.createClient(url, key);
-}
+let SB=null,currentUser=null;
+let prospects=[],openId=null,bcSel=new Set(),remTab='overdue',curPage='dashboard';
+let csvParsed=[],csvDups=[],csvNew=[],dupDecisions={};
+let bulkParsed=[];
 
-async function saveSupabaseCfg(){
-  const url = document.getElementById('sb-url').value.trim();
-  const key = document.getElementById('sb-key').value.trim();
-  if(!url || !key){ toast('Enter both URL and key','err'); return; }
-  try{
-    initSupabase(url, key);
-    const { error } = await SB.auth.getSession();
-    if(error) throw error;
-    localStorage.setItem(CFG_KEY, JSON.stringify({url, key}));
-    document.getElementById('setup-screen').style.display = 'none';
-    document.getElementById('auth-screen').style.display = 'flex';
-    toast('Connected! Now sign up or log in.','ok');
-  }catch(e){
-    toast('Connection failed: '+e.message,'err');
-  }
-}
-
-// ═══════════════════════════════════════════════════
-//  AUTH
-// ═══════════════════════════════════════════════════
-let authMode = 'login';
-
-function switchAuthTab(mode){
-  authMode = mode;
-  document.getElementById('tab-login').classList.toggle('active', mode==='login');
-  document.getElementById('tab-signup').classList.toggle('active', mode==='signup');
-  document.getElementById('name-field').style.display = mode==='signup' ? 'block' : 'none';
-  document.getElementById('auth-btn').textContent = mode==='login' ? 'Login' : 'Create Account';
-  document.getElementById('auth-err').style.display = 'none';
-  document.getElementById('auth-ok').style.display = 'none';
-  document.getElementById('auth-hint').textContent = '';
-}
-
-async function doAuth(){
-  const email = document.getElementById('auth-email').value.trim();
-  const pass  = document.getElementById('auth-pass').value;
-  const name  = document.getElementById('auth-name').value.trim();
-  const btn   = document.getElementById('auth-btn');
-  const errEl = document.getElementById('auth-err');
-  const okEl  = document.getElementById('auth-ok');
-  errEl.style.display='none'; okEl.style.display='none';
-  if(!email||!pass){ errEl.textContent='Enter email and password'; errEl.style.display='block'; return; }
-  btn.innerHTML='<span class="spinner"></span>';
-  btn.disabled=true;
-  try{
-    if(authMode==='signup'){
-      const {data,error} = await SB.auth.signUp({email, password:pass, options:{data:{full_name:name||email.split('@')[0]}}});
-      if(error) throw error;
-      if(data.session){
-        await afterLogin(data.session.user);
-      } else {
-        okEl.textContent='Account created! Check your email to confirm, then log in.';
-        okEl.style.display='block';
-        switchAuthTab('login');
-      }
-    } else {
-      const {data,error} = await SB.auth.signInWithPassword({email, password:pass});
-      if(error) throw error;
-      await afterLogin(data.user);
-    }
-  }catch(e){
-    errEl.textContent = e.message || 'Something went wrong';
-    errEl.style.display='block';
-  }
-  btn.textContent = authMode==='login'?'Login':'Create Account';
-  btn.disabled=false;
-}
-
-async function afterLogin(user){
-  currentUser = user;
-  document.getElementById('auth-screen').style.display='none';
-  document.getElementById('app').style.display='block';
-  document.getElementById('sb-user').textContent = user.user_metadata?.full_name || user.email;
-  await loadProspects();
-  renderDates();
-  updBadges();
-  renderDash();
-  setInterval(renderDates,60000);
-  setInterval(checkRems,60000);
-  // FIX #2: real-time subscription properly awaits loadProspects before renderAll
-  SB.channel('prospects-changes')
-    .on('postgres_changes',{event:'*',schema:'public',table:'prospects',filter:'user_id=eq.'+user.id}, async ()=>{
-      await loadProspects();
-      renderAll();
-    })
-    .subscribe();
-}
-
-async function signOut(){
-  await SB.auth.signOut();
-  // FIX: also clear cfg so another user on same device doesn't inherit it
-  // (comment this out if you want to stay connected to same Supabase project)
-  // localStorage.removeItem(CFG_KEY);
-  prospects=[];
-  currentUser=null;
-  document.getElementById('app').style.display='none';
-  document.getElementById('auth-screen').style.display='flex';
-  document.getElementById('auth-email').value='';
-  document.getElementById('auth-pass').value='';
-}
-
-// ═══════════════════════════════════════════════════
-//  DATABASE
-// ═══════════════════════════════════════════════════
-function setSyncState(state){
+// ══════════════════════════════════════════════
+//  SUPABASE
+// ══════════════════════════════════════════════
+function setSyncState(s){
   const dot=document.getElementById('sync-dot');
   const lbl=document.getElementById('sync-label');
   if(!dot)return;
-  dot.className='sync-dot '+state;
-  lbl.textContent=state==='ok'?'Synced':state==='syncing'?'Saving…':'Sync error';
+  dot.className='sync-dot '+s;
+  lbl.textContent=s==='ok'?'Synced':s==='syncing'?'Saving…':'Error';
 }
 
 async function loadProspects(){
   if(!SB||!currentUser)return;
-  const {data,error}=await SB.from('prospects').select('data').eq('user_id',currentUser.id);
+  const {data,error}=await SB.from('prospects')
+    .select('data')
+    .eq('user_id',currentUser.id)
+    .order('updated_at',{ascending:false})
+    .limit(500);
   if(error){setSyncState('err');return;}
   prospects=data.map(r=>r.data);
 }
@@ -717,27 +1089,124 @@ async function dbDel(id){
   if(!SB||!currentUser)return;
   setSyncState('syncing');
   const {error}=await SB.from('prospects').delete().eq('id',id).eq('user_id',currentUser.id);
-  if(error)setSyncState('err');
-  else setSyncState('ok');
+  if(error)setSyncState('err');else setSyncState('ok');
 }
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════
+let authMode='login';
+function switchAuthTab(m){
+  authMode=m;
+  document.getElementById('tab-login').classList.toggle('active',m==='login');
+  document.getElementById('tab-signup').classList.toggle('active',m==='signup');
+  document.getElementById('name-field').style.display=m==='signup'?'block':'none';
+  document.getElementById('auth-btn').textContent=m==='login'?'Sign In':'Create Account';
+  document.getElementById('auth-err').style.display='none';
+  document.getElementById('auth-ok').style.display='none';
+}
+
+async function doAuth(){
+  const email=document.getElementById('auth-email').value.trim();
+  const pass=document.getElementById('auth-pass').value;
+  const name=document.getElementById('auth-name').value.trim();
+  const btn=document.getElementById('auth-btn');
+  const errEl=document.getElementById('auth-err');
+  const okEl=document.getElementById('auth-ok');
+  errEl.style.display='none';okEl.style.display='none';
+  if(!email||!pass){errEl.textContent='Enter email and password';errEl.style.display='block';return;}
+  btn.innerHTML='<span class="spinner"></span>';btn.disabled=true;
+  try{
+    if(authMode==='signup'){
+      const {data,error}=await SB.auth.signUp({email,password:pass,options:{data:{full_name:name||email.split('@')[0]}}});
+      if(error)throw error;
+      if(data.session){await afterLogin(data.session.user);}
+      else{okEl.textContent='Account created! Check your email to confirm, then sign in.';okEl.style.display='block';switchAuthTab('login');}
+    }else{
+      const {data,error}=await SB.auth.signInWithPassword({email,password:pass});
+      if(error)throw error;
+      await afterLogin(data.user);
+    }
+  }catch(e){errEl.textContent=e.message||'Something went wrong';errEl.style.display='block';}
+  btn.textContent=authMode==='login'?'Sign In':'Create Account';btn.disabled=false;
+}
+
+async function afterLogin(user){
+  currentUser=user;
+  hideLoader();
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  const name=user.user_metadata?.full_name||user.email;
+  document.getElementById('sb-user-meta').textContent=name;
+  await loadProspects();
+  renderDates();updBadges();renderDash();
+  setInterval(renderDates,60000);
+  setInterval(checkRems,60000);
+  SB.channel('prospect-ch')
+    .on('postgres_changes',{event:'*',schema:'public',table:'prospects',filter:'user_id=eq.'+user.id},
+      async()=>{await loadProspects();renderAll();})
+    .subscribe();
+}
+
+async function signOut(){
+  await SB.auth.signOut();
+  prospects=[];currentUser=null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('auth-email').value='';
+  document.getElementById('auth-pass').value='';
+}
+
+// ══════════════════════════════════════════════
 //  UTILS
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function now(){return new Date().toISOString()}
 function ini(n){return(n||'?').trim().split(' ').filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?'}
-const AVC=[{bg:'#dbeafe',c:'#1d4ed8'},{bg:'#dcfce7',c:'#15803d'},{bg:'#fce7f3',c:'#be185d'},{bg:'#fef3c7',c:'#b45309'},{bg:'#ede9fe',c:'#6d28d9'},{bg:'#ccfbf1',c:'#0f766e'},{bg:'#fee2e2',c:'#b91c1c'},{bg:'#e0e7ff',c:'#3730a3'},{bg:'#fdf4ff',c:'#86198f'}];
-function avc(n){let s=0;for(const c of(n||''))s+=c.charCodeAt(0);return AVC[s%AVC.length]}
+const AVC=[
+  {bg:'#DBEAFE',c:'#1D4ED8'},{bg:'#D1FAE5',c:'#065F46'},
+  {bg:'#FCE7F3',c:'#9D174D'},{bg:'#FEF3C7',c:'#92400E'},
+  {bg:'#EDE9FE',c:'#5B21B6'},{bg:'#CCFBF1',c:'#0F766E'},
+  {bg:'#FEE2E2',c:'#991B1B'},{bg:'#E0E7FF',c:'#3730A3'},
+  {bg:'#FDF4FF',c:'#7E22CE'},
+];
+const AVC_DARK=[
+  {bg:'#1E3A5F',c:'#93C5FD'},{bg:'#1A3A2A',c:'#6EE7B7'},
+  {bg:'#3A1A30',c:'#F9A8D4'},{bg:'#3A2A10',c:'#FCD34D'},
+  {bg:'#2A1A4A',c:'#C4B5FD'},{bg:'#0F2A28',c:'#5EEAD4'},
+  {bg:'#3A1A1A',c:'#FCA5A5'},{bg:'#1A1A3A',c:'#A5B4FC'},
+  {bg:'#2A1A3A',c:'#E879F9'},
+];
+function avc(n){
+  let s=0;for(const c of(n||''))s+=c.charCodeAt(0);
+  const idx=s%AVC.length;
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  return dark?AVC_DARK[idx]:AVC[idx];
+}
 function fdts(s){if(!s)return'';try{const d=new Date(s);return d.toLocaleDateString('en-IN',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true})}catch{return s}}
 function ago(s){if(!s)return'';const d=Date.now()-new Date(s).getTime(),m=Math.floor(d/6e4),h=Math.floor(m/60),dd=Math.floor(h/24);return dd>0?dd+'d ago':h>0?h+'h ago':m>0?m+'m ago':'Just now'}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-const SM={today:{l:'Today',c:'var(--green)',ch:'today-p',i:'📋'},dnp:{l:'DNP',c:'var(--red)',ch:'dnp',i:'📵'},ni:{l:'Not Interested',c:'var(--slate)',ch:'ni',i:'🚫'},followup:{l:'Follow Up',c:'var(--blue)',ch:'followup',i:'🔄'},reminder:{l:'Reminder',c:'var(--amber)',ch:'reminder',i:'⏰'},future:{l:'Future',c:'var(--purple)',ch:'future',i:'🌱'},cold:{l:'Cold Pool',c:'var(--teal)',ch:'cold',i:'❄️'}};
-function remSt(p){if(!p.reminderDT)return null;const dt=new Date(p.reminderDT),n=new Date(),td=new Date();td.setHours(23,59,59,999);if(dt<n)return'overdue';if(dt<=td)return'today';return'upcoming'}
 
-// ═══════════════════════════════════════════════════
+const SM={
+  today:{l:'Today',ch:'ch-tp',i:'📋'},
+  dnp:{l:'DNP',ch:'ch-dnp',i:'📵'},
+  ni:{l:'Not Interested',ch:'ch-ni',i:'🚫'},
+  followup:{l:'Follow Up',ch:'ch-fu',i:'🔄'},
+  reminder:{l:'Reminder',ch:'ch-rm',i:'⏰'},
+  future:{l:'Future',ch:'ch-ft',i:'🌱'},
+  cold:{l:'Cold Pool',ch:'ch-co',i:'❄️'},
+};
+
+function remSt(p){
+  if(!p.reminderDT)return null;
+  const dt=new Date(p.reminderDT),n=new Date(),td=new Date();
+  td.setHours(23,59,59,999);
+  if(dt<n)return'overdue';if(dt<=td)return'today';return'upcoming';
+}
+
+// ══════════════════════════════════════════════
 //  CSV PARSER
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 function parseCSVLine(line){
   const cols=[];let cur='',inQ=false;
   for(let i=0;i<line.length;i++){
@@ -762,12 +1231,9 @@ function mapStatus(raw){
   return'today';
 }
 
-// FIX #4: extended date parser — now handles DD/MM/YYYY (Indian format) + existing formats
 function extractReminderDT(raw){
   if(!raw)return null;
   const mths={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
-
-  // Helper: extract time from a string
   function getTime(str){
     const tm=str.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
     if(!tm)return{h:9,min:0};
@@ -776,35 +1242,11 @@ function extractReminderDT(raw){
     if(tm[3].toLowerCase()==='am'&&h===12)h=0;
     return{h,min};
   }
-
-  // Format: DD/Mon/YY or DD-Mon-YYYY (e.g. 25/Apr/25 or 25-April-2025)
   const m1=raw.match(/(\d{1,2})[\/\-](\w{3,9})[\/\-](\d{2,4})/i);
-  if(m1){
-    const day=parseInt(m1[1]),mon=mths[m1[2].toLowerCase().slice(0,3)],yr=m1[3].length===2?2000+parseInt(m1[3]):parseInt(m1[3]);
-    if(mon!==undefined){const {h,min}=getTime(raw);return new Date(yr,mon,day,h,min).toISOString();}
-  }
-
-  // FIX #4a: Format DD/MM/YYYY or DD-MM-YYYY (Indian numeric format)
+  if(m1){const day=parseInt(m1[1]),mon=mths[m1[2].toLowerCase().slice(0,3)],yr=m1[3].length===2?2000+parseInt(m1[3]):parseInt(m1[3]);if(mon!==undefined){const{h,min}=getTime(raw);return new Date(yr,mon,day,h,min).toISOString();}}
   const m2=raw.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
-  if(m2){
-    const day=parseInt(m2[1]),mon=parseInt(m2[2])-1,yr=m2[3].length===2?2000+parseInt(m2[3]):parseInt(m2[3]);
-    if(mon>=0&&mon<=11&&day>=1&&day<=31){const {h,min}=getTime(raw);return new Date(yr,mon,day,h,min).toISOString();}
-  }
-
-  // Format: YYYY-MM-DD (ISO style)
-  const m3=raw.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
-  if(m3){
-    const yr=parseInt(m3[1]),mon=parseInt(m3[2])-1,day=parseInt(m3[3]);
-    if(mon>=0&&mon<=11&&day>=1&&day<=31){const {h,min}=getTime(raw);return new Date(yr,mon,day,h,min).toISOString();}
-  }
-
-  // "tomorrow" keyword
-  if(/tomorrow/i.test(raw)){
-    const d=new Date();d.setDate(d.getDate()+1);
-    const {h,min}=getTime(raw);d.setHours(h,min,0,0);
-    return d.toISOString();
-  }
-
+  if(m2){const day=parseInt(m2[1]),mon=parseInt(m2[2])-1,yr=m2[3].length===2?2000+parseInt(m2[3]):parseInt(m2[3]);if(mon>=0&&mon<=11){const{h,min}=getTime(raw);return new Date(yr,mon,day,h,min).toISOString();}}
+  if(/tomorrow/i.test(raw)){const d=new Date();d.setDate(d.getDate()+1);const{h,min}=getTime(raw);d.setHours(h,min,0,0);return d.toISOString();}
   return null;
 }
 
@@ -833,14 +1275,15 @@ function parseCsvText(text){
   }).filter(Boolean);
 }
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  IMPORT FLOW
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 function dzOver(e){e.preventDefault();document.getElementById('dz').classList.add('drag')}
 function dzLeave(){document.getElementById('dz').classList.remove('drag')}
 function dzDrop(e){e.preventDefault();dzLeave();if(e.dataTransfer.files[0])readFile(e.dataTransfer.files[0])}
 function loadCsv(input){if(input.files[0])readFile(input.files[0])}
 function readFile(f){const r=new FileReader();r.onload=e=>afterRead(e.target.result);r.readAsText(f)}
+
 function afterRead(text){
   csvParsed=parseCsvText(text);
   if(!csvParsed.length){toast('No valid rows found','err');return;}
@@ -850,16 +1293,17 @@ function afterRead(text){
   dupDecisions={};csvDups.forEach(p=>dupDecisions[p.phone]='skip');
   if(csvDups.length>0)renderDupStep(ep);else renderPreviewStep();
 }
+
 function renderDupStep(ep){
   document.getElementById('imp-step1').style.display='none';
   document.getElementById('imp-step2').style.display='block';
   document.getElementById('dup-list').innerHTML=csvDups.map(p=>{
     const ex=ep[p.phone];const exSM=SM[ex.status]||{};
     return`<div class="dup-card">
-      <div style="font-weight:700;font-size:13px">${esc(p.name)} · ${p.phone}</div>
-      <div style="font-size:11px;color:var(--text3);margin-top:2px">Existing: <span style="font-weight:600;color:${exSM.c||'inherit'}">${exSM.l||ex.status}</span></div>
-      ${ex.timeline&&ex.timeline.length?`<div style="font-size:11px;color:var(--text2);margin-top:2px;font-style:italic">${esc(ex.timeline[ex.timeline.length-1].text.split('\n')[0].slice(0,80))}</div>`:''}
-      ${p.timeline&&p.timeline.length?`<div style="font-size:11px;color:var(--blue);margin-top:2px">New note: ${esc(p.timeline[0].text.split('\n')[0].slice(0,80))}</div>`:''}
+      <div style="font-weight:600;font-size:13px">${esc(p.name)} · <span style="color:var(--text3)">${p.phone}</span></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:3px">Already in: <strong>${exSM.l||ex.status}</strong></div>
+      ${ex.timeline&&ex.timeline.length?`<div style="font-size:11px;color:var(--text2);margin-top:3px;font-style:italic">${esc(ex.timeline[ex.timeline.length-1].text.split('\n')[0].slice(0,80))}</div>`:''}
+      ${p.timeline&&p.timeline.length?`<div style="font-size:11px;color:var(--blue);margin-top:3px">New: ${esc(p.timeline[0].text.split('\n')[0].slice(0,80))}</div>`:''}
       <div class="dup-opts">
         <button class="dup-opt sel-skip" id="dup-skip-${p.phone}" onclick="setDup('${p.phone}','skip')">Skip</button>
         <button class="dup-opt" id="dup-merge-${p.phone}" onclick="setDup('${p.phone}','merge')">Merge Notes</button>
@@ -868,6 +1312,7 @@ function renderDupStep(ep){
     </div>`;
   }).join('');
 }
+
 function setDup(phone,action){
   dupDecisions[phone]=action;
   ['skip','merge','replace'].forEach(o=>{
@@ -877,46 +1322,44 @@ function setDup(phone,action){
 }
 function setAllDup(action){csvDups.forEach(p=>setDup(p.phone,action))}
 function proceedImport(){document.getElementById('imp-step2').style.display='none';renderPreviewStep()}
+
 function renderPreviewStep(){
   document.getElementById('imp-step1').style.display='none';
   document.getElementById('imp-step2').style.display='none';
   document.getElementById('imp-step3').style.display='block';
   const upd=csvDups.filter(p=>dupDecisions[p.phone]!=='skip').length;
   const total=csvNew.length+upd;
-  document.getElementById('imp-preview-label').textContent=`Ready: ${csvNew.length} new + ${upd} updates = ${total} total`;
+  document.getElementById('imp-preview-label').textContent=`${csvNew.length} new + ${upd} updates = ${total} total`;
   document.getElementById('imp-confirm-btn').textContent=`Import ${total} Prospects`;
   const all=[...csvNew,...csvDups.filter(p=>dupDecisions[p.phone]!=='skip')];
   document.getElementById('imp-preview-list').innerHTML=all.slice(0,30).map(p=>{
-    const sm=SM[p.status]||{};const ac=avc(p.name);const isDup=csvDups.some(d=>d.phone===p.phone);
+    const sm=SM[p.status]||{};const ac=avc(p.name);
+    const isDup=csvDups.some(d=>d.phone===p.phone);
     const al={new:'➕ New',merge:'🔀 Merge',replace:'♻️ Replace'}[isDup?dupDecisions[p.phone]:'new']||'➕ New';
     return`<div class="parsed-row">
-      <div style="width:34px;height:34px;border-radius:50%;background:${ac.bg};color:${ac.c};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0">${ini(p.name)}</div>
+      <div style="width:34px;height:34px;border-radius:8px;background:${ac.bg};color:${ac.c};display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0">${ini(p.name)}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-weight:700;font-size:13px">${esc(p.name)}</div>
-        <div style="font-size:11px;color:var(--text2)">${p.phone||'No phone'} ${p.project?'· '+p.project:''} ${p.budget?'· '+p.budget:''}</div>
-        ${p.timeline&&p.timeline.length?`<div style="font-size:11px;color:var(--text2);margin-top:2px;white-space:pre-wrap">${esc(p.timeline[0].text.slice(0,120))}</div>`:''}
+        <div style="font-weight:600;font-size:13px">${esc(p.name)}</div>
+        <div style="font-size:11px;color:var(--text3)">${p.phone||'—'} ${p.project?'· '+p.project:''} ${p.budget?'· '+p.budget:''}</div>
+        ${p.timeline&&p.timeline.length?`<div style="font-size:11px;color:var(--text2);margin-top:3px">${esc(p.timeline[0].text.slice(0,100))}</div>`:''}
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-        <span class="chip ${sm.ch||'n'}">${sm.i||''} ${sm.l||p.status}</span>
-        <span style="font-size:10px;font-weight:700;color:${isDup?'var(--amber)':'var(--green)'}">${al}</span>
+        <span class="chip ${sm.ch||'ch-n'}">${sm.i||''} ${sm.l||p.status}</span>
+        <span style="font-size:10px;font-weight:600;color:${isDup?'var(--amber)':'var(--green)'}">${al}</span>
       </div>
     </div>`;
-  }).join('')+(all.length>30?`<div style="font-size:12px;color:var(--text3);padding:8px">…and ${all.length-30} more</div>`:'');
+  }).join('')+(all.length>30?`<div style="font-size:12px;color:var(--text3);padding:8px 0">…and ${all.length-30} more</div>`:'');
 }
+
 async function confirmImport(){
   const ep={};prospects.forEach(p=>{if(p.phone)ep[p.phone]=p});
   let added=0,updated=0;
-  
-  // Batch insert all new prospects in ONE call
   if(csvNew.length){
-    const rows = csvNew.map(p=>({id:p.id, user_id:currentUser.id, data:p, updated_at:new Date().toISOString()}));
-    const {error} = await SB.from('prospects').upsert(rows);
-    if(error){ toast('Import failed: '+error.message,'err'); return; }
-    csvNew.forEach(p=>prospects.unshift(p));
-    added = csvNew.length;
+    const rows=csvNew.map(p=>({id:p.id,user_id:currentUser.id,data:p,updated_at:new Date().toISOString()}));
+    const {error}=await SB.from('prospects').upsert(rows);
+    if(error){toast('Import failed: '+error.message,'err');return;}
+    csvNew.forEach(p=>prospects.unshift(p));added=csvNew.length;
   }
-
-  // Handle duplicates one by one (usually few)
   for(const p of csvDups){
     const dec=dupDecisions[p.phone];if(dec==='skip')continue;
     const ex=ep[p.phone];if(!ex)continue;
@@ -924,7 +1367,7 @@ async function confirmImport(){
       if(p.timeline&&p.timeline.length){const nn=p.timeline[0].text;if(!ex.timeline)ex.timeline=[];if(!ex.timeline.some(t=>t.text===nn))ex.timeline.push({text:nn,type:'import',date:now()});}
       if(!ex.project&&p.project)ex.project=p.project;if(!ex.budget&&p.budget)ex.budget=p.budget;
       ex.updatedAt=now();await dbPut(ex);
-    } else if(dec==='replace'){
+    }else if(dec==='replace'){
       ex.status=p.status;ex.reminderDT=p.reminderDT||ex.reminderDT;ex.reminderNote=p.reminderNote||ex.reminderNote;
       ex.project=p.project||ex.project;ex.budget=p.budget||ex.budget;
       if(p.timeline&&p.timeline.length){if(!ex.timeline)ex.timeline=[];const nn=p.timeline[0].text;if(!ex.timeline.some(t=>t.text===nn))ex.timeline.push({text:nn,type:'import',date:now()});}
@@ -932,51 +1375,89 @@ async function confirmImport(){
     }
     updated++;
   }
-  resetImport();renderAll();toast(`✅ ${added} added, ${updated} updated`,'ok');gp('dashboard',null);
+  resetImport();renderAll();
+  toast(`✅ ${added} added, ${updated} updated`,'ok');
+  gp('dashboard',null);
 }
 
-// ═══════════════════════════════════════════════════
+function resetImport(){
+  csvParsed=[];csvDups=[];csvNew=[];dupDecisions={};
+  document.getElementById('imp-step1').style.display='block';
+  document.getElementById('imp-step2').style.display='none';
+  document.getElementById('imp-step3').style.display='none';
+  document.getElementById('cfi').value='';
+}
+
+// ══════════════════════════════════════════════
 //  BULK PASTE
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 function parseBulk(){
   const lines=document.getElementById('bt').value.split('\n').map(l=>l.trim()).filter(Boolean);
-  bulkParsed=lines.map(line=>{const pm=line.match(/\b[6-9]\d{9}\b/);const phone=pm?pm[0]:'';const name=line.replace(phone,'').replace(/[,\-–|]/g,'').trim()||'Unknown';return{id:uid(),name,phone,project:'',budget:'',source:'',status:'today',timeline:[],createdAt:now(),updatedAt:now()};}).filter(p=>p.phone);
-  const btn=document.getElementById('bc-btn');btn.textContent=`Add ${bulkParsed.length} →`;btn.disabled=bulkParsed.length===0;
-  document.getElementById('bp').innerHTML=bulkParsed.slice(0,20).map(p=>`<div class="parsed-row"><div style="width:30px;height:30px;border-radius:50%;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;flex-shrink:0">${ini(p.name)}</div><div><div style="font-weight:600;font-size:13px">${esc(p.name)}</div><div style="font-size:12px;color:var(--text2)">${p.phone}</div></div></div>`).join('')+(bulkParsed.length>20?`<div style="font-size:12px;color:var(--text3);padding:8px">…and ${bulkParsed.length-20} more</div>`:'');
+  bulkParsed=lines.map(line=>{
+    const pm=line.match(/\b[6-9]\d{9}\b/);
+    const phone=pm?pm[0]:'';
+    const name=line.replace(phone,'').replace(/[,\-–|]/g,'').trim()||'Unknown';
+    return{id:uid(),name,phone,project:'',budget:'',source:'',status:'today',timeline:[],createdAt:now(),updatedAt:now()};
+  }).filter(p=>p.phone);
+  const btn=document.getElementById('bc-btn');
+  btn.textContent=`Add ${bulkParsed.length} Prospects →`;
+  btn.disabled=bulkParsed.length===0;
+  document.getElementById('bp').innerHTML=bulkParsed.slice(0,20).map(p=>`
+    <div class="parsed-row">
+      <div style="width:30px;height:30px;border-radius:7px;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0">${ini(p.name)}</div>
+      <div><div style="font-weight:600;font-size:13px">${esc(p.name)}</div><div style="font-size:12px;color:var(--text3)">${p.phone}</div></div>
+    </div>`).join('')+(bulkParsed.length>20?`<div style="font-size:12px;color:var(--text3);padding:8px">…and ${bulkParsed.length-20} more</div>`:'');
 }
+
 async function confirmBulk(){
   if(!bulkParsed.length)return;
   const phones=new Set(prospects.map(p=>p.phone));
   const fresh=bulkParsed.filter(p=>!phones.has(p.phone));
   const skipped=bulkParsed.length-fresh.length;
-  for(const p of fresh){prospects.unshift(p);await dbPut(p);}
-  bulkParsed=[];document.getElementById('bt').value='';document.getElementById('bp').innerHTML='';document.getElementById('bc-btn').disabled=true;document.getElementById('bc-btn').textContent='Add 0 →';
-  renderAll();toast(`${fresh.length} added${skipped?', '+skipped+' duplicates skipped':''}!`,'ok');
+  if(fresh.length){
+    const rows=fresh.map(p=>({id:p.id,user_id:currentUser.id,data:p,updated_at:new Date().toISOString()}));
+    await SB.from('prospects').upsert(rows);
+    fresh.forEach(p=>prospects.unshift(p));
+  }
+  bulkParsed=[];
+  document.getElementById('bt').value='';
+  document.getElementById('bp').innerHTML='';
+  document.getElementById('bc-btn').disabled=true;
+  document.getElementById('bc-btn').textContent='Add 0 Prospects →';
+  renderAll();
+  toast(`${fresh.length} added${skipped?', '+skipped+' duplicates skipped':''}!`,'ok');
 }
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  SINGLE ADD
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 async function addSingle(){
   const name=document.getElementById('sn').value.trim();
   const phone=document.getElementById('sp').value.replace(/\D/g,'');
-  if(!name||!phone){toast('Name and phone required','err');return;}
+  if(!name||!phone){toast('Name and phone are required','err');return;}
   if(prospects.some(p=>p.phone===phone)){toast('Phone already exists','warn');return;}
   const note=document.getElementById('sno').value.trim();
-  const p={id:uid(),name,phone,project:document.getElementById('spr').value.trim(),budget:document.getElementById('sb2').value.trim(),source:document.getElementById('ss').value.trim(),status:'today',timeline:note?[{text:note,type:'note',date:now()}]:[],createdAt:now(),updatedAt:now()};
+  const p={id:uid(),name,phone,
+    project:document.getElementById('spr').value.trim(),
+    budget:document.getElementById('sb2').value.trim(),
+    source:document.getElementById('ss').value.trim(),
+    status:'today',
+    timeline:note?[{text:note,type:'note',date:now()}]:[],
+    createdAt:now(),updatedAt:now()
+  };
   prospects.unshift(p);await dbPut(p);
   ['sn','sp','spr','sb2','ss','sno'].forEach(id=>document.getElementById(id).value='');
   renderAll();toast(name+' added!','ok');
 }
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  MODAL
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 function openP(id){
   const p=prospects.find(x=>x.id===id);if(!p)return;
   openId=id;const ac=avc(p.name);
   const av=document.getElementById('pm-av');
-  av.style.cssText=`background:${ac.bg};color:${ac.c};width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0`;
+  av.style.cssText=`background:${ac.bg};color:${ac.c};width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0`;
   av.textContent=ini(p.name);
   document.getElementById('pm-n').textContent=p.name;
   document.getElementById('pm-p').textContent=[p.phone,p.project,p.budget].filter(Boolean).join(' · ');
@@ -986,192 +1467,316 @@ function openP(id){
   ['pm-ni','pm-rd','pm-rt','pm-rn'].forEach(id2=>document.getElementById(id2).value='');
   document.getElementById('pm-proj').value=p.project||'';
   document.getElementById('pm-bud').value=p.budget||'';
-  document.querySelectorAll('#pmodal .sgrid .sbtn').forEach(b=>{b.className='sbtn';const fn=b.getAttribute('onclick')||'';if(fn.includes("'"+p.status+"'"))b.classList.add('sel-'+p.status);});
+  document.querySelectorAll('#pmodal .status-grid .status-btn').forEach(b=>{
+    b.className='status-btn';
+    const fn=b.getAttribute('onclick')||'';
+    const match=fn.match(/'(\w+)'/);
+    if(match&&match[1]===p.status)b.classList.add('sb-'+p.status);
+  });
   renderTL(p);
   document.getElementById('pmodal').classList.add('open');
 }
+
 function renderTL(p){
   const tl=p.timeline||[];const el=document.getElementById('pm-tl');
-  if(!tl.length){el.innerHTML='<div style="color:var(--text3);font-size:13px">No activity yet</div>';return;}
-  el.innerHTML=[...tl].reverse().map(t=>`<div class="tli ${t.type||'note'}"><div>${esc(t.text)}</div><div class="tdate">${fdts(t.date)}</div></div>`).join('');
+  if(!tl.length){el.innerHTML='<div style="color:var(--text3);font-size:13px">No activity logged yet</div>';return;}
+  el.innerHTML=[...tl].reverse().map(t=>`
+    <div class="tli ${t.type||'note'}">
+      <div>${esc(t.text)}</div>
+      <div class="tdate">${fdts(t.date)}</div>
+    </div>`).join('');
 }
+
 function closePM(e){if(e.target.id==='pmodal')document.getElementById('pmodal').classList.remove('open')}
 
 async function chSt(st){
   const p=prospects.find(x=>x.id===openId);if(!p)return;
   if(st==='reminder'){document.getElementById('pm-remflds').style.display='block';return;}
   document.getElementById('pm-remflds').style.display='none';
-  p.status=st;p.updatedAt=now();tlAdd(p,'Moved to '+(SM[st]?.l||st),'status');
-  await dbPut(p);renderAll();toast('Moved to '+(SM[st]?.l||st),'ok');openP(openId);
+  p.status=st;p.updatedAt=now();
+  tlAdd(p,'Moved to '+(SM[st]?.l||st),'status');
+  await dbPut(p);renderAll();
+  toast('Moved to '+(SM[st]?.l||st),'ok');
+  openP(openId);
 }
 
-// FIX #6: warn if reminder date is in the past
 async function saveRem(){
   const p=prospects.find(x=>x.id===openId);if(!p)return;
   const d=document.getElementById('pm-rd').value;if(!d){toast('Pick a date','err');return;}
   const t=document.getElementById('pm-rt').value||'09:00';
   const note=document.getElementById('pm-rn').value.trim();
   const reminderDate=new Date(d+'T'+t+':00');
-  if(reminderDate<new Date()){
-    toast('⚠️ Date is in the past — saved as overdue','warn');
-  }
-  p.status='reminder';p.reminderDT=reminderDate.toISOString();p.reminderNote=note;p.updatedAt=now();
+  if(reminderDate<new Date())toast('⚠️ Date is in the past — saved as overdue','warn');
+  p.status='reminder';p.reminderDT=reminderDate.toISOString();
+  p.reminderNote=note;p.updatedAt=now();
   tlAdd(p,'Reminder: '+fdts(p.reminderDT)+(note?' — '+note:''),'status');
-  await dbPut(p);renderAll();toast('Reminder set!','ok');
-  document.getElementById('pm-remflds').style.display='none';openP(openId);
+  await dbPut(p);
+  renderAll();
+  document.getElementById('pm-remflds').style.display='none';
+  openP(openId);
+  toast('Reminder set ✅','ok');
+  // schedule device notification (no await — UI stays instant)
+  try{
+    if(window.Capacitor?.Plugins?.LocalNotifications){
+      const{LocalNotifications}=window.Capacitor.Plugins;
+      const perm=await LocalNotifications.checkPermissions();
+      if(perm.display!=='granted')await LocalNotifications.requestPermissions();
+      LocalNotifications.schedule({notifications:[{
+        title:'⏰ LeadTrackr Reminder',
+        body:'Call '+p.name+(note?' — '+note:''),
+        id:Math.floor(Math.random()*2147483647),
+        schedule:{at:reminderDate,allowWhileIdle:true},
+        sound:'default',autoCancel:true,
+      }]});
+    }
+  }catch(e){console.error('Notif error:',e)}
 }
 
 async function addNote(){
   const p=prospects.find(x=>x.id===openId);if(!p)return;
   const txt=document.getElementById('pm-ni').value.trim();if(!txt)return;
   tlAdd(p,txt,'note');p.updatedAt=now();await dbPut(p);
-  document.getElementById('pm-ni').value='';renderTL(p);renderAll();toast('Note saved','ok');
+  document.getElementById('pm-ni').value='';
+  renderTL(p);renderAll();toast('Note saved','ok');
 }
+
 async function saveDetails(){
   const p=prospects.find(x=>x.id===openId);if(!p)return;
-  p.project=document.getElementById('pm-proj').value.trim();p.budget=document.getElementById('pm-bud').value.trim();
+  p.project=document.getElementById('pm-proj').value.trim();
+  p.budget=document.getElementById('pm-bud').value.trim();
   p.updatedAt=now();await dbPut(p);renderAll();toast('Saved','ok');
 }
+
 async function delCurr(){
   if(!openId||!confirm('Delete this prospect?'))return;
-  prospects=prospects.filter(x=>x.id!==openId);await dbDel(openId);
-  document.getElementById('pmodal').classList.remove('open');openId=null;renderAll();toast('Deleted','warn');
+  prospects=prospects.filter(x=>x.id!==openId);
+  await dbDel(openId);
+  document.getElementById('pmodal').classList.remove('open');
+  openId=null;renderAll();toast('Deleted','warn');
 }
-function tlAdd(p,text,type='note'){if(!p.timeline)p.timeline=[];p.timeline.push({text,type,date:now()})}
 
-// ═══════════════════════════════════════════════════
+function tlAdd(p,text,type='note'){
+  if(!p.timeline)p.timeline=[];
+  p.timeline.push({text,type,date:now()});
+}
+
+// ══════════════════════════════════════════════
 //  CALL / WA
-// ═══════════════════════════════════════════════════
-function doWA(id){const p=prospects.find(x=>x.id===id);if(!p)return;const ph=p.phone.replace(/\D/g,'');window.open('https://wa.me/91'+ph+'?text='+encodeURIComponent('Hi '+p.name.split(' ')[0]+', '),'_blank')}
-
-// ═══════════════════════════════════════════════════
-//  BULK RETRY
-// ═══════════════════════════════════════════════════
-async function bulkToToday(){
-  const dnpList=prospects.filter(p=>p.status==='dnp');
-  if(!dnpList.length){toast('No DNP prospects','warn');return;}
-  for(const p of dnpList){p.status='today';p.updatedAt=now();tlAdd(p,'Moved back to Today','status');await dbPut(p);}
-  renderAll();toast(dnpList.length+' moved to Today','ok');
+// ══════════════════════════════════════════════
+function doWA(id){
+  const p=prospects.find(x=>x.id===id);if(!p)return;
+  const ph=p.phone.replace(/\D/g,'');
+  window.open('https://wa.me/91'+ph+'?text='+encodeURIComponent('Hi '+p.name.split(' ')[0]+', '),'_blank');
 }
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
+//  BULK DNP → TODAY
+// ══════════════════════════════════════════════
+async function bulkToToday(){
+  const list=prospects.filter(p=>p.status==='dnp');
+  if(!list.length){toast('No DNP prospects','warn');return;}
+  for(const p of list){p.status='today';p.updatedAt=now();tlAdd(p,'Moved back to Today','status');await dbPut(p);}
+  renderAll();toast(list.length+' moved to Today','ok');
+}
+
+// ══════════════════════════════════════════════
 //  RENDER SECTIONS
-// ═══════════════════════════════════════════════════
-function setRemTab(tab,btn){remTab=tab;document.querySelectorAll('#rem-tabs .tbb').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');rs('reminder')}
+// ══════════════════════════════════════════════
+function setRemTab(tab,btn){
+  remTab=tab;
+  document.querySelectorAll('#rem-tabs .tbb').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  rs('reminder');
+}
 
 function rs(status){
-  const qEl=document.getElementById('q-'+status);const q=qEl?qEl.value.toLowerCase():'';
+  const qEl=document.getElementById('q-'+status);
+  const q=qEl?qEl.value.toLowerCase():'';
   let list;
-  if(status==='reminder'){list=prospects.filter(p=>p.status==='reminder');if(remTab!=='all')list=list.filter(p=>remSt(p)===remTab);list.sort((a,b)=>new Date(a.reminderDT||0)-new Date(b.reminderDT||0));}
-  else list=prospects.filter(p=>p.status===status);
+  if(status==='reminder'){
+    list=prospects.filter(p=>p.status==='reminder');
+    if(remTab!=='all')list=list.filter(p=>remSt(p)===remTab);
+    list.sort((a,b)=>new Date(a.reminderDT||0)-new Date(b.reminderDT||0));
+  }else{
+    list=prospects.filter(p=>p.status===status);
+  }
   if(q)list=list.filter(p=>(p.name+p.phone+(p.project||'')+(p.budget||'')).toLowerCase().includes(q));
   const el=document.getElementById('list-'+status);if(!el)return;
-  if(!list.length){const icons={today:'📋',dnp:'📵',ni:'🚫',followup:'🔄',reminder:'⏰',future:'🌱',cold:'❄️'};el.innerHTML=`<div class="empty"><div class="empty-ico">${icons[status]||'📋'}</div><div class="empty-txt">Nothing here</div><div class="empty-sub">Prospects appear when moved here</div></div>`;return;}
+  if(!list.length){
+    const icons={today:'📋',dnp:'📵',ni:'🚫',followup:'🔄',reminder:'⏰',future:'🌱',cold:'❄️'};
+    el.innerHTML=`<div class="empty"><div class="empty-ico">${icons[status]||'📋'}</div><div class="empty-txt">Nothing here yet</div><div class="empty-sub">Prospects appear when you move them here</div></div>`;
+    return;
+  }
   el.innerHTML='<div class="plist">'+list.map(p=>{
-    const sm=SM[p.status]||{};const ac=avc(p.name);const rs2=p.status==='reminder'?remSt(p):null;
+    const sm=SM[p.status]||{};const ac=avc(p.name);
+    const rs2=p.status==='reminder'?remSt(p):null;
     const allNotes=p.timeline?p.timeline.filter(t=>t.type==='import'||t.type==='note').map(t=>t.text).join('\n'):'';
+    const cleanPhone=p.phone.replace(/\D/g,'');
     return`<div class="pc" onclick="openP('${p.id}')">
       <div class="pav" style="background:${ac.bg};color:${ac.c}">${ini(p.name)}</div>
       <div class="pb">
-        <div class="pn">${esc(p.name)}</div>
-        <div class="pp">${p.phone}${p.project?' · '+esc(p.project):''}${p.dateAdded?' · '+p.dateAdded:''}</div>
-        <div class="pm">${p.budget?`<span class="chip n">${esc(p.budget)}</span>`:''} ${p.source?`<span class="chip n">${esc(p.source)}</span>`:''}<span style="font-size:11px;color:var(--text3)">${ago(p.updatedAt)}</span></div>
-        ${allNotes?`<div class="pnote">${esc(allNotes)}</div>`:''}
-        ${p.status==='reminder'&&p.reminderDT?`<div class="prem ${rs2==='overdue'?'ov':''}">${rs2==='overdue'?'⚠ OVERDUE: ':'📅 '}${fdts(p.reminderDT)}${p.reminderNote?' — '+esc(p.reminderNote.slice(0,60)):''}</div>`:''}
+        <div class="pname">${esc(p.name)}</div>
+        <div class="pphone">${p.phone}${p.project?' · '+esc(p.project):''}${p.dateAdded?' · '+p.dateAdded:''}</div>
+        <div class="pmeta">
+          ${p.budget?`<span class="chip ch-n">${esc(p.budget)}</span>`:''}
+          ${p.source?`<span class="chip ch-n">${esc(p.source)}</span>`:''}
+          <span style="font-size:10px;color:var(--text3);margin-left:auto">${ago(p.updatedAt)}</span>
+        </div>
+        ${allNotes?`<div class="pnote">${esc(allNotes.slice(0,160))}${allNotes.length>160?'…':''}</div>`:''}
+        ${p.status==='reminder'&&p.reminderDT?`<div class="prem ${rs2==='overdue'?'ov':''}">${rs2==='overdue'?'⚠ OVERDUE':'📅'} ${fdts(p.reminderDT)}${p.reminderNote?' — '+esc(p.reminderNote.slice(0,50)):''}</div>`:''}
       </div>
       <div class="pact" onclick="event.stopPropagation()">
-        <a class="bico" href="tel:+91${p.phone.replace(/\D/g,'')}" onclick="event.stopPropagation()">📞</a>
-        <button class="bico" onclick="doWA('${p.id}')">💬</button>
+        <a class="act-btn" href="tel:+91${cleanPhone}" onclick="event.stopPropagation()" title="Call">📞</a>
+        <button class="act-btn" onclick="doWA('${p.id}')" title="WhatsApp">💬</button>
       </div>
     </div>`;
   }).join('')+'</div>';
 }
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  DASHBOARD
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 function renderDash(){
   const cnt=s=>prospects.filter(p=>p.status===s).length;
-  document.getElementById('dg').innerHTML=[{k:'tot',l:'Total',n:prospects.length,go:'today'},{k:'s-today',l:"Today",n:cnt('today'),go:'today'},{k:'s-dnp',l:'DNP',n:cnt('dnp'),go:'dnp'},{k:'s-ni',l:'Not Interested',n:cnt('ni'),go:'ni'},{k:'s-followup',l:'Follow Up',n:cnt('followup'),go:'followup'},{k:'s-reminder',l:'Reminders',n:cnt('reminder'),go:'reminder'},{k:'s-future',l:'Future',n:cnt('future'),go:'future'},{k:'s-cold',l:'Cold Pool',n:cnt('cold'),go:'cold'}].map(({k,l,n,go})=>`<div class="dc ${k}" onclick="gp('${go}',null)"><div class="dn">${n}</div><div class="dl">${l}</div></div>`).join('');
-  const rems=prospects.filter(p=>p.status==='reminder'&&(remSt(p)==='overdue'||remSt(p)==='today')).sort((a,b)=>new Date(a.reminderDT)-new Date(b.reminderDT));
-  document.getElementById('dash-rems').innerHTML=rems.length===0?`<div style="color:var(--text3);font-size:13px;padding:6px 0">No reminders due today ✓</div>`:rems.map(p=>{const rs2=remSt(p);return`<div class="alert-item ${rs2==='overdue'?'ov':''}" onclick="openP('${p.id}')"><span style="font-size:17px">${rs2==='overdue'?'🔴':'🟡'}</span><div style="flex:1"><div style="font-weight:700">${esc(p.name)}</div><div style="font-size:12px;color:var(--text2)">${p.reminderNote?esc(p.reminderNote.slice(0,60)):''}</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:11px;font-weight:700;color:${rs2==='overdue'?'var(--red)':'var(--amber)'}">${rs2==='overdue'?'⚠ OVERDUE':'TODAY'}</div><div style="font-size:11px;color:var(--text3)">${fdts(p.reminderDT)}</div></div><a class="alert-act ${rs2==='overdue'?'red':''}" href="tel:+91${p.phone.replace(/\D/g,'')}" onclick="event.stopPropagation()">📞 Call</a></div>`;}).join('');
-  const recent=[...prospects].filter(p=>p.updatedAt).sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt)).slice(0,6);
-  document.getElementById('dash-recent').innerHTML=recent.length===0?`<div style="color:var(--text3);font-size:13px;padding:6px 0">No activity — import a CSV or add prospects</div>`:'<div class="plist">'+recent.map(p=>{const sm=SM[p.status]||{};const ac=avc(p.name);return`<div class="pc" onclick="openP('${p.id}')"><div class="pav" style="background:${ac.bg};color:${ac.c}">${ini(p.name)}</div><div class="pb"><div class="pn">${esc(p.name)}</div><div class="pp">${p.phone}${p.project?' · '+esc(p.project):''}</div><div class="pm"><span class="chip ${sm.ch||'n'}">${sm.i||''} ${sm.l||p.status}</span>${p.budget?`<span class="chip n">${esc(p.budget)}</span>`:''}<span style="font-size:11px;color:var(--text3)">${ago(p.updatedAt)}</span></div></div></div>`;}).join('')+'</div>';
+  document.getElementById('dg').innerHTML=[
+    {k:'tot',l:'Total',n:prospects.length,go:'today'},
+    {k:'s-today',l:'Today',n:cnt('today'),go:'today'},
+    {k:'s-dnp',l:'DNP',n:cnt('dnp'),go:'dnp'},
+    {k:'s-ni',l:'Not Interested',n:cnt('ni'),go:'ni'},
+    {k:'s-followup',l:'Follow Up',n:cnt('followup'),go:'followup'},
+    {k:'s-reminder',l:'Reminders',n:cnt('reminder'),go:'reminder'},
+    {k:'s-future',l:'Future',n:cnt('future'),go:'future'},
+    {k:'s-cold',l:'Cold Pool',n:cnt('cold'),go:'cold'},
+  ].map(({k,l,n,go})=>`
+    <div class="dc ${k}" onclick="gp('${go}',null)" title="${l}">
+      <div class="dc-n">${n}</div>
+      <div class="dc-l">${l}</div>
+    </div>`).join('');
+
+  const rems=prospects.filter(p=>p.status==='reminder'&&(remSt(p)==='overdue'||remSt(p)==='today'))
+    .sort((a,b)=>new Date(a.reminderDT)-new Date(b.reminderDT));
+
+  document.getElementById('dash-rems').innerHTML=rems.length===0
+    ?`<div class="info-card" style="color:var(--text3)">No reminders due today ✓</div>`
+    :rems.map(p=>{
+      const rs2=remSt(p);
+      const cleanPhone=p.phone.replace(/\D/g,'');
+      return`<div class="alert-item ${rs2==='overdue'?'ov':''}" onclick="openP('${p.id}')">
+        <div style="flex:1">
+          <div class="alert-name">${esc(p.name)}</div>
+          <div class="alert-sub">${p.reminderNote?esc(p.reminderNote.slice(0,60)):''} · ${fdts(p.reminderDT)}</div>
+        </div>
+        <span class="alert-tag ${rs2==='overdue'?'tag-ov':'tag-today'}">${rs2==='overdue'?'OVERDUE':'TODAY'}</span>
+        <a class="alert-call" href="tel:+91${cleanPhone}" onclick="event.stopPropagation()">📞 Call</a>
+      </div>`;
+    }).join('');
+
+  const recent=[...prospects].filter(p=>p.updatedAt)
+    .sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt)).slice(0,5);
+  document.getElementById('dash-recent').innerHTML=recent.length===0
+    ?`<div class="info-card" style="color:var(--text3)">No activity yet — import a CSV or add prospects to get started</div>`
+    :'<div class="plist">'+recent.map(p=>{
+      const sm=SM[p.status]||{};const ac=avc(p.name);
+      return`<div class="pc" onclick="openP('${p.id}')">
+        <div class="pav" style="background:${ac.bg};color:${ac.c}">${ini(p.name)}</div>
+        <div class="pb">
+          <div class="pname">${esc(p.name)}</div>
+          <div class="pphone">${p.phone}${p.project?' · '+esc(p.project):''}</div>
+          <div class="pmeta">
+            <span class="chip ${sm.ch||'ch-n'}">${sm.i||''} ${sm.l||p.status}</span>
+            ${p.budget?`<span class="chip ch-n">${esc(p.budget)}</span>`:''}
+            <span style="font-size:10px;color:var(--text3);margin-left:auto">${ago(p.updatedAt)}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('')+'</div>';
 }
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  BADGES
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 function updBadges(){
-  ['today','dnp','ni','followup','reminder','future','cold'].forEach(s=>{const el=document.getElementById('b-'+s);if(el)el.textContent=prospects.filter(p=>p.status===s).length;});
+  ['today','dnp','ni','followup','reminder','future','cold'].forEach(s=>{
+    const el=document.getElementById('b-'+s);
+    if(el)el.textContent=prospects.filter(p=>p.status===s).length;
+  });
   const ov=prospects.filter(p=>p.status==='reminder'&&remSt(p)==='overdue').length;
-  const rb=document.getElementById('b-reminder');if(rb)rb.style.background=ov?'var(--red)':'var(--amber)';
+  const rb=document.getElementById('b-reminder');
+  if(rb)rb.style.background=ov?'var(--red)':'var(--amber)';
 }
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  BROADCAST
-// FIX #3: fixed template literal in renderBC
-// FIX #7: generate clickable links instead of window.open spam
-// ═══════════════════════════════════════════════════
-function bcPreview(){const msg=document.getElementById('bcmsg').value;document.getElementById('bc-prev').textContent=msg.replace('{name}','Rahul')||'Preview will appear here…'}
+// ══════════════════════════════════════════════
+function bcPreview(){
+  const msg=document.getElementById('bcmsg').value;
+  document.getElementById('bc-prev').textContent=msg.replace('{name}','Rahul')||'Preview will appear here…';
+}
 
 function renderBC(){
   const q=(document.getElementById('q-bc').value||'').toLowerCase();
   const list=prospects.filter(p=>p.status!=='ni'&&(!q||(p.name+p.phone).toLowerCase().includes(q)));
   document.getElementById('bc-list').innerHTML=list.map(p=>{
-    const sm=SM[p.status]||{};
-    const sel=bcSel.has(p.id);
-    // FIX #3: clean template literal — no broken quote
-    return`<div class="pc" style="${sel?'border-color:var(--blue);background:var(--blue-bg);':''}" onclick="bcToggle('${p.id}')">
-      <input type="checkbox" ${sel?'checked':''} style="width:15px;height:15px;accent-color:var(--blue);flex-shrink:0" onclick="event.stopPropagation();bcToggle('${p.id}')">
+    const sm=SM[p.status]||{};const sel=bcSel.has(p.id);
+    return`<div class="pc" style="${sel?'border-color:var(--gold);background:var(--gold-bg);':''}" onclick="bcToggle('${p.id}')">
+      <input type="checkbox" ${sel?'checked':''} style="width:15px;height:15px;accent-color:var(--gold);flex-shrink:0" onclick="event.stopPropagation();bcToggle('${p.id}')">
       <div class="pb">
-        <div class="pn">${esc(p.name)}</div>
-        <div class="pm"><span class="chip ${sm.ch||'n'}">${sm.i||''} ${sm.l||p.status}</span><span style="font-size:12px;color:var(--text2);margin-left:4px">${p.phone}</span></div>
+        <div class="pname">${esc(p.name)}</div>
+        <div class="pmeta"><span class="chip ${sm.ch||'ch-n'}">${sm.i||''} ${sm.l||p.status}</span><span style="font-size:11px;color:var(--text3);margin-left:6px">${p.phone}</span></div>
       </div>
     </div>`;
   }).join('');
   bcUpdBar();
 }
+
 function bcToggle(id){if(bcSel.has(id))bcSel.delete(id);else bcSel.add(id);renderBC()}
 function bcAll(){prospects.filter(p=>p.status!=='ni').forEach(p=>bcSel.add(p.id));renderBC()}
 function bcClear(){bcSel.clear();document.getElementById('bc-links-out').style.display='none';renderBC()}
 function bcByStatus(s){bcSel.clear();prospects.filter(p=>p.status===s).forEach(p=>bcSel.add(p.id));renderBC()}
+
 function bcUpdBar(){
   const bar=document.getElementById('bc-bar');
   document.getElementById('bc-cnt').textContent=bcSel.size;
   bar.style.display=bcSel.size>0?'block':'none';
 }
 
-// FIX #7: generate clickable wa.me links instead of popup-blocked window.open calls
 function sendBC(){
   const msg=document.getElementById('bcmsg').value.trim();
   if(!msg){toast('Write a message first','err');return;}
-  if(!bcSel.size){toast('Select prospects','err');return;}
+  if(!bcSel.size){toast('Select at least one prospect','err');return;}
   const sel=prospects.filter(p=>bcSel.has(p.id));
   const linksOut=document.getElementById('bc-links-out');
   const linksList=document.getElementById('bc-links-list');
   linksList.innerHTML=sel.map(p=>{
     const ph=p.phone.replace(/\D/g,'');
     const text=encodeURIComponent(msg.replace('{name}',p.name.split(' ')[0]));
-    const url=`https://wa.me/91${ph}?text=${text}`;
+    const url='https://wa.me/91'+ph+'?text='+text;
     return`<div class="bc-link-item">
-      <span style="font-weight:600">${esc(p.name)}</span>
-      <span style="color:var(--text2);font-size:12px">${p.phone}</span>
-      <a href="${url}" target="_blank">Open WhatsApp ↗</a>
+      <div>
+        <div style="font-weight:600;font-size:13px">${esc(p.name)}</div>
+        <div style="font-size:11px;color:var(--text3)">${p.phone}</div>
+      </div>
+      <a href="${url}" target="_blank">Open WhatsApp →</a>
     </div>`;
   }).join('');
   linksOut.style.display='block';
-  toast(`${sel.length} links ready — tap each to send`,'ok');
+  toast(sel.length+' links ready','ok');
 }
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  NAVIGATION
-// ═══════════════════════════════════════════════════
-const TITLES={dashboard:'Dashboard',today:"Today's List",dnp:'Did Not Pick',ni:'Not Interested',followup:'Follow Up',reminder:'Reminders',future:'Future / Investors',cold:'Cold Pool',add:'Add Prospect',broadcast:'Broadcast',import:'Import CSV'};
+// ══════════════════════════════════════════════
+const TITLES={
+  dashboard:'Dashboard',today:"Today's List",dnp:'Did Not Pick',
+  ni:'Not Interested',followup:'Follow Up',reminder:'Reminders',
+  future:'Future / Investors',cold:'Cold Pool',
+  add:'Add Prospect',broadcast:'Broadcast',import:'Import CSV',
+};
+
 function gp(name,btn){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+name)?.classList.add('active');
-  document.querySelectorAll('.ni').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   if(btn)btn.classList.add('active');
   document.getElementById('tb-title').textContent=TITLES[name]||name;
   curPage=name;closeSB();
@@ -1181,68 +1786,107 @@ function gp(name,btn){
   else if(['today','dnp','ni','followup','future','cold'].includes(name))rs(name);
 }
 
-// FIX #1: openSB / closeSB now correctly toggle the overlay visibility class
 function openSB(){
   document.getElementById('sidebar').classList.add('open');
-  document.getElementById('mob-overlay').classList.add('visible');
+  document.getElementById('mob-overlay').classList.add('vis');
 }
 function closeSB(){
   document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('mob-overlay').classList.remove('visible');
+  document.getElementById('mob-overlay').classList.remove('vis');
+}
+function setAddTab(t){
+  ['s','b'].forEach(x=>{
+    document.getElementById('add-'+x).style.display=x===t?'block':'none';
+    document.getElementById('tadd-'+x).classList.toggle('active',x===t);
+  });
 }
 
-function setAddTab(t){['s','b'].forEach(x=>{document.getElementById('add-'+x).style.display=x===t?'block':'none';document.getElementById('tadd-'+x).classList.toggle('active',x===t)})}
-
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  DATES & REMINDERS
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 function renderDates(){
   const d=new Date();
-  document.getElementById('sb-date').textContent=d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
   document.getElementById('tb-date').textContent=d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('sb-user-meta').querySelector&&null;
   const h=d.getHours();
-  document.getElementById('dash-greeting').textContent=(h<12?'Good morning':h<17?'Good afternoon':'Good evening')+' 👋';
+  document.getElementById('dash-greeting').textContent=h<12?'Good morning 👋':h<17?'Good afternoon 👋':'Good evening 👋';
 }
-function checkRems(){const now2=new Date();prospects.filter(p=>p.status==='reminder'&&p.reminderDT).forEach(p=>{const diff=new Date(p.reminderDT)-now2;if(diff>0&&diff<60000)toast('⏰ Call '+p.name+' NOW!','warn')})}
 
-// FIX #2: renderAll is defined after loadProspects — no stale closure issue
-function renderAll(){updBadges();if(curPage==='dashboard')renderDash();else if(curPage==='reminder')rs('reminder');else if(curPage==='broadcast')renderBC();else if(['today','dnp','ni','followup','future','cold'].includes(curPage))rs(curPage)}
+function checkRems(){
+  const now2=new Date();
+  prospects.filter(p=>p.status==='reminder'&&p.reminderDT).forEach(p=>{
+    const diff=new Date(p.reminderDT)-now2;
+    if(diff>0&&diff<60000)toast('⏰ Call '+p.name+' NOW!','warn');
+  });
+}
 
-// ═══════════════════════════════════════════════════
+function renderAll(){
+  updBadges();
+  if(curPage==='dashboard')renderDash();
+  else if(curPage==='reminder')rs('reminder');
+  else if(curPage==='broadcast')renderBC();
+  else if(['today','dnp','ni','followup','future','cold'].includes(curPage))rs(curPage);
+}
+
+// ══════════════════════════════════════════════
 //  TOAST
-// ═══════════════════════════════════════════════════
-function toast(msg,type=''){const el=document.createElement('div');el.className='toast '+(type==='ok'?'ok':type==='warn'?'warn':type==='err'?'err':'');el.textContent=msg;document.getElementById('tc').appendChild(el);requestAnimationFrame(()=>el.classList.add('show'));setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400)},3200)}
+// ══════════════════════════════════════════════
+function toast(msg,type=''){
+  const el=document.createElement('div');
+  el.className='toast '+(type==='ok'?'ok':type==='warn'?'warn':type==='err'?'err':'');
+  el.textContent=msg;
+  document.getElementById('tc').appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('show'));
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400)},3200);
+}
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
+//  LOADER
+// ══════════════════════════════════════════════
+function hideLoader(){
+  const l=document.getElementById('loading');
+  if(l){l.classList.add('hide');setTimeout(()=>l.style.display='none',500);}
+}
+
+// ══════════════════════════════════════════════
 //  KEYBOARD
-// ═══════════════════════════════════════════════════
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('pmodal').classList.remove('open')});
+// ══════════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')document.getElementById('pmodal').classList.remove('open');
+});
 document.getElementById('auth-email')?.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('auth-pass').focus()});
 document.getElementById('auth-pass')?.addEventListener('keydown',e=>{if(e.key==='Enter')doAuth()});
 
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 //  BOOT
-// ═══════════════════════════════════════════════════
+// ══════════════════════════════════════════════
 async function boot(){
-  // Credentials hard-coded — setup screen no longer needed
-  const SUPABASE_URL = 'https://pvvzhvopnyiczdkjiiep.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2dnpodm9wbnlpY3pka2ppaWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MTAzMjAsImV4cCI6MjA5MjQ4NjMyMH0.6AABJrOXYqBSvMbvAohitsEy0SAa8k2fcAjkRyAI1I0';
-  initSupabase(SUPABASE_URL, SUPABASE_KEY);
-  localStorage.setItem(CFG_KEY, JSON.stringify({url: SUPABASE_URL, key: SUPABASE_KEY}));
-  // FIX #8: wrap session check in try/catch so network errors surface
+  SB=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  // set dark mode icon
+  const t=localStorage.getItem('lt_theme')||'light';
+  const btn=document.getElementById('dark-btn');
+  if(btn)btn.textContent=t==='dark'?'🌙':'☀️';
   try{
-    const {data:{session}, error} = await SB.auth.getSession();
-    if(error) throw error;
+    const {data:{session},error}=await SB.auth.getSession();
+    if(error)throw error;
     if(session){
       await afterLogin(session.user);
+    }else{
+      hideLoader();
+      document.getElementById('auth-screen').style.display='flex';
     }
   }catch(e){
-    console.error('Session check failed:', e);
-    toast('Could not connect to Supabase. Check your internet connection.','err');
+    hideLoader();
+    document.getElementById('auth-screen').style.display='flex';
+    toast('Connection error — check your internet','err');
   }
-  SB.auth.onAuthStateChange(async (event, session)=>{
-    if(event==='SIGNED_IN'&&session) await afterLogin(session.user);
-    if(event==='SIGNED_OUT'){ prospects=[]; currentUser=null; document.getElementById('app').style.display='none'; document.getElementById('auth-screen').style.display='flex'; }
+  SB.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_IN'&&session)await afterLogin(session.user);
+    if(event==='SIGNED_OUT'){
+      prospects=[];currentUser=null;
+      document.getElementById('app').style.display='none';
+      document.getElementById('auth-screen').style.display='flex';
+    }
   });
 }
 boot();
