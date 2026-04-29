@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>LeadTrackr</title>
+<script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
@@ -1289,8 +1290,11 @@ function toggleDark(){
 // ══════════════════════════════════════════════
 //  CONFIG — hardcoded Supabase keys
 // ══════════════════════════════════════════════
-const SUPABASE_URL = 'https://pvvzhvopnyiczdkjiiep.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2dnpodm9wbnlpY3pka2ppaWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MTAzMjAsImV4cCI6MjA5MjQ4NjMyMH0.6AABJrOXYqBSvMbvAohitsEy0SAa8k2fcAjkRyAI1I0';
+// ── CONFIG — loaded from config.js (not hardcoded here) ──
+// config.js must define: window.LT_CONFIG = { url: '...', key: '...' }
+// This keeps keys out of the main app file.
+const SUPABASE_URL = window.LT_CONFIG?.url || '';
+const SUPABASE_KEY = window.LT_CONFIG?.key || '';
 
 let SB=null,currentUser=null;
 let prospects=[],openId=null,bcSel=new Set(),remTab='overdue',curPage='dashboard';
@@ -2424,6 +2428,14 @@ document.getElementById('auth-pass')?.addEventListener('keydown',e=>{if(e.key===
 //  BOOT
 // ══════════════════════════════════════════════
 async function boot(){
+  // Validate config loaded
+  if(!SUPABASE_URL || !SUPABASE_KEY){
+    hideLoader();
+    document.getElementById('auth-screen').style.display='flex';
+    document.getElementById('auth-err').textContent='App config missing. Contact support.';
+    document.getElementById('auth-err').style.display='block';
+    return;
+  }
   SB=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   loadMeta();
   const t=localStorage.getItem('lt_theme')||'light';

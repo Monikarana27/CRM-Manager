@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>LeadTrackr</title>
+<script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
@@ -430,6 +431,7 @@ body{
 .ch-rm{background:var(--amber-lt);color:var(--amber)}
 .ch-ft{background:var(--purple-lt);color:var(--purple)}
 .ch-co{background:var(--teal-lt);color:var(--teal)}
+.ch-cv{background:#d4edda;color:#27AE60}
 .ch-n{background:var(--bg3);color:var(--text3)}
 .pnote{
   font-size:12px;color:var(--text3);margin-top:6px;
@@ -730,6 +732,105 @@ select.fi{cursor:pointer}
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 
+/* ── POST-CALL POPUP ── */
+#postcall{
+  position:fixed;bottom:0;left:0;right:0;z-index:300;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+  padding:0 16px 32px;max-width:560px;margin:0 auto;
+}
+#postcall.show{transform:translateY(0)}
+.postcall-card{
+  background:var(--card);border-radius:18px 18px 0 0;
+  padding:20px 18px 8px;box-shadow:var(--sh3);
+  border:1px solid var(--border);border-bottom:none;
+}
+.postcall-name{
+  font-family:'DM Serif Display',serif;
+  font-size:18px;font-weight:700;margin-bottom:4px;
+}
+.postcall-sub{font-size:12px;color:var(--text3);margin-bottom:16px}
+.postcall-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.pcbtn{
+  padding:14px 10px;border-radius:12px;border:2px solid var(--border);
+  background:var(--bg3);font-family:inherit;font-size:13px;
+  font-weight:600;cursor:pointer;text-align:center;
+  transition:all .15s;line-height:1.4;
+}
+.pcbtn:active{transform:scale(.97)}
+.pcbtn.dnp{background:var(--red-bg);border-color:var(--red-lt);color:var(--red)}
+.pcbtn.interested{background:var(--green-bg);border-color:var(--green-lt);color:var(--green)}
+.pcbtn.no{background:var(--slate-lt);border-color:var(--slate);color:var(--slate)}
+.pcbtn.callback{background:var(--amber-bg);border-color:var(--amber-lt);color:var(--amber)}
+.callback-times{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.cbt{
+  padding:10px 6px;border-radius:9px;border:1.5px solid var(--amber-lt);
+  background:var(--amber-bg);color:var(--amber);
+  font-family:inherit;font-size:12px;font-weight:700;
+  cursor:pointer;text-align:center;transition:all .15s;
+}
+.cbt:hover{background:var(--amber);color:white}
+.cbt:active{transform:scale(.97)}
+.postcall-note{display:flex;gap:7px;margin-bottom:10px}
+.pc-skip{
+  width:100%;padding:10px;border:none;background:transparent;
+  color:var(--text3);font-family:inherit;font-size:13px;
+  cursor:pointer;text-align:center;
+}
+
+/* ── DATE BADGE ── */
+.date-badge{
+  font-size:10px;font-weight:600;padding:2px 7px;
+  border-radius:5px;background:var(--bg4);color:var(--text3);
+  white-space:nowrap;
+}
+.date-badge.fresh{background:var(--green-lt);color:var(--green)}
+
+/* ── CALL COUNTER ── */
+.call-counter{
+  display:flex;align-items:center;gap:10px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:12px 16px;margin-bottom:10px;
+  box-shadow:var(--sh);
+}
+.cc-num{
+  font-family:'DM Serif Display',serif;
+  font-size:32px;font-weight:700;color:var(--green);
+  letter-spacing:-1px;line-height:1;
+}
+.cc-label{font-size:12px;color:var(--text3);margin-top:2px}
+.cc-converted{
+  margin-left:auto;text-align:right;
+}
+.cc-cv-num{
+  font-family:'DM Serif Display',serif;
+  font-size:24px;font-weight:700;color:var(--gold);
+  letter-spacing:-1px;line-height:1;
+}
+
+/* ── PROJECT FILTER ── */
+.proj-filters{
+  display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;
+  padding-bottom:10px;border-bottom:1px solid var(--border);
+}
+.proj-pill{
+  padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;
+  border:1.5px solid var(--border);background:var(--bg3);color:var(--text2);
+  cursor:pointer;transition:all .15s;user-select:none;
+}
+.proj-pill.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+.proj-pill:hover:not(.active){background:var(--bg4)}
+
+/* ── SPECIAL TAGS ── */
+.stag{
+  font-size:10px;font-weight:700;padding:2px 7px;
+  border-radius:5px;cursor:pointer;transition:all .15s;
+  border:1.5px solid var(--border);background:var(--bg3);color:var(--text3);
+}
+.stag.active-tag{background:var(--gold-lt);color:var(--gold);border-color:var(--gold)}
+
+/* ── CONVERTED BUCKET ── */
+.dc.s-converted{--dc-color:#27AE60}
+
 /* ── INFO CARD ── */
 .info-card{
   background:var(--bg3);border:1px solid var(--border);
@@ -789,6 +890,7 @@ select.fi{cursor:pointer}
     <button class="nav-btn" onclick="gp('reminder',this)"><span class="nav-ico">⏰</span>Reminders<span class="nav-badge nb-a" id="b-reminder">0</span></button>
     <button class="nav-btn" onclick="gp('future',this)"><span class="nav-ico">🌱</span>Future / Investor<span class="nav-badge nb-p" id="b-future">0</span></button>
     <button class="nav-btn" onclick="gp('cold',this)"><span class="nav-ico">❄️</span>Cold Pool<span class="nav-badge nb-t" id="b-cold">0</span></button>
+    <button class="nav-btn" onclick="gp('converted',this)"><span class="nav-ico">✅</span>Converted<span class="nav-badge" id="b-converted" style="background:#27AE60">0</span></button>
 
     <div class="nav-section-label">Tools</div>
     <button class="nav-btn" onclick="gp('add',this)"><span class="nav-ico">➕</span>Add Prospect</button>
@@ -816,6 +918,22 @@ select.fi{cursor:pointer}
       <div class="pt" id="dash-greeting">Good morning</div>
       <div class="ps">Here's your pipeline today</div>
     </div>
+    <!-- Call counter -->
+    <div class="call-counter" id="dash-counter">
+      <div>
+        <div class="cc-num" id="cc-calls">0</div>
+        <div class="cc-label">calls today</div>
+      </div>
+      <div style="width:1px;height:36px;background:var(--border);margin:0 4px"></div>
+      <div>
+        <div class="cc-num" style="color:var(--gold)" id="cc-month">0</div>
+        <div class="cc-label">this month</div>
+      </div>
+      <div class="cc-converted">
+        <div class="cc-cv-num" id="cc-converted">0</div>
+        <div class="cc-label">converted ✅</div>
+      </div>
+    </div>
     <div class="dash-grid" id="dg"></div>
     <div class="sec-row"><span class="sec-label">🔴 Reminders Due</span><span class="sec-line"></span></div>
     <div id="dash-rems"></div>
@@ -829,6 +947,7 @@ select.fi{cursor:pointer}
       <div><div class="pt">📋 Today's List</div><div class="ps">Call each. Move them to a bucket.</div></div>
       <button class="btn btn-ink btn-sm" onclick="gp('add',null)">+ Add</button>
     </div>
+    <div class="proj-filters" id="proj-filter-bar"></div>
     <div class="sbar"><input class="sinput" placeholder="Search name or phone…" oninput="rs('today')" id="q-today"></div>
     <div id="list-today"></div>
   </div>
@@ -881,6 +1000,13 @@ select.fi{cursor:pointer}
     <div class="ph"><div class="pt">❄️ Cold Pool</div><div class="ps">Low priority — check back later</div></div>
     <div class="sbar"><input class="sinput" placeholder="Search…" oninput="rs('cold')" id="q-cold"></div>
     <div id="list-cold"></div>
+  </div>
+
+  <!-- CONVERTED -->
+  <div class="page" id="page-converted">
+    <div class="ph"><div class="pt">✅ Converted</div><div class="ps">Deals closed — your wins 🎉</div></div>
+    <div class="sbar"><input class="sinput" placeholder="Search…" oninput="rs('converted')" id="q-converted"></div>
+    <div id="list-converted"></div>
   </div>
 
   <!-- ADD -->
@@ -1040,6 +1166,34 @@ select.fi{cursor:pointer}
 </div><!-- layout -->
 </div><!-- app -->
 
+<!-- POST-CALL POPUP -->
+<div id="postcall">
+  <div class="postcall-card">
+    <div class="postcall-name" id="pc-name">Rahul Sharma</div>
+    <div class="postcall-sub">How did the call go?</div>
+    <div class="postcall-grid">
+      <button class="pcbtn dnp" onclick="postCallAction('dnp')">📵<br>Didn't Pick</button>
+      <button class="pcbtn interested" onclick="postCallAction('followup')">🔄<br>Interested</button>
+      <button class="pcbtn no" onclick="postCallAction('ni')">🚫<br>Not Interested</button>
+      <button class="pcbtn callback" onclick="showCallbackTimes()">📅<br>Call Back</button>
+    </div>
+    <div id="pc-callback-times" style="display:none">
+      <div style="font-size:11px;font-weight:600;color:var(--amber);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">When to call back?</div>
+      <div class="callback-times">
+        <button class="cbt" onclick="quickCallback(2,'hours')">In 2 hrs</button>
+        <button class="cbt" onclick="quickCallback(0,'5pm')">Today 5 PM</button>
+        <button class="cbt" onclick="quickCallback(1,'morning')">Tomorrow 10 AM</button>
+      </div>
+    </div>
+    <div class="postcall-note">
+      <input class="fi" id="pc-note" placeholder="Add a note… (optional)" style="flex:1;font-size:13px">
+      <button class="btn btn-ghost btn-sm" onclick="savePostNote()">Save</button>
+    </div>
+    <button class="pc-skip" onclick="closePostCall()">Skip — log later</button>
+  </div>
+</div>
+<div id="postcall-overlay" style="display:none;position:fixed;inset:0;z-index:299;background:var(--overlay)" onclick="closePostCall()"></div>
+
 <!-- PROSPECT MODAL -->
 <div class="mwrap" id="pmodal" onclick="closePM(event)">
   <div class="modal">
@@ -1069,6 +1223,15 @@ select.fi{cursor:pointer}
         <button class="status-btn" onclick="chSt('reminder')">⏰<br>Reminder</button>
         <button class="status-btn" onclick="chSt('future')">🌱<br>Future</button>
         <button class="status-btn" onclick="chSt('cold')">❄️<br>Cold</button>
+        <button class="status-btn" onclick="chSt('converted')" style="border-color:#27AE60;background:#f0fdf4;color:#27AE60">✅<br>Converted</button>
+      </div>
+
+      <div class="sdiv">Special Tags</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px" id="pm-stags">
+        <button class="stag" onclick="toggleSpecialTag('needs_visit')">🏠 Needs Site Visit</button>
+        <button class="stag" onclick="toggleSpecialTag('family_approval')">👨‍👩‍👧 Family Approval</button>
+        <button class="stag" onclick="toggleSpecialTag('investor')">💼 Investor</button>
+        <button class="stag" onclick="toggleSpecialTag('hot')">🔥 Hot Lead</button>
       </div>
 
       <div id="pm-remflds" style="display:none;margin-bottom:14px">
@@ -1127,13 +1290,19 @@ function toggleDark(){
 // ══════════════════════════════════════════════
 //  CONFIG — hardcoded Supabase keys
 // ══════════════════════════════════════════════
-const SUPABASE_URL = 'https://pvvzhvopnyiczdkjiiep.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB2dnpodm9wbnlpY3pka2ppaWVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5MTAzMjAsImV4cCI6MjA5MjQ4NjMyMH0.6AABJrOXYqBSvMbvAohitsEy0SAa8k2fcAjkRyAI1I0';
+// ── CONFIG — loaded from config.js (not hardcoded here) ──
+// config.js must define: window.LT_CONFIG = { url: '...', key: '...' }
+// This keeps keys out of the main app file.
+const SUPABASE_URL = window.LT_CONFIG?.url || '';
+const SUPABASE_KEY = window.LT_CONFIG?.key || '';
 
 let SB=null,currentUser=null;
 let prospects=[],openId=null,bcSel=new Set(),remTab='overdue',curPage='dashboard';
 let csvParsed=[],csvDups=[],csvNew=[],dupDecisions={};
 let bulkParsed=[];
+let callsTodayCount=0, callsMonthCount=0;
+let activeProjFilter=null;
+let postCallId=null;
 
 // ══════════════════════════════════════════════
 //  SUPABASE
@@ -1275,6 +1444,7 @@ const SM={
   reminder:{l:'Reminder',ch:'ch-rm',i:'⏰'},
   future:{l:'Future',ch:'ch-ft',i:'🌱'},
   cold:{l:'Cold Pool',ch:'ch-co',i:'❄️'},
+  converted:{l:'Converted',ch:'ch-cv',i:'✅'},
 };
 
 function remSt(p){
@@ -1654,12 +1824,15 @@ async function addSingle(){
 function openP(id){
   const p=prospects.find(x=>x.id===id);if(!p)return;
   openId=id;const ac=avc(p.name);
+  const displayName=p.name||('Lead '+p.phone.slice(-4));
   const av=document.getElementById('pm-av');
   av.style.cssText=`background:${ac.bg};color:${ac.c};width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0`;
-  av.textContent=ini(p.name);
-  document.getElementById('pm-n').textContent=p.name;
+  av.textContent=ini(displayName);
+  document.getElementById('pm-n').textContent=displayName;
   document.getElementById('pm-p').textContent=[p.phone,p.project,p.budget].filter(Boolean).join(' · ');
-  document.getElementById('pm-call').href='tel:+91'+p.phone.replace(/\D/g,'');
+  const callHref='tel:+91'+p.phone.replace(/\D/g,'');
+  document.getElementById('pm-call').href=callHref;
+  document.getElementById('pm-call').onclick=()=>trackCall(id);
   document.getElementById('pm-wa').onclick=()=>doWA(id);
   document.getElementById('pm-remflds').style.display='none';
   ['pm-ni','pm-rd','pm-rt','pm-rn'].forEach(id2=>document.getElementById(id2).value='');
@@ -1671,6 +1844,7 @@ function openP(id){
     const match=fn.match(/'(\w+)'/);
     if(match&&match[1]===p.status)b.classList.add('sb-'+p.status);
   });
+  renderSpecialTags(p);
   renderTL(p);
   document.getElementById('pmodal').classList.add('open');
 }
@@ -1767,6 +1941,171 @@ function doWA(id){
   window.open('https://wa.me/91'+ph+'?text='+encodeURIComponent('Hi '+p.name.split(' ')[0]+', '),'_blank');
 }
 
+// Track call made — increment counter + show post-call popup
+function trackCall(id){
+  const p=prospects.find(x=>x.id===id);if(!p)return;
+  // increment counters
+  callsTodayCount++;
+  callsMonthCount++;
+  saveMeta();
+  updCounterUI();
+  // log in timeline
+  tlAdd(p,'📞 Called','call');
+  p.updatedAt=now();
+  dbPut(p);
+  // show post-call popup after slight delay (let dialer open first)
+  postCallId=id;
+  setTimeout(()=>showPostCall(p),1500);
+}
+
+function saveMeta(){
+  const key='lt_meta_'+todayKey();
+  localStorage.setItem(key,JSON.stringify({calls:callsTodayCount}));
+  localStorage.setItem('lt_month_calls',callsMonthCount);
+}
+
+function loadMeta(){
+  const key='lt_meta_'+todayKey();
+  try{
+    const d=JSON.parse(localStorage.getItem(key)||'{}');
+    callsTodayCount=d.calls||0;
+    callsMonthCount=parseInt(localStorage.getItem('lt_month_calls')||'0');
+  }catch{callsTodayCount=0;callsMonthCount=0;}
+}
+
+function todayKey(){return new Date().toISOString().split('T')[0]}
+
+function updCounterUI(){
+  const cc=document.getElementById('cc-calls');
+  const cm=document.getElementById('cc-month');
+  const cv=document.getElementById('cc-converted');
+  if(cc)cc.textContent=callsTodayCount;
+  if(cm)cm.textContent=callsMonthCount;
+  if(cv)cv.textContent=prospects.filter(p=>p.status==='converted').length;
+}
+
+// ══════════════════════════════════════════════
+//  POST-CALL POPUP
+// ══════════════════════════════════════════════
+function showPostCall(p){
+  const displayName=p.name||('Lead '+p.phone.slice(-4));
+  document.getElementById('pc-name').textContent=displayName;
+  document.getElementById('pc-note').value='';
+  document.getElementById('pc-callback-times').style.display='none';
+  document.getElementById('postcall').classList.add('show');
+  document.getElementById('postcall-overlay').style.display='block';
+}
+
+function closePostCall(){
+  document.getElementById('postcall').classList.remove('show');
+  document.getElementById('postcall-overlay').style.display='none';
+  postCallId=null;
+}
+
+async function postCallAction(status){
+  if(!postCallId)return;
+  const p=prospects.find(x=>x.id===postCallId);if(!p)return;
+  const note=document.getElementById('pc-note').value.trim();
+  p.status=status;p.updatedAt=now();
+  tlAdd(p,'Moved to '+(SM[status]?.l||status)+(note?' — '+note:''),'status');
+  if(note)tlAdd(p,note,'note');
+  await dbPut(p);
+  closePostCall();
+  renderAll();
+  toast('Moved to '+(SM[status]?.l||status),'ok');
+}
+
+function showCallbackTimes(){
+  document.getElementById('pc-callback-times').style.display='block';
+}
+
+async function quickCallback(val,type){
+  if(!postCallId)return;
+  const p=prospects.find(x=>x.id===postCallId);if(!p)return;
+  let dt=new Date();
+  if(type==='hours'){dt.setHours(dt.getHours()+val);}
+  else if(type==='5pm'){dt.setHours(17,0,0,0);if(dt<new Date())dt.setDate(dt.getDate()+1);}
+  else if(type==='morning'){dt.setDate(dt.getDate()+1);dt.setHours(10,0,0,0);}
+  const note=document.getElementById('pc-note').value.trim();
+  p.status='reminder';p.reminderDT=dt.toISOString();
+  p.reminderNote=note||'Callback';p.updatedAt=now();
+  tlAdd(p,'Callback set: '+fdts(dt.toISOString()),'status');
+  if(note)tlAdd(p,note,'note');
+  await dbPut(p);
+  // schedule notification
+  try{
+    if(window.Capacitor?.Plugins?.LocalNotifications){
+      const{LocalNotifications}=window.Capacitor.Plugins;
+      LocalNotifications.schedule({notifications:[{
+        title:'⏰ Call Back — LeadTrackr',
+        body:'Call '+p.name+(note?' — '+note:''),
+        id:Math.floor(Math.random()*2147483647),
+        schedule:{at:dt,allowWhileIdle:true},
+        sound:'default',autoCancel:true,
+      }]});
+    }
+  }catch(e){}
+  closePostCall();renderAll();
+  toast('Callback set for '+fdts(dt.toISOString()),'ok');
+}
+
+async function savePostNote(){
+  if(!postCallId)return;
+  const p=prospects.find(x=>x.id===postCallId);if(!p)return;
+  const note=document.getElementById('pc-note').value.trim();
+  if(!note)return;
+  tlAdd(p,note,'note');p.updatedAt=now();
+  await dbPut(p);
+  document.getElementById('pc-note').value='';
+  toast('Note saved','ok');
+}
+
+// ══════════════════════════════════════════════
+//  SPECIAL TAGS
+// ══════════════════════════════════════════════
+async function toggleSpecialTag(tag){
+  const p=prospects.find(x=>x.id===openId);if(!p)return;
+  if(!p.tags)p.tags=[];
+  const idx=p.tags.indexOf(tag);
+  if(idx>-1)p.tags.splice(idx,1);else p.tags.push(tag);
+  p.updatedAt=now();
+  await dbPut(p);
+  renderSpecialTags(p);
+  renderAll();
+}
+
+function renderSpecialTags(p){
+  const tags=p.tags||[];
+  const tagDefs=[
+    {k:'needs_visit',l:'🏠 Needs Site Visit'},
+    {k:'family_approval',l:'👨‍👩‍👧 Family Approval'},
+    {k:'investor',l:'💼 Investor'},
+    {k:'hot',l:'🔥 Hot Lead'},
+  ];
+  document.getElementById('pm-stags').innerHTML=tagDefs.map(t=>`
+    <button class="stag ${tags.includes(t.k)?'active-tag':''}" onclick="toggleSpecialTag('${t.k}')">${t.l}</button>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════
+//  PROJECT FILTER
+// ══════════════════════════════════════════════
+function renderProjFilter(){
+  const bar=document.getElementById('proj-filter-bar');
+  if(!bar)return;
+  const projects=[...new Set(prospects.filter(p=>p.project).map(p=>p.project))].slice(0,8);
+  if(!projects.length){bar.style.display='none';return;}
+  bar.style.display='flex';
+  bar.innerHTML=`<button class="proj-pill ${!activeProjFilter?'active':''}" onclick="setProjFilter(null)">All</button>`+
+    projects.map(pr=>`<button class="proj-pill ${activeProjFilter===pr?'active':''}" onclick="setProjFilter('${esc(pr)}')">${esc(pr)}</button>`).join('');
+}
+
+function setProjFilter(proj){
+  activeProjFilter=proj;
+  renderProjFilter();
+  rs('today');
+}
+
 // ══════════════════════════════════════════════
 //  BULK DNP → TODAY
 // ══════════════════════════════════════════════
@@ -1787,6 +2126,15 @@ function setRemTab(tab,btn){
   rs('reminder');
 }
 
+function dateBadge(createdAt){
+  if(!createdAt)return'';
+  const diff=Math.floor((Date.now()-new Date(createdAt).getTime())/86400000);
+  if(diff===0)return'<span class="date-badge fresh">Today</span>';
+  if(diff===1)return'<span class="date-badge">Yesterday</span>';
+  if(diff<=7)return`<span class="date-badge">${diff}d ago</span>`;
+  return`<span class="date-badge">${diff}d ago</span>`;
+}
+
 function rs(status){
   const qEl=document.getElementById('q-'+status);
   const q=qEl?qEl.value.toLowerCase():'';
@@ -1798,10 +2146,14 @@ function rs(status){
   }else{
     list=prospects.filter(p=>p.status===status);
   }
+  // project filter (only on today's list)
+  if(status==='today'&&activeProjFilter){
+    list=list.filter(p=>p.project===activeProjFilter);
+  }
   if(q)list=list.filter(p=>(p.name+p.phone+(p.project||'')+(p.budget||'')).toLowerCase().includes(q));
   const el=document.getElementById('list-'+status);if(!el)return;
   if(!list.length){
-    const icons={today:'📋',dnp:'📵',ni:'🚫',followup:'🔄',reminder:'⏰',future:'🌱',cold:'❄️'};
+    const icons={today:'📋',dnp:'📵',ni:'🚫',followup:'🔄',reminder:'⏰',future:'🌱',cold:'❄️',converted:'✅'};
     el.innerHTML=`<div class="empty"><div class="empty-ico">${icons[status]||'📋'}</div><div class="empty-txt">Nothing here yet</div><div class="empty-sub">Prospects appear when you move them here</div></div>`;
     return;
   }
@@ -1810,21 +2162,27 @@ function rs(status){
     const rs2=p.status==='reminder'?remSt(p):null;
     const allNotes=p.timeline?p.timeline.filter(t=>t.type==='import'||t.type==='note').map(t=>t.text).join('\n'):'';
     const cleanPhone=p.phone.replace(/\D/g,'');
+    // auto-name nameless leads
+    const displayName=p.name||('Lead '+p.phone.slice(-4));
+    // special tags chips
+    const specialTagMap={needs_visit:'🏠 Site Visit',family_approval:'👨‍👩‍👧 Family',investor:'💼 Investor',hot:'🔥 Hot'};
+    const tagChips=(p.tags||[]).map(t=>specialTagMap[t]?`<span class="chip" style="background:var(--gold-lt);color:var(--gold)">${specialTagMap[t]}</span>`:'').join('');
     return`<div class="pc" onclick="openP('${p.id}')">
-      <div class="pav" style="background:${ac.bg};color:${ac.c}">${ini(p.name)}</div>
+      <div class="pav" style="background:${ac.bg};color:${ac.c}">${ini(displayName)}</div>
       <div class="pb">
-        <div class="pname">${esc(p.name)}</div>
-        <div class="pphone">${p.phone}${p.project?' · '+esc(p.project):''}${p.dateAdded?' · '+p.dateAdded:''}</div>
+        <div class="pname" style="font-size:16px">${esc(displayName)}</div>
+        <div class="pphone">${p.phone}${p.project?' · '+esc(p.project):''}</div>
         <div class="pmeta">
           ${p.budget?`<span class="chip ch-n">${esc(p.budget)}</span>`:''}
-          ${p.source?`<span class="chip ch-n">${esc(p.source)}</span>`:''}
+          ${tagChips}
+          ${status==='today'?dateBadge(p.createdAt):''}
           <span style="font-size:10px;color:var(--text3);margin-left:auto">${ago(p.updatedAt)}</span>
         </div>
-        ${allNotes?`<div class="pnote">${esc(allNotes.slice(0,160))}${allNotes.length>160?'…':''}</div>`:''}
+        ${allNotes?`<div class="pnote" style="font-size:13px">${esc(allNotes.slice(0,180))}${allNotes.length>180?'…':''}</div>`:''}
         ${p.status==='reminder'&&p.reminderDT?`<div class="prem ${rs2==='overdue'?'ov':''}">${rs2==='overdue'?'⚠ OVERDUE':'📅'} ${fdts(p.reminderDT)}${p.reminderNote?' — '+esc(p.reminderNote.slice(0,50)):''}</div>`:''}
       </div>
       <div class="pact" onclick="event.stopPropagation()">
-        <a class="act-btn" href="tel:+91${cleanPhone}" onclick="event.stopPropagation()" title="Call">📞</a>
+        <a class="act-btn" href="tel:+91${cleanPhone}" onclick="event.stopPropagation();trackCall('${p.id}')" title="Call">📞</a>
         <button class="act-btn" onclick="doWA('${p.id}')" title="WhatsApp">💬</button>
       </div>
     </div>`;
@@ -1845,11 +2203,14 @@ function renderDash(){
     {k:'s-reminder',l:'Reminders',n:cnt('reminder'),go:'reminder'},
     {k:'s-future',l:'Future',n:cnt('future'),go:'future'},
     {k:'s-cold',l:'Cold Pool',n:cnt('cold'),go:'cold'},
+    {k:'s-converted',l:'Converted',n:cnt('converted'),go:'converted'},
   ].map(({k,l,n,go})=>`
     <div class="dc ${k}" onclick="gp('${go}',null)" title="${l}">
       <div class="dc-n">${n}</div>
       <div class="dc-l">${l}</div>
     </div>`).join('');
+
+  updCounterUI();
 
   const rems=prospects.filter(p=>p.status==='reminder'&&(remSt(p)==='overdue'||remSt(p)==='today'))
     .sort((a,b)=>new Date(a.reminderDT)-new Date(b.reminderDT));
@@ -1859,26 +2220,28 @@ function renderDash(){
     :rems.map(p=>{
       const rs2=remSt(p);
       const cleanPhone=p.phone.replace(/\D/g,'');
+      const displayName=p.name||('Lead '+p.phone.slice(-4));
       return`<div class="alert-item ${rs2==='overdue'?'ov':''}" onclick="openP('${p.id}')">
         <div style="flex:1">
-          <div class="alert-name">${esc(p.name)}</div>
+          <div class="alert-name">${esc(displayName)}</div>
           <div class="alert-sub">${p.reminderNote?esc(p.reminderNote.slice(0,60)):''} · ${fdts(p.reminderDT)}</div>
         </div>
         <span class="alert-tag ${rs2==='overdue'?'tag-ov':'tag-today'}">${rs2==='overdue'?'OVERDUE':'TODAY'}</span>
-        <a class="alert-call" href="tel:+91${cleanPhone}" onclick="event.stopPropagation()">📞 Call</a>
+        <a class="alert-call" href="tel:+91${cleanPhone}" onclick="event.stopPropagation();trackCall('${p.id}')">📞 Call</a>
       </div>`;
     }).join('');
 
   const recent=[...prospects].filter(p=>p.updatedAt)
     .sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt)).slice(0,5);
   document.getElementById('dash-recent').innerHTML=recent.length===0
-    ?`<div class="info-card" style="color:var(--text3)">No activity yet — import a CSV or add prospects to get started</div>`
+    ?`<div class="info-card" style="color:var(--text3)">No activity yet — import a file or add prospects to get started</div>`
     :'<div class="plist">'+recent.map(p=>{
       const sm=SM[p.status]||{};const ac=avc(p.name);
+      const displayName=p.name||('Lead '+p.phone.slice(-4));
       return`<div class="pc" onclick="openP('${p.id}')">
-        <div class="pav" style="background:${ac.bg};color:${ac.c}">${ini(p.name)}</div>
+        <div class="pav" style="background:${ac.bg};color:${ac.c}">${ini(displayName)}</div>
         <div class="pb">
-          <div class="pname">${esc(p.name)}</div>
+          <div class="pname" style="font-size:16px">${esc(displayName)}</div>
           <div class="pphone">${p.phone}${p.project?' · '+esc(p.project):''}</div>
           <div class="pmeta">
             <span class="chip ${sm.ch||'ch-n'}">${sm.i||''} ${sm.l||p.status}</span>
@@ -1894,7 +2257,7 @@ function renderDash(){
 //  BADGES
 // ══════════════════════════════════════════════
 function updBadges(){
-  ['today','dnp','ni','followup','reminder','future','cold'].forEach(s=>{
+  ['today','dnp','ni','followup','reminder','future','cold','converted'].forEach(s=>{
     const el=document.getElementById('b-'+s);
     if(el)el.textContent=prospects.filter(p=>p.status===s).length;
   });
@@ -1945,13 +2308,17 @@ function sendBC(){
   const sel=prospects.filter(p=>bcSel.has(p.id));
   const linksOut=document.getElementById('bc-links-out');
   const linksList=document.getElementById('bc-links-list');
-  linksList.innerHTML=sel.map(p=>{
+  linksList.innerHTML=`<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+    <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('bcmsg').value).then(()=>toast('Message copied — paste in WhatsApp!','ok'))">📋 Copy Message Text</button>
+    <span style="font-size:12px;color:var(--text3);padding:6px 0">or open each link:</span>
+  </div>`+sel.map(p=>{
     const ph=p.phone.replace(/\D/g,'');
-    const text=encodeURIComponent(msg.replace('{name}',p.name.split(' ')[0]));
+    const displayName=p.name||('Lead '+p.phone.slice(-4));
+    const text=encodeURIComponent(msg.replace('{name}',displayName.split(' ')[0]));
     const url='https://wa.me/91'+ph+'?text='+text;
     return`<div class="bc-link-item">
       <div>
-        <div style="font-weight:600;font-size:13px">${esc(p.name)}</div>
+        <div style="font-weight:600;font-size:13px">${esc(displayName)}</div>
         <div style="font-size:11px;color:var(--text3)">${p.phone}</div>
       </div>
       <a href="${url}" target="_blank">Open WhatsApp →</a>
@@ -1967,7 +2334,7 @@ function sendBC(){
 const TITLES={
   dashboard:'Dashboard',today:"Today's List",dnp:'Did Not Pick',
   ni:'Not Interested',followup:'Follow Up',reminder:'Reminders',
-  future:'Future / Investors',cold:'Cold Pool',
+  future:'Future / Investors',cold:'Cold Pool',converted:'Converted ✅',
   add:'Add Prospect',broadcast:'Broadcast',import:'Import File',
 };
 
@@ -1981,7 +2348,8 @@ function gp(name,btn){
   if(name==='dashboard')renderDash();
   else if(name==='reminder')rs('reminder');
   else if(name==='broadcast')renderBC();
-  else if(['today','dnp','ni','followup','future','cold'].includes(name))rs(name);
+  else if(name==='today'){renderProjFilter();rs('today');}
+  else if(['dnp','ni','followup','future','cold','converted'].includes(name))rs(name);
 }
 
 function openSB(){
@@ -2023,7 +2391,8 @@ function renderAll(){
   if(curPage==='dashboard')renderDash();
   else if(curPage==='reminder')rs('reminder');
   else if(curPage==='broadcast')renderBC();
-  else if(['today','dnp','ni','followup','future','cold'].includes(curPage))rs(curPage);
+  else if(curPage==='today'){renderProjFilter();rs('today');}
+  else if(['dnp','ni','followup','future','cold','converted'].includes(curPage))rs(curPage);
 }
 
 // ══════════════════════════════════════════════
@@ -2059,8 +2428,16 @@ document.getElementById('auth-pass')?.addEventListener('keydown',e=>{if(e.key===
 //  BOOT
 // ══════════════════════════════════════════════
 async function boot(){
+  // Validate config loaded
+  if(!SUPABASE_URL || !SUPABASE_KEY){
+    hideLoader();
+    document.getElementById('auth-screen').style.display='flex';
+    document.getElementById('auth-err').textContent='App config missing. Contact support.';
+    document.getElementById('auth-err').style.display='block';
+    return;
+  }
   SB=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-  // set dark mode icon
+  loadMeta();
   const t=localStorage.getItem('lt_theme')||'light';
   const btn=document.getElementById('dark-btn');
   if(btn)btn.textContent=t==='dark'?'🌙':'☀️';
