@@ -1301,8 +1301,10 @@ let prospects=[],openId=null,bcSel=new Set(),remTab='overdue',curPage='dashboard
 let csvParsed=[],csvDups=[],csvNew=[],dupDecisions={};
 let bulkParsed=[];
 let callsTodayCount=0, callsMonthCount=0;
+let orgId=null;
 let activeProjFilter=null;
 let postCallId=null;
+
 
 // ══════════════════════════════════════════════
 //  SUPABASE
@@ -1329,11 +1331,10 @@ async function loadProspects(){
 async function dbPut(p){
   if(!SB||!currentUser)return;
   setSyncState('syncing');
-  const {error}=await SB.from('prospects').upsert({id:p.id,user_id:currentUser.id,data:p,updated_at:new Date().toISOString()});
+  const {error}=await SB.from('prospects').upsert({id:p.id,user_id:currentUser.id,org_id:orgId||null,data:p,updated_at:new Date().toISOString()});
   if(error){setSyncState('err');console.error(error);}
   else setSyncState('ok');
 }
-
 async function dbDel(id){
   if(!SB||!currentUser)return;
   setSyncState('syncing');
@@ -1387,8 +1388,11 @@ async function afterLogin(user){
   document.getElementById('app').style.display='block';
   const name=user.user_metadata?.full_name||user.email;
   document.getElementById('sb-user-meta').textContent=name;
-  await loadProspects();
-  renderDates();updBadges();renderDash();
+ // Load org_id for this user
+const {data:prof}=await SB.from('user_profiles').select('org_id').eq('id',user.id).single();
+if(prof)orgId=prof.org_id;
+await loadProspects();
+renderDates();updBadges();renderDash();
   setInterval(renderDates,60000);
   setInterval(checkRems,60000);
   SB.channel('prospect-ch')
@@ -1721,7 +1725,7 @@ async function confirmImport(){
   const ep={};prospects.forEach(p=>{if(p.phone)ep[p.phone]=p});
   let added=0,updated=0;
   if(csvNew.length){
-    const rows=csvNew.map(p=>({id:p.id,user_id:currentUser.id,data:p,updated_at:new Date().toISOString()}));
+    const rows=csvNew.map(p=>({id:p.id,user_id:currentUser.id,org_id:orgId||null,data:p,updated_at:new Date().toISOString()}));
     const {error}=await SB.from('prospects').upsert(rows);
     if(error){toast('Import failed: '+error.message,'err');return;}
     csvNew.forEach(p=>prospects.unshift(p));added=csvNew.length;
@@ -1783,7 +1787,7 @@ async function confirmBulk(){
   const fresh=bulkParsed.filter(p=>!phones.has(p.phone));
   const skipped=bulkParsed.length-fresh.length;
   if(fresh.length){
-    const rows=fresh.map(p=>({id:p.id,user_id:currentUser.id,data:p,updated_at:new Date().toISOString()}));
+    const rows=fresh.map(p=>({id:p.id,user_id:currentUser.id,org_id:orgId||null,data:p,updated_at:new Date().toISOString()}));
     await SB.from('prospects').upsert(rows);
     fresh.forEach(p=>prospects.unshift(p));
   }
