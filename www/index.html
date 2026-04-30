@@ -1264,6 +1264,24 @@ select.fi{cursor:pointer}
   </div>
 </div>
 
+<!-- INVITE CODE BANNER -->
+<div id="invite-banner" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:250;width:calc(100% - 32px);max-width:480px">
+  <div style="background:var(--card);border:1.5px solid var(--gold);border-radius:14px;padding:16px 18px;box-shadow:var(--sh3)">
+    <div style="display:flex;align-items:flex-start;gap:12px">
+      <div style="font-size:1.8rem;flex-shrink:0">🏢</div>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:14px;color:var(--text);margin-bottom:3px">Got an invite code?</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">Your manager can track your pipeline. Enter their code to join the team.</div>
+        <div style="display:flex;gap:7px">
+          <input class="fi" id="invite-input" placeholder="e.g. LEAD42" style="flex:1;font-size:13px;text-transform:uppercase;letter-spacing:2px" maxlength="10" oninput="this.value=this.value.toUpperCase()">
+          <button class="btn btn-gold btn-sm" onclick="joinTeam()">Join</button>
+        </div>
+      </div>
+      <button onclick="dismissInvite()" style="background:none;border:none;color:var(--text3);font-size:1.1rem;cursor:pointer;padding:2px;flex-shrink:0;line-height:1">✕</button>
+    </div>
+  </div>
+</div>
+
 <div id="tc"></div>
 
 <script>
@@ -1393,6 +1411,7 @@ const {data:prof}=await SB.from('user_profiles').select('org_id').eq('id',user.i
 if(prof)orgId=prof.org_id;
 await loadProspects();
 renderDates();updBadges();renderDash();
+if(!orgId)showInviteBanner();
   setInterval(renderDates,60000);
   setInterval(checkRems,60000);
   SB.channel('prospect-ch')
@@ -2467,6 +2486,76 @@ async function boot(){
       document.getElementById('auth-screen').style.display='flex';
     }
   });
+}
+
+// ══════════════════════════════════════════════
+//  INVITE CODE — JOIN A TEAM
+// ══════════════════════════════════════════════
+function showInviteBanner(){
+  // Don't show if already in a team or dismissed
+  if(localStorage.getItem('lt_invite_dismissed'))return;
+  if(localStorage.getItem('lt_org_joined'))return;
+  setTimeout(()=>{
+    document.getElementById('invite-banner').style.display='block';
+  },2000);
+}
+
+function dismissInvite(){
+  document.getElementById('invite-banner').style.display='none';
+  localStorage.setItem('lt_invite_dismissed','1');
+}
+
+async function joinTeam(){
+  const code=document.getElementById('invite-input').value.trim().toUpperCase();
+  if(!code){toast('Enter an invite code','err');return;}
+
+  // Look up the code
+  const {data:inv,error}=await SB.from('invite_codes')
+    .select('id,org_id,use_count,max_uses,active')
+    .eq('code',code)
+    .eq('active',true)
+    .single();
+
+  if(error||!inv){toast('Invalid or expired code','err');return;}
+  if(inv.use_count>=inv.max_uses){toast('This code has reached its limit','err');return;}
+
+  // Check if user already has a profile
+  const {data:existing}=await SB.from('user_profiles')
+    .select('id,org_id')
+    .eq('id',currentUser.id)
+    .single();
+
+  if(existing?.org_id){
+    toast('You are already in a team','warn');
+    dismissInvite();return;
+  }
+
+  // Create or update user profile
+  const name=currentUser.user_metadata?.full_name||currentUser.email;
+  const {error:profErr}=await SB.from('user_profiles').upsert({
+    id:currentUser.id,
+    org_id:inv.org_id,
+    role:'salesperson',
+    full_name:name,
+  });
+  if(profErr){toast('Could not join team: '+profErr.message,'err');return;}
+
+  // Update orgId in memory
+  orgId=inv.org_id;
+
+  // Increment use_count
+  await SB.from('invite_codes').update({use_count:inv.use_count+1}).eq('id',inv.id);
+
+  // Backfill existing prospects with org_id
+  if(prospects.length){
+    await SB.from('prospects')
+      .update({org_id:inv.org_id})
+      .eq('user_id',currentUser.id);
+  }
+
+  localStorage.setItem('lt_org_joined','1');
+  document.getElementById('invite-banner').style.display='none';
+  toast('✅ Joined the team! Your manager can now see your pipeline.','ok');
 }
 boot();
 </script>
